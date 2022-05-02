@@ -17,8 +17,8 @@ DWORD txThreadCount = 0;
 #include "core.h"
 #include "EMAC_DEF.h"
 
-#pragma O3
-#pragma Otime
+//#pragma O3
+//#pragma Otime
 
 #endif
 
@@ -29,27 +29,31 @@ DWORD txThreadCount = 0;
 
 //#pragma diag_suppress 546,550,177
 
-
+#ifndef _DEBUG
+	static const bool __debug = false;
+#else
+	static const bool __debug = true;
+#endif
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 /* Net_Config.c */
 
-#define OUR_IP_ADDR   	IP32(192, 168, 3, 234)
-#define DHCP_IP_ADDR   	IP32(192, 168, 3, 254)
+//#define OUR_IP_ADDR   	IP32(192, 168, 3, 234)
+//#define DHCP_IP_ADDR   	IP32(192, 168, 3, 254)
 
-static const MAC hwAdr = {0x12345678, 0x9ABC};
+static const MAC hwAdr = HW_EMAC_GetHwAdr(); //{0x12345678, 0x9ABC};
 static const MAC hwBroadCast = {0xFFFFFFFF, 0xFFFF};
-static const u32 ipAdr = OUR_IP_ADDR;//IP32(192, 168, 10, 1);
-static const u32 ipMask = IP32(255, 255, 255, 0);
+static const u32 ipAdr = HW_EMAC_GetIpAdr();//IP32(192, 168, 10, 1);
+static const u32 ipMask = HW_EMAC_GetIpMask();
 
-static const u16 udpInPort = SWAP16(66);
-static const u16 udpOutPort = SWAP16(66);
+//static const u16 udpInPort = ReverseWord(HW_EMAC_GetUdpInPort());
+//static const u16 udpOutPort = ReverseWord(HW_EMAC_GetUdpOutPort());
 
 bool emacConnected = false;
 
 /* Local variables */
-static byte PHYA = 0;
+static const byte PHYA = HW_EMAC_GetAdrPHY();
 static byte RxBufIndex = 0;
 static byte TxBufIndex = 0;
 static byte TxFreeIndex = 0;
@@ -168,9 +172,11 @@ static void FreeTxDesc()
 	{
 		td.Free();
 
-		EthBuf* b = (EthBuf*)(td.GetAdr() - 8);
+		if (__debug && !HW::RamCheck(td.GetAdr())) __breakpoint(0); 
 
-		b->len = 0;
+		EthBuf* b; b = (EthBuf*)(td.GetAdr() - ((byte*)&b->eth - (byte*)b));
+
+		b->Free();
 
 		TxFreeIndex = (td.ChkWrap()) ? 0 : TxFreeIndex + 1;
 	};
@@ -286,91 +292,87 @@ bool TransmitEth(EthBuf *b)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool TransmitIp(EthIpBuf *b)
+bool TransmitIp(EthBuf *mb)
 {
-	if (b == 0 || b->len < sizeof(EthIp))
-	{
-		return false;
-	};
+	if (mb == 0 || mb->len < sizeof(EthIp)) return false;
 
-	b->iph.off = 0;		
+	EthIp &b = (EthIp&)mb->eth;
 
-	b->eth.protlen = SWAP16(PROT_IP);
+	b.iph.off = 0;		
 
-	b->iph.hl_v = 0x45;	
-	b->iph.tos = 0;		
-	b->iph.ttl = 64;		
-	b->iph.sum = 0;		
-	b->iph.src = ipAdr;		
-	b->iph.off = ReverseWord(b->iph.off);		
-	b->iph.len = ReverseWord(b->len - sizeof(EthHdr));		
+	b.eth.protlen = SWAP16(PROT_IP);
 
-	b->iph.sum = IpChkSum((u16*)&b->iph, 10);
+	b.iph.hl_v = 0x45;	
+	b.iph.tos = 0;		
+	b.iph.ttl = 64;		
+	b.iph.sum = 0;		
+	b.iph.src = ipAdr;		
+	b.iph.off = ReverseWord(b.iph.off);		
+	b.iph.len = ReverseWord(mb->len - sizeof(EthHdr));		
 
-	return TransmitEth(b);
+	b.iph.sum = IpChkSum((u16*)&b.iph, 10);
+
+	return TransmitEth(mb);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool TransmitFragIp(EthIpBuf *b)
+bool TransmitFragIp(EthBuf *mb)
 {
-	if (b == 0 || b->len < sizeof(EthIp))
-	{
-		return false;
-	};
+	if (mb == 0 || mb->len < sizeof(EthIp))	return false;
 
-	b->eth.protlen = SWAP16(PROT_IP);
+	EthIp &b = (EthIp&)mb->eth;
 
-	b->iph.hl_v = 0x45;	
-	b->iph.tos = 0;		
-	b->iph.ttl = 64;		
-	b->iph.sum = 0;		
-	b->iph.src = ipAdr;		
-	b->iph.off = ReverseWord(b->iph.off);		
-	b->iph.len = ReverseWord(b->len - sizeof(EthHdr));		
+	b.eth.protlen = SWAP16(PROT_IP);
 
-	b->iph.sum = IpChkSum((u16*)&b->iph, 10);
+	b.iph.hl_v = 0x45;	
+	b.iph.tos = 0;		
+	b.iph.ttl = 64;		
+	b.iph.sum = 0;		
+	b.iph.src = ipAdr;		
+	b.iph.off = ReverseWord(b.iph.off);		
+	b.iph.len = ReverseWord(mb->len - sizeof(EthHdr));		
 
-	return TransmitEth(b);
+	b.iph.sum = IpChkSum((u16*)&b.iph, 10);
+
+	return TransmitEth(mb);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool TransmitUdp(EthUdpBuf *b)
+bool TransmitUdp(EthBuf *mb)
 {
-	if (b == 0 || b->len < sizeof(EthUdp))
-	{
-		return false;
-	};
+	if (mb == 0 || mb->len < sizeof(EthUdp)) return false;
 
-	b->iph.p = PROT_UDP;
-	b->udp.src = udpOutPort;
-	b->udp.xsum = 0;
-	b->udp.len = ReverseWord(b->len - sizeof(EthIp));
+	EthUdp &b = (EthUdp&)mb->eth;
 
-	return TransmitIp(b);
+	b.iph.p = PROT_UDP;
+	//b.udp.src = udpOutPort;
+	b.udp.xsum = 0;
+	b.udp.len = ReverseWord(mb->len - sizeof(EthIp));
+
+	return TransmitIp(mb);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool TransmitFragUdp(EthUdpBuf *b, u16 dst)
+bool TransmitFragUdp(EthBuf *mb, u16 src, u16 dst)
 {
-	if (b == 0 || b->len < sizeof(EthUdp))
+	if (mb == 0 || mb->len < sizeof(EthUdp)) return false;
+
+	EthUdp &b = (EthUdp&)mb->eth;
+
+	b.iph.p = PROT_UDP;
+
+	if ((b.iph.off & 0x1FFF) == 0)
 	{
-		return false;
+		b.udp.dst = dst;
+		b.udp.src = src;
+		b.udp.xsum = 0;
+		b.udp.len = ReverseWord((b.iph.off & 0x2000) ? b.udp.len : (mb->len - sizeof(EthIp)));
 	};
 
-	b->iph.p = PROT_UDP;
-
-	if ((b->iph.off & 0x1FFF) == 0)
-	{
-		b->udp.dst = dst;
-		b->udp.src = udpOutPort;
-		b->udp.xsum = 0;
-		b->udp.len = ReverseWord((b->iph.off & 0x2000) ? b->udp.len :b->len - sizeof(EthIp));
-	};
-
-	return TransmitFragIp(b);
+	return TransmitFragIp(mb);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -520,7 +522,7 @@ static bool RequestDHCP(EthBuf *mb)
 	t->dhcp.secs = 0;
 	t->dhcp.flags = 0;
 	t->dhcp.ciaddr = 0;
-	t->dhcp.yiaddr = DHCP_IP_ADDR;//IP32(192, 168, 10, 2); // New client IP
+	t->dhcp.yiaddr = HW_EMAC_GetDhcpIpAdr(); // New client IP
 	t->dhcp.siaddr = ipAdr;
 	t->dhcp.giaddr = 0;
 	t->dhcp.chaddr = h->dhcp.chaddr; //h->eth.src;
@@ -630,8 +632,8 @@ static bool RequestUDP(EthBuf* mb)
 
 	switch (h->udp.dst)
 	{
-		case BOOTPS:	c = RequestDHCP(mb); break;
-		case udpInPort: c = RequestTrap(mb); break;
+		case BOOTPS:	c = RequestDHCP(mb);		break;
+		default:		c = HW_EMAC_RequestUDP(mb);	break;
 	};
 
 	reqUdpCount++;
@@ -681,6 +683,8 @@ static void RecieveFrame()
 
 		if (buf.CheckRcvFrame()) // buffer contains a whole frame
 		{
+			if (__debug && !HW::RamCheck(buf.GetAdr())) __breakpoint(0); 
+
 			mb = (SysEthBuf*)(buf.GetAdr() - ((byte*)&mb->eth - (byte*)mb));
 
 			switch (ReverseWord(mb->eth.protlen))
@@ -722,9 +726,9 @@ static void RecieveFrame()
 		++rxCount;
 
 		ResumeReceiveProcessing();
-	};
 
-	RxBufIndex = (RxBufIndex >= ArraySize(Rx_Desc)) ? 0 : (RxBufIndex+1);
+		RxBufIndex = (buf.ChkWrap()) ? 0 : (RxBufIndex+1);
+	};
 
 #else // #ifndef WIN32
 
@@ -957,7 +961,7 @@ bool InitEMAC()
 
 	using namespace HW;
 	
-	PHYA = GetAdrPHY();
+	//PHYA = GetAdrPHY();
 
 	HW_EMAC_Init();
 

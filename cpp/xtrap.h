@@ -19,7 +19,9 @@
 
 __packed struct HugeTx : public EthBuf
 {
-	byte data[IP_MTU];
+	IPheader	iph; // 20
+	UdpHdr		udp; // 8
+	byte		data[IP_MTU - sizeof(UdpHdr)];
 
 	static List<HugeTx> freeList;
 
@@ -34,7 +36,7 @@ __packed struct HugeTx : public EthBuf
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 extern bool RequestTrap(EthBuf *mb);
-extern void InitTraps();
+//extern void InitTraps();
 extern void UpdateTraps();
 
 //extern SmallTx*	GetSmallTxBuffer();

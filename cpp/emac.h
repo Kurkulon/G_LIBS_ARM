@@ -19,7 +19,6 @@ extern void ReqWritePHY(byte PhyReg, u16 Value);
 extern void ReqReadPHY(byte PhyReg);
 extern bool IsReadyPHY();
 extern u16 ResultPHY();
-extern byte GetAdrPHY();
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -109,7 +108,8 @@ __packed struct MAC
 			void 	SetOwn() 					{ stat |= RD0_OWN; }
 			void 	ClrOwn() 					{ stat &= ~RD0_OWN; }
 			void	SetWrap()					{ ctrl |= RD1_RER; }
-			void	ClrWrap()					{ ctrl &= ~RD1_RER; }
+			bool	ChkWrap()					{ return ctrl & RD1_RER; }
+			//void	ClrWrap()					{ ctrl &= ~RD1_RER; }
 			byte*	GetAdr() 					{ return (byte*)addr1; }
 			void 	SetAdr(void *adr, u32 len)	{ addr1 = adr; ctrl = len; addr2 = 0; SetOwn(); }
 			void 	ClrAdr()					{ addr1 = 0;ClrOwn(); }
@@ -363,11 +363,19 @@ __packed struct SysEthBuf : public EthBuf
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 extern bool TransmitEth(EthBuf *b);
-extern bool TransmitIp(EthIpBuf *b);
-extern bool TransmitFragIp(EthIpBuf *b);
-extern bool TransmitUdp(EthUdpBuf *b);
-extern bool TransmitFragUdp(EthUdpBuf *b, u16 dst);
+extern bool TransmitIp(EthBuf *b);
+extern bool TransmitFragIp(EthBuf *b);
+//extern bool TransmitUdp(EthBuf *b);
+extern bool TransmitFragUdp(EthBuf *b, u16 src, u16 dst);
 extern SysEthBuf* GetSysEthBuffer();
+extern const MAC& HW_EMAC_GetHwAdr();
+extern byte HW_EMAC_GetAdrPHY();
+extern u32  HW_EMAC_GetIpAdr();
+extern u32  HW_EMAC_GetIpMask();
+extern u32  HW_EMAC_GetDhcpIpAdr();
+extern u16  HW_EMAC_GetUdpInPort();
+extern u16  HW_EMAC_GetUdpOutPort();
+extern bool HW_EMAC_RequestUDP(EthBuf* mb);
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

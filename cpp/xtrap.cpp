@@ -33,16 +33,19 @@ static TrapReq  traps[10];
 //static List<TrapReq> freeTrapList;
 static List<EthBuf> reqTrapList;
 
-//static List<SmallTx> txList;
+static List<EthBuf> txList;
 //static List<SmallTx> txFree;
 
 static MAC ComputerEmacAddr = {0,0};	// Our Ethernet MAC address and IP address
 static u32 ComputerIpAddr	= IP32(192,168,3,254);
 static u16 ComputerUDPPort	= 0;
+static u16 srcUDPPort	= 0;
 static u32 ComputerOldIpAddr	= 0;
 static u16 ComputerOldUDPPort	= 0;
 bool ComputerFind = false;
 
+List<HugeTx> HugeTx::freeList;
+static HugeTx	hugeTxBuf[8];
 
 
 
@@ -122,69 +125,25 @@ void FreeHugeTxBuffer(EthBuf* b)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void SendTrap(SmallTx *p)
+void SendTrap(EthBuf *p)
 {
-	p->iph.off = 0;
+	((EthIp*)p)->iph.off = 0;
 
 	txList.Add(p);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void SendFragTrap(SmallTx *p)
+void SendFragTrap(EthBuf *p)
 {
 	txList.Add(p);
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-SmallTx* GetSmallTxBuffer()
-{
-	static byte		indSmallTx = 0;
-	static SmallTx	smallTxBuf[8];
-
-	SmallTx *p = &smallTxBuf[indSmallTx];
-
-	if (p->len == 0)
-	{
-		p->len = 1;
-		indSmallTx = (indSmallTx + 1) & 7;
-		return p;
-	}
-	else
-	{
-		return 0;
-	};
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 HugeTx* GetHugeTxBuffer()
 {
-	static byte		indHugeTx = 0;
-	static HugeTx	hugeTxBuf[8];
-
-	HugeTx *p = &hugeTxBuf[indHugeTx];
-
-	if (p->len == 0)
-	{
-		indHugeTx = (indHugeTx + 1) & 7;
-		return p;
-	}
-	else
-	{
-		return 0;
-	};
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-void InitTraps()
-{
-	for (u32 i = 0; i < ArraySize(traps); i++)
-	{
-		freeTrapList.Add(&traps[i]);
-	};
+	return HugeTx::Alloc();
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -193,7 +152,7 @@ static void UpdateRequestTraps()
 {
 	static byte i = 0;
 	static EthBuf *req = 0;
-	static EthPtr *et = 0;
+	static EthPtr et = {0};
 
 	switch(i)
 	{
@@ -203,7 +162,7 @@ static void UpdateRequestTraps()
 
 			if (req != 0)
 			{
-				et->eth = &req->eth;
+				et.eth = &req->eth;
 				i++;
 			};
 
@@ -215,7 +174,7 @@ static void UpdateRequestTraps()
 			{
 				i = 3;
 			}
-			else if (ComputerEmacAddr != et->eth->src || ComputerIpAddr != et->eip->iph.src || ComputerUDPPort != et->eudp->udp.src)
+			else if (ComputerEmacAddr != et.eth->src || ComputerIpAddr != et.eip->iph.src || ComputerUDPPort != et.eudp->udp.src)
 			{
 				i = 2;
 			}
@@ -228,7 +187,7 @@ static void UpdateRequestTraps()
 
 		case 2:
 
-			if (TRAP_INFO_SendLostIP(ReverseDword(et->eip->iph.src), ReverseWord(et->eudp->udp.src)))
+			if (TRAP_INFO_SendLostIP(ReverseDword(et.eip->iph.src), ReverseWord(et.eudp->udp.src)))
 			{
 				i++;
 			};
@@ -240,9 +199,10 @@ static void UpdateRequestTraps()
 			ComputerOldIpAddr	= ComputerIpAddr;
 			ComputerOldUDPPort	= ComputerUDPPort;
 
-			ComputerEmacAddr	= et->eth->src;
-			ComputerIpAddr		= et->eip->iph.src;
-			ComputerUDPPort		= et->eudp->udp.src;
+			ComputerEmacAddr	= et.eth->src;
+			ComputerIpAddr		= et.eip->iph.src;
+			ComputerUDPPort		= et.eudp->udp.src;
+			srcUDPPort			= et.eudp->udp.dst;
 
 			ComputerFind = true;
 
@@ -277,17 +237,19 @@ static void UpdateSendTraps()
 		return;
 	};
 
-	SmallTx *t = txList.Get();
+	EthBuf *t = txList.Get();
 
 	if (t != 0)
 	{
-		t->eth.dest = ComputerEmacAddr;
+		EthUdp &et = (EthUdp&)t->eth;
 
-		t->iph.dst = ComputerIpAddr;	
+		et.eth.dest = ComputerEmacAddr;
 
-		if (t->iph.off == 0) { t->iph.id = GetIpID(); };
+		et.iph.dst = ComputerIpAddr;	
 
-		TransmitFragUdp(t, ComputerUDPPort);
+		if (et.iph.off == 0) { et.iph.id = GetIpID(); };
+
+		TransmitFragUdp(t, srcUDPPort, ComputerUDPPort);
 	};
 	
 	if (ComputerFind && tm.Check(500))

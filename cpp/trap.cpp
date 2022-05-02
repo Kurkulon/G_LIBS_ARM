@@ -210,14 +210,16 @@ bool TRAP_TRACE_SendData(const char *pData, u32 size)
 
 	MakePacketHeaders(&trap.hdr, TRAP_PACKET_NO_NEED_ASK, TRAP_PACKET_NO_ASK, TRAP_TRACE_DEVICE);
 
-	buf->th.cmd = TRAP_TRACE_COMMAND_MAIN;
+	trap.hdr.cmd = TRAP_TRACE_COMMAND_MAIN;
 
-	if (size > sizeof(buf->data))
+	u32 maxlen = buf->MaxLen() - sizeof(EthTrpHdr);
+
+	if (size > maxlen)
 	{
-		size = sizeof(buf->data);
+		size = maxlen;
 	};
 
-	COPY(pData, (char*)buf->data, size);
+	COPY(pData, trap.data, size);
 
 	buf->len = sizeof(EthUdp) + sizeof(TrapHdr) + size;
 
@@ -236,29 +238,21 @@ bool TRAP_TRACE_PrintString(const char *data, ...)
 
 	EthTrap &et = (EthTrap&)buf->eth;
 
-//	Trap &trap = (TrapClock&)buf->th;
+	Trap &trap = (Trap&)et.trap;
 
-	MakePacketHeaders(&buf->th, TRAP_PACKET_NO_NEED_ASK, TRAP_PACKET_NO_ASK, TRAP_TRACE_DEVICE);
+	MakePacketHeaders(&trap.hdr, TRAP_PACKET_NO_NEED_ASK, TRAP_PACKET_NO_ASK, TRAP_TRACE_DEVICE);
 
-	buf->th.cmd = TRAP_TRACE_COMMAND_MAIN;
+	trap.hdr.cmd = TRAP_TRACE_COMMAND_MAIN;
 
 	va_list arglist;
 
     va_start(arglist, data);
     
-	int i = vsnprintf((char*)buf->data, sizeof(buf->data) - 2, data, arglist);
-
-//	u16 i = sizeof(buf->data) - 2;
-
+	int i = vsnprintf((char*)trap.data, buf->MaxLen() - sizeof(EthTrpHdr) - 2, data, arglist);
 
 	if (i < 0) i = 0;
 	
-	byte *dst = buf->data + i;
-
-	//while((i > 0) && (*data != 0))
-	//{
-	//	*dst++ = *data++; i--;
-	//};
+	byte *dst = trap.data + i;
 
 	*dst++ = '\r';
 	*dst++ = '\n';
@@ -328,7 +322,7 @@ bool TRAP_MEMORY_SendInfo()
 
 	EthTrap &et = (EthTrap&)buf->eth;
 
-	TrapMemInfo &trap = (TrapMemInfo&)buf->th;
+	TrapMemInfo &trap = (TrapMemInfo&)et.trap;
 
 	MakePacketHeaders(&trap.hdr, TRAP_PACKET_NO_NEED_ASK, TRAP_PACKET_NO_ASK, TRAP_MEMORY_DEVICE);
 
@@ -357,7 +351,7 @@ bool TRAP_MEMORY_SendStatus(u32 progress, byte status)
 
 	EthTrap &et = (EthTrap&)buf->eth;
 
-	TrapMemStatus &trap = (TrapMemStatus&)buf->th;
+	TrapMemStatus &trap = (TrapMemStatus&)et.trap;
 
 	MakePacketHeaders(&trap.hdr, TRAP_PACKET_NO_NEED_ASK, TRAP_PACKET_NO_ASK, TRAP_MEMORY_DEVICE);
 
@@ -386,7 +380,7 @@ bool TRAP_MEMORY_SendSession(u16 session, i64 size, i64 last_adress, RTC_type st
 
 	EthTrap &et = (EthTrap&)buf->eth;
 
-	TrapSession &trap = (TrapSession&)buf->th;
+	TrapSession &trap = (TrapSession&)et.trap;
 
 	MakePacketHeaders(&trap.hdr, TRAP_PACKET_NO_NEED_ASK, TRAP_PACKET_NO_ASK, TRAP_MEMORY_DEVICE);
 
@@ -491,7 +485,7 @@ static bool TRAP_SendAsknowlege(byte device, u32 on_packet)
 
 	EthTrap &et = (EthTrap&)buf->eth;
 
-	TrapAsk &trap = (TrapAsk&)buf->th;
+	TrapAsk &trap = (TrapAsk&)et.trap;
 
 	MakePacketHeaders(&trap.hdr, TRAP_PACKET_NO_NEED_ASK, TRAP_PACKET_IS_ASK, device);
 
@@ -1086,7 +1080,7 @@ static bool UpdateSendVector_Dlya_Vova()
 	static byte i = 0;
 //	static FLRB flrb;
 
-	static SmallTx *t = 0;
+	static SysEthBuf *t = 0;
 //	static VecData::Hdr h;
 
 	static u32 vecCount = 0;
@@ -1162,7 +1156,7 @@ static bool UpdateSendVector_Dlya_Vova()
 			}
 			else if (!pause)
 			{
-				t = GetHugeTxBuffer();
+				t = GetSysEthBuffer();
 
 				if (t != 0)
 				{
@@ -1238,7 +1232,7 @@ static bool UpdateSendVector_Dlya_Vova()
 
 					vecCount += 2;
 
-					t->iph.off = 0;
+					et.eu.iph.off = 0;
 
 					et.data[0] = 0x40;
 					et.data[1] = 0xAD;

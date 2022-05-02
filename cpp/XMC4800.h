@@ -20282,6 +20282,27 @@ namespace HW
 	__forceinline void WDT_Disable()		{ SCU_RESET->ResetEnable(PID_WDT); SCU_CLK->CLKCLR = SCU_CLK_CLKCLR_WDTCDI_Pos; SCU_CLK->ClockDisable(PID_WDT); }
 	__forceinline void ResetWDT()			{ WDT->SRV = 0xABADCAFE; }
 
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	inline bool RamCheck(void *ptr)
+	{
+		u32 v = (u32)ptr;
+
+		return (v >= 0x1FFE8000 && v < 0x20040000);
+
+	};
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	inline bool RomCheck(void *ptr)
+	{
+		u32 v = (u32)ptr;
+
+		return (v >= 0x08000000 && v < 0x08100000);
+
+	};
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 };
 
 /** @} */ /* End of group Device_Peripheral_Registers */

@@ -59,6 +59,14 @@ __packed struct	TrapHdr
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+__packed struct	EthTrpHdr
+{
+	EthUdp	eudp;
+	TrapHdr	th;
+};
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 __packed struct	Trap
 {
 	TrapHdr	hdr;
