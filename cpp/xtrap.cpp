@@ -127,7 +127,7 @@ void FreeHugeTxBuffer(EthBuf* b)
 
 void SendTrap(EthBuf *p)
 {
-	((EthIp*)p)->iph.off = 0;
+	((EthIp*)&p->eth)->iph.off = 0;
 
 	txList.Add(p);
 }

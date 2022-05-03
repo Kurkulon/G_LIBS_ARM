@@ -28,7 +28,7 @@ enum trap_status
 static trap_status trapStatus = TRAP_WAIT;
 
 
-static const bool __trace = false;
+static const bool __trace = true;
 
 //char TrapTxDataBuffer[TRAP_TX_DATA_BUFFER_SIZE];
 
@@ -364,7 +364,7 @@ bool TRAP_MEMORY_SendStatus(u32 progress, byte status)
 
 	SendTrap(buf);
 
-	if (__trace) { TRAP_TRACE_PrintString(__func__); };
+	//if (__trace) { TRAP_TRACE_PrintString(__func__); };
 
 	return true;
 }
@@ -508,6 +508,8 @@ void TRAP_HandleRxData(EthBuf *b)
 	EthTrap *et = (EthTrap*)&b->eth;
 
 	Trap *t = &et->trap;
+
+	//if (__trace) TRAP_TRACE_PrintString("TRAP_Request 0x%04hX", t->hdr.cmd);
 
 	u32 size = et->eudp.udp.len - sizeof(et->eudp.udp);
 

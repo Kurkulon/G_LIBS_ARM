@@ -179,6 +179,8 @@ static void FreeTxDesc()
 		b->Free();
 
 		TxFreeIndex = (td.ChkWrap()) ? 0 : TxFreeIndex + 1;
+
+		if (__debug && TxFreeIndex >= ArraySize(Tx_Desc)) __breakpoint(0);
 	};
 }
 
@@ -307,7 +309,6 @@ bool TransmitIp(EthBuf *mb)
 	b.iph.ttl = 64;		
 	b.iph.sum = 0;		
 	b.iph.src = ipAdr;		
-	b.iph.off = ReverseWord(b.iph.off);		
 	b.iph.len = ReverseWord(mb->len - sizeof(EthHdr));		
 
 	b.iph.sum = IpChkSum((u16*)&b.iph, 10);
@@ -728,6 +729,8 @@ static void RecieveFrame()
 		ResumeReceiveProcessing();
 
 		RxBufIndex = (buf.ChkWrap()) ? 0 : (RxBufIndex+1);
+
+		if (__debug && RxBufIndex >= ArraySize(Rx_Desc)) __breakpoint(0);
 	};
 
 #else // #ifndef WIN32

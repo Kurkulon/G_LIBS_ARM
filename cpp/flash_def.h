@@ -4,6 +4,7 @@
 #include "types.h"
 //#include "core.h"
 #include "time.h"
+#include "CRC16.h"
 
 //#define NAND_SAMSUNG
 #define NAND_MICRON

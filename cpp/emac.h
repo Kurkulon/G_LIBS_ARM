@@ -58,7 +58,8 @@ __packed struct MAC
 			void 	SetOwn()					{ *((u32*)&addr1) &= ~OWNERSHIP_BIT; }
 			void 	ClrOwn()					{ *((u32*)&addr1) |= OWNERSHIP_BIT; }
 			void 	SetWrap()					{ *((u32*)&addr1) |= WRAP_BIT; }
-			void 	ClrWrap()					{ *((u32*)&addr1) &= ~WRAP_BIT; }
+			//void 	ClrWrap()					{ *((u32*)&addr1) &= ~WRAP_BIT; }
+			bool 	ChkWrap()					{ return *((u32*)&addr1) & WRAP_BIT; }
 			byte*	GetAdr()					{ return (byte*)((u32)addr1 & ~(OWNERSHIP_BIT|WRAP_BIT)); }
 			void	SetAdr(void *adr, u32 len)	{ addr1 = (void*)(((u32)addr1 & WRAP_BIT) | ((u32)adr & (~OWNERSHIP_BIT|WRAP_BIT))); }
 			void	ClrAdr()					{ *((u32*)&addr1) &= ~(OWNERSHIP_BIT|WRAP_BIT); ClrOwn(); }
@@ -111,7 +112,7 @@ __packed struct MAC
 			bool	ChkWrap()					{ return ctrl & RD1_RER; }
 			//void	ClrWrap()					{ ctrl &= ~RD1_RER; }
 			byte*	GetAdr() 					{ return (byte*)addr1; }
-			void 	SetAdr(void *adr, u32 len)	{ addr1 = adr; ctrl = len; addr2 = 0; SetOwn(); }
+			void 	SetAdr(void *adr, u32 len)	{ addr1 = adr; ctrl = (ctrl & RD1_RER) | (len & RD1_RBS1); addr2 = 0; SetOwn(); }
 			void 	ClrAdr()					{ addr1 = 0;ClrOwn(); }
 			u32		GetStatus()					{ return stat; }
 	};
@@ -309,6 +310,8 @@ __packed struct EthBuf
 	EthBuf*		next;
 
 	u32			len;
+	u16			z_align;
+
 	EthHdr		eth;
 
 	virtual	u32	MaxLen() { return sizeof(eth); }

@@ -244,6 +244,72 @@ static u32 invalidBlocks = 0;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+byte	FLADR::chipValidNext[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ следующий хороший чип
+byte	FLADR::chipValidPrev[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ предыдущий хороший чип
+u32		FLADR::chipOffsetNext[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на следующий хороший чип
+u32		FLADR::chipOffsetPrev[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на предыдущий хороший чип
+byte 	FLADR::COL_BITS;
+byte 	FLADR::PAGE_BITS;		
+byte 	FLADR::BLOCK_BITS;		
+//byte 	FLADR::COL_OFF;		// = 0
+byte 	FLADR::PAGE_OFF;	// = COL_BITS;
+byte 	FLADR::CHIP_OFF;	// = PAGE_OFF + PAGE_BITS
+byte 	FLADR::BLOCK_OFF;	// = CHIP_OFF + NAND_CHIP_BITS 		
+u32 	FLADR::COL_MASK;
+u32 	FLADR::PAGE_MASK;		
+u32 	FLADR::CHIP_MASK;		
+u32 	FLADR::BLOCK_MASK;		
+u32 	FLADR::RAWPAGE_MASK;	
+u32 	FLADR::RAWBLOCK_MASK;	
+u64 	FLADR::RAWADR_MASK;
+u32 	FLADR::pg; //enum { pg = (1<<NAND_COL_BITS) };
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void	FLADR::InitVaildTables(u16 mask)
+{
+	u32 blocksize = 1UL << CHIP_OFF;
+
+	for(byte chip = 0; chip < NAND_MAX_CHIP; chip++)
+	{
+		chipValidNext[chip] = 0;
+		chipValidPrev[chip] = 0;
+
+		u32 offset = 0;
+
+		for (byte i = 0; i < NAND_MAX_CHIP; i++)
+		{
+			byte cn = chip+i; if (cn >= NAND_MAX_CHIP) cn = 0;
+
+			if (mask & (1<<cn))
+			{
+				chipValidNext[chip] = cn;
+				chipOffsetNext[chip] = offset;
+				break;
+			};
+
+			offset += blocksize;
+		};
+
+		offset = 0;
+
+		for (byte i = 0; i < NAND_MAX_CHIP; i++)
+		{
+			byte cp = chip-i; if (cp >= NAND_MAX_CHIP) cp = NAND_MAX_CHIP - 1;
+
+			if (mask & (1<<cp))
+			{
+				chipValidPrev[chip] = cp;
+				chipOffsetPrev[chip] = offset;
+				break;
+			};
+			
+			offset += blocksize;
+		};
+	};
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 bool FLASH_SendStatus(u32 progress, byte status)
 {
 	lastFlashProgress = progress;
