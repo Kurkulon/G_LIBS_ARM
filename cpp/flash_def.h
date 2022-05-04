@@ -9,9 +9,9 @@
 //#define NAND_SAMSUNG
 #define NAND_MICRON
 
-#define NAND_CHIP_BITS		3
+//#define NAND_CHIP_BITS		3
 #define NAND_MAX_CHIP		(1<<3)
-#define NAND_CHIP_MASK		(NAND_MAX_CHIP-1)
+//#define NAND_CHIP_MASK		(NAND_MAX_CHIP-1)
 
 #define K9K8_CHIP_BITS		3
 #define K9K8_MAX_CHIP		(1<<3)

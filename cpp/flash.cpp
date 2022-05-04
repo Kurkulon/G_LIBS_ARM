@@ -263,6 +263,7 @@ u32 	FLADR::RAWPAGE_MASK;
 u32 	FLADR::RAWBLOCK_MASK;	
 u64 	FLADR::RAWADR_MASK;
 u32 	FLADR::pg; //enum { pg = (1<<NAND_COL_BITS) };
+
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 void	FLADR::InitVaildTables(u16 mask)

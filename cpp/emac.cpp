@@ -135,6 +135,8 @@ inline bool IsBusyPHY() { return !IsReadyPHY(); }
 #else
 
 	inline bool CheckStatusUDP(u32 stat) { return true; }
+	static const u16 udpInPort = ReverseWord(HW_EMAC_GetUdpInPort());
+	static const u16 udpOutPort = ReverseWord(HW_EMAC_GetUdpOutPort());
 
 #endif
 
@@ -901,6 +903,8 @@ DWORD WINAPI TxThreadFunction(LPVOID lpParam)
 
 			b->len = 0;
 
+			b->Free();
+
 			count = 100;
 		}
 		else
@@ -1087,12 +1091,12 @@ bool InitEMAC()
 	};
 
 
-	int iMode = 0;
+	//int iMode = 0;
 
-	if (ioctlsocket(lstnSocket, FIONBIO, (u_long FAR*) &iMode) != 0)
-	{
-		cputs("Set socket to blocking mode FAILED!!!\n");
-	};
+	//if (ioctlsocket(lstnSocket, FIONBIO, (u_long FAR*) &iMode) != 0)
+	//{
+	//	cputs("Set socket to blocking mode FAILED!!!\n");
+	//};
 
 	BOOL bOptVal = TRUE;
 	int bOptLen = sizeof(BOOL);
