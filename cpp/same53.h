@@ -164,7 +164,85 @@ extern byte core_sys_array[0x100000];
 	#define SDHC0_IRQ                135 	/**< 135 SAME53N19A SD/MMC Host Controller 0 (SDHC0) */
 	#define SDHC1_IRQ                136 	/**< 136 SAME53N19A SD/MMC Host Controller 1 (SDHC1) */
 
+	#define PID_AHB_HPB0       			(0)        	/**< \brief (MCLK_AHBMASK) HPB0 AHB Clock Mask */
+	#define PID_AHB_HPB1       			(1)        	/**< \brief (MCLK_AHBMASK) HPB1 AHB Clock Mask */
+	#define PID_AHB_HPB2       			(2)        	/**< \brief (MCLK_AHBMASK) HPB2 AHB Clock Mask */
+	#define PID_AHB_HPB3       			(3)        	/**< \brief (MCLK_AHBMASK) HPB3 AHB Clock Mask */
+	#define PID_AHB_DSU        			(4)        	/**< \brief (MCLK_AHBMASK) DSU AHB Clock Mask */
+	#define PID_AHB_HMATRIX    			(5)        	/**< \brief (MCLK_AHBMASK) HMATRIX AHB Clock Mask */
+	#define PID_AHB_NVMCTRL    			(6)        	/**< \brief (MCLK_AHBMASK) NVMCTRL AHB Clock Mask */
+	#define PID_AHB_HSRAM      			(7)        	/**< \brief (MCLK_AHBMASK) HSRAM AHB Clock Mask */
+	#define PID_AHB_CMCC       			(8)        	/**< \brief (MCLK_AHBMASK) CMCC AHB Clock Mask */
+	#define PID_AHB_DMAC       			(9)        	/**< \brief (MCLK_AHBMASK) DMAC AHB Clock Mask */
+	#define PID_AHB_USB        			(10)       	/**< \brief (MCLK_AHBMASK) USB AHB Clock Mask */
+	#define PID_AHB_BKUPRAM    			(11)       	/**< \brief (MCLK_AHBMASK) BKUPRAM AHB Clock Mask */
+	#define PID_AHB_PAC        			(12)       	/**< \brief (MCLK_AHBMASK) PAC AHB Clock Mask */
+	#define PID_AHB_QSPI       			(13)       	/**< \brief (MCLK_AHBMASK) QSPI AHB Clock Mask */
+	#define PID_AHB_GMAC       			(14)       	/**< \brief (MCLK_AHBMASK) GMAC AHB Clock Mask */
+	#define PID_AHB_SDHC0      			(15)       	/**< \brief (MCLK_AHBMASK) SDHC0 AHB Clock Mask */
+	#define PID_AHB_SDHC1      			(16)       	/**< \brief (MCLK_AHBMASK) SDHC1 AHB Clock Mask */
+	#define PID_AHB_ICM        			(19)       	/**< \brief (MCLK_AHBMASK) ICM AHB Clock Mask */
+	#define PID_AHB_PUKCC      			(20)       	/**< \brief (MCLK_AHBMASK) PUKCC AHB Clock Mask */
+	#define PID_AHB_QSPI_2X    			(21)       	/**< \brief (MCLK_AHBMASK) QSPI_2X AHB Clock Mask */
+	#define PID_AHB_NVMCTRL_SMEEPROM	(22)       	/**< \brief (MCLK_AHBMASK) NVMCTRL_SMEEPROM AHB Clock Mask */
+	#define PID_AHB_NVMCTRL_CACHE		(23)       	/**< \brief (MCLK_AHBMASK) NVMCTRL_CACHE AHB Clock Mask */
 
+	#define PID_PAC       			(32+0)        	/**< \brief (MCLK_APBAMASK) PAC APB Clock Enable */
+	#define PID_PM        			(32+1)        	/**< \brief (MCLK_APBAMASK) PM APB Clock Enable */
+	#define PID_MCLK      			(32+2)        	/**< \brief (MCLK_APBAMASK) MCLK APB Clock Enable */
+	#define PID_RSTC      			(32+3)        	/**< \brief (MCLK_APBAMASK) RSTC APB Clock Enable */
+	#define PID_OSCCTRL   			(32+4)        	/**< \brief (MCLK_APBAMASK) OSCCTRL APB Clock Enable */
+	#define PID_OSC32KCTRL			(32+5)        	/**< \brief (MCLK_APBAMASK) OSC32KCTRL APB Clock Enable */
+	#define PID_SUPC      			(32+6)        	/**< \brief (MCLK_APBAMASK) SUPC APB Clock Enable */
+	#define PID_GCLK      			(32+7)        	/**< \brief (MCLK_APBAMASK) GCLK APB Clock Enable */
+	#define PID_WDT       			(32+8)        	/**< \brief (MCLK_APBAMASK) WDT APB Clock Enable */
+	#define PID_RTC       			(32+9)        	/**< \brief (MCLK_APBAMASK) RTC APB Clock Enable */
+	#define PID_EIC       			(32+10)       	/**< \brief (MCLK_APBAMASK) EIC APB Clock Enable */
+	#define PID_FREQM     			(32+11)       	/**< \brief (MCLK_APBAMASK) FREQM APB Clock Enable */
+	#define PID_SERCOM0   			(32+12)       	/**< \brief (MCLK_APBAMASK) SERCOM0 APB Clock Enable */
+	#define PID_SERCOM1   			(32+13)       	/**< \brief (MCLK_APBAMASK) SERCOM1 APB Clock Enable */
+	#define PID_TC0       			(32+14)       	/**< \brief (MCLK_APBAMASK) TC0 APB Clock Enable */
+	#define PID_TC1       			(32+15)       	/**< \brief (MCLK_APBAMASK) TC1 APB Clock Enable */
+											  
+	#define PID_USB       			(64+0)        	/**< \brief (MCLK_APBBMASK) USB APB Clock Enable */
+	#define PID_DSU       			(64+1)        	/**< \brief (MCLK_APBBMASK) DSU APB Clock Enable */
+	#define PID_NVMCTRL   			(64+2)        	/**< \brief (MCLK_APBBMASK) NVMCTRL APB Clock Enable */
+	#define PID_PORT      			(64+4)        	/**< \brief (MCLK_APBBMASK) PORT APB Clock Enable */
+	#define PID_HMATRIX   			(64+6)        	/**< \brief (MCLK_APBBMASK) HMATRIX APB Clock Enable */
+	#define PID_EVSYS     			(64+7)        	/**< \brief (MCLK_APBBMASK) EVSYS APB Clock Enable */
+	#define PID_SERCOM2   			(64+9)        	/**< \brief (MCLK_APBBMASK) SERCOM2 APB Clock Enable */
+	#define PID_SERCOM3   			(64+10)       	/**< \brief (MCLK_APBBMASK) SERCOM3 APB Clock Enable */
+	#define PID_TCC0      			(64+11)       	/**< \brief (MCLK_APBBMASK) TCC0 APB Clock Enable */
+	#define PID_TCC1      			(64+12)       	/**< \brief (MCLK_APBBMASK) TCC1 APB Clock Enable */
+	#define PID_TC2       			(64+13)       	/**< \brief (MCLK_APBBMASK) TC2 APB Clock Enable */
+	#define PID_TC3       			(64+14)       	/**< \brief (MCLK_APBBMASK) TC3 APB Clock Enable */
+	#define PID_RAMECC    			(64+16)       	/**< \brief (MCLK_APBBMASK) RAMECC APB Clock Enable */
+
+	#define PID_GMAC      			(96+2)        	/**< \brief (MCLK_APBCMASK) GMAC APB Clock Enable */
+	#define PID_TCC2      			(96+3)        	/**< \brief (MCLK_APBCMASK) TCC2 APB Clock Enable */
+	#define PID_TCC3      			(96+4)        	/**< \brief (MCLK_APBCMASK) TCC3 APB Clock Enable */
+	#define PID_TC4       			(96+5)        	/**< \brief (MCLK_APBCMASK) TC4 APB Clock Enable */
+	#define PID_TC5       			(96+6)        	/**< \brief (MCLK_APBCMASK) TC5 APB Clock Enable */
+	#define PID_PDEC      			(96+7)        	/**< \brief (MCLK_APBCMASK) PDEC APB Clock Enable */
+	#define PID_AC        			(96+8)        	/**< \brief (MCLK_APBCMASK) AC APB Clock Enable */
+	#define PID_AES       			(96+9)        	/**< \brief (MCLK_APBCMASK) AES APB Clock Enable */
+	#define PID_TRNG      			(96+10)       	/**< \brief (MCLK_APBCMASK) TRNG APB Clock Enable */
+	#define PID_ICM       			(96+11)       	/**< \brief (MCLK_APBCMASK) ICM APB Clock Enable */
+	#define PID_QSPI      			(96+13)       	/**< \brief (MCLK_APBCMASK) QSPI APB Clock Enable */
+	#define PID_CCL       			(96+14)       	/**< \brief (MCLK_APBCMASK) CCL APB Clock Enable */
+
+	#define PID_SERCOM4   			(128+0)        	/**< \brief (MCLK_APBDMASK) SERCOM4 APB Clock Enable */
+	#define PID_SERCOM5   			(128+1)        	/**< \brief (MCLK_APBDMASK) SERCOM5 APB Clock Enable */
+	#define PID_SERCOM6   			(128+2)        	/**< \brief (MCLK_APBDMASK) SERCOM6 APB Clock Enable */
+	#define PID_SERCOM7   			(128+3)        	/**< \brief (MCLK_APBDMASK) SERCOM7 APB Clock Enable */
+	#define PID_TCC4      			(128+4)        	/**< \brief (MCLK_APBDMASK) TCC4 APB Clock Enable */
+	#define PID_TC6       			(128+5)        	/**< \brief (MCLK_APBDMASK) TC6 APB Clock Enable */
+	#define PID_TC7       			(128+6)        	/**< \brief (MCLK_APBDMASK) TC7 APB Clock Enable */
+	#define PID_ADC0      			(128+7)        	/**< \brief (MCLK_APBDMASK) ADC0 APB Clock Enable */
+	#define PID_ADC1      			(128+8)      	/**< \brief (MCLK_APBDMASK) ADC1 APB Clock Enable */
+	#define PID_DAC       			(128+9)      	/**< \brief (MCLK_APBDMASK) DAC APB Clock Enable */
+	#define PID_I2S       			(128+10)       	/**< \brief (MCLK_APBDMASK) I2S APB Clock Enable */
+	#define PID_PCC       			(128+11)       	/**< \brief (MCLK_APBDMASK) PCC APB Clock Enable */
 
 #pragma anon_unions
 
@@ -355,6 +433,9 @@ namespace T_HW
 		RW32  		APBBMASK;    /**< \brief Offset: 0x18 (R/W 32) APBB Mask */
 		RW32  		APBCMASK;    /**< \brief Offset: 0x1C (R/W 32) APBC Mask */
 		RW32  		APBDMASK;    /**< \brief Offset: 0x20 (R/W 32) APBD Mask */
+
+		void ClockEnable(u32 pid)	{ *((&AHBMASK)+pid/32) |= (1UL << (pid&31)); }
+		void ClockDisable(u32 pid)	{ *((&AHBMASK)+pid/32) &= ~(1UL << (pid&31)); }
 	};
 
 	#define MCLK_CKRDY				(1<<0)            /**< \brief (MCLK_INTENCLR) Clock Ready Interrupt Enable */

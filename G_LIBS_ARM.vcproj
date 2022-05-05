@@ -188,6 +188,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\usic.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\xtrap.cpp"
 				>
 			</File>
@@ -283,6 +287,10 @@
 			</File>
 			<File
 				RelativePath=".\cpp\types.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\usic.h"
 				>
 			</File>
 			<File
