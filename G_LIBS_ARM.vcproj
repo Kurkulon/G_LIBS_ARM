@@ -246,6 +246,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\hw_nand_imp.h"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\I2C.h"
 				>
 			</File>

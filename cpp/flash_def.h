@@ -9,9 +9,7 @@
 //#define NAND_SAMSUNG
 #define NAND_MICRON
 
-//#define NAND_CHIP_BITS		3
-#define NAND_MAX_CHIP		(1<<3)
-//#define NAND_CHIP_MASK		(NAND_MAX_CHIP-1)
+#define FLASH_MAX_CHIP		(1<<3)
 
 #define K9K8_CHIP_BITS		3
 #define K9K8_MAX_CHIP		(1<<3)
@@ -114,10 +112,10 @@ struct NandMemSize
  	u64 fl;	// full
 	u16 mask;
 
-	byte	chipDataBusMask[NAND_MAX_CHIP]; // ≈сли проблема по линии данных, то соответствующи бит равен 0
+	byte	chipDataBusMask[FLASH_MAX_CHIP]; // ≈сли проблема по линии данных, то соответствующи бит равен 0
 
-	NandID	id[NAND_MAX_CHIP];
-	u16		integrityCRC[NAND_MAX_CHIP];
+	NandID	id[FLASH_MAX_CHIP];
+	u16		integrityCRC[FLASH_MAX_CHIP];
 };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -174,11 +172,11 @@ struct FLADR
 
 //	const NandMemSize& sz;
 
-	static byte	chipValidNext[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ следующий хороший чип
-	static byte	chipValidPrev[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ предыдущий хороший чип
+	static byte	chipValidNext[FLASH_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ следующий хороший чип
+	static byte	chipValidPrev[FLASH_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ предыдущий хороший чип
 
-	static u32	chipOffsetNext[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на следующий хороший чип
-	static u32	chipOffsetPrev[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на предыдущий хороший чип
+	static u32	chipOffsetNext[FLASH_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на следующий хороший чип
+	static u32	chipOffsetPrev[FLASH_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на предыдущий хороший чип
 
 	inline void operator=(const FLADR &a) { raw = a.raw; }
 
@@ -302,10 +300,10 @@ __packed struct SpareArea
 extern bool NAND_BUSY(); 
 extern bool NAND_CmdBusy();
 extern void NAND_WriteDataDMA(volatile void *src, u16 len);
-extern void NAND_WriteDataPIO(volatile void *src, u16 len);
+//extern void NAND_WriteDataPIO(volatile void *src, u16 len);
 extern void NAND_ReadDataDMA(volatile void *dst, u16 len);
 extern void NAND_ReadDataDMA2(volatile void *dst, u16 len);
-extern void NAND_ReadDataPIO(volatile void *dst, u16 len);
+//extern void NAND_ReadDataPIO(volatile void *dst, u16 len);
 extern bool NAND_CheckDataComplete();
 extern void NAND_Chip_Select(byte chip);
 extern void NAND_Chip_Disable();
