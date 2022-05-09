@@ -29,12 +29,6 @@ DWORD txThreadCount = 0;
 
 //#pragma diag_suppress 546,550,177
 
-#ifndef _DEBUG
-	static const bool __debug = false;
-#else
-	static const bool __debug = true;
-#endif
-
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 /* Net_Config.c */
@@ -42,10 +36,10 @@ DWORD txThreadCount = 0;
 //#define OUR_IP_ADDR   	IP32(192, 168, 3, 234)
 //#define DHCP_IP_ADDR   	IP32(192, 168, 3, 254)
 
-static const MAC hwAdr = HW_EMAC_GetHwAdr(); //{0x12345678, 0x9ABC};
+//static const MAC hwAdr = HW_EMAC_GetHwAdr(); //{0x12345678, 0x9ABC};
 static const MAC hwBroadCast = {0xFFFFFFFF, 0xFFFF};
-static const u32 ipAdr = HW_EMAC_GetIpAdr();//IP32(192, 168, 10, 1);
-static const u32 ipMask = HW_EMAC_GetIpMask();
+static const u32 ipAdr = OUR_IP_ADDR;
+static const u32 ipMask = OUR_IP_MASK;
 
 //static const u16 udpInPort = ReverseWord(HW_EMAC_GetUdpInPort());
 //static const u16 udpOutPort = ReverseWord(HW_EMAC_GetUdpOutPort());
@@ -53,7 +47,7 @@ static const u32 ipMask = HW_EMAC_GetIpMask();
 bool emacConnected = false;
 
 /* Local variables */
-static const byte PHYA = HW_EMAC_GetAdrPHY();
+//static const byte PHYA = HW_EMAC_GetAdrPHY();
 static byte RxBufIndex = 0;
 static byte TxBufIndex = 0;
 static byte TxFreeIndex = 0;
@@ -61,6 +55,8 @@ static byte TxFreeIndex = 0;
 enum	StateEM { LINKING, CONNECTED };	
 
 StateEM stateEMAC = LINKING;
+
+static byte linkState = 0;
 
 //static byte linkState = 0;
 
@@ -84,7 +80,7 @@ u16  txIpID = 0;
 	Receive_Desc	Rx_Desc[NUM_RX_BUF];
 	Transmit_Desc	Tx_Desc[NUM_TX_DSC];
 #elif defined(CPU_XMC48)
-	Receive_Desc	Rx_Desc[NUM_RX_BUF] __attribute__((aligned (0x20000)));;
+	Receive_Desc	Rx_Desc[NUM_RX_BUF];
 	Transmit_Desc	Tx_Desc[NUM_TX_DSC];
 #endif
 
@@ -97,9 +93,6 @@ u16  txIpID = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-List<SysEthBuf> SysEthBuf::freeList;
-
-static SysEthBuf	sysTxBuf[16];
 //static byte			indSysTx = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -116,6 +109,8 @@ static void rx_descr_init (void);
 static void tx_descr_init (void);
 
 #ifdef CPU_SAME53	
+	inline void EnableMDI() { HW::GMAC->NCR |= GMAC_MPE; }
+	inline void DisableMDI() { HW::GMAC->NCR &= ~GMAC_MPE; }
 			bool IsReadyPHY() { return HW::GMAC->NSR & GMAC_IDLE; }
 			u16 ResultPHY() { return HW::GMAC->MAN; }
 	inline	bool CheckStatusIP(u32 stat) { return (stat & RD_IP_CHECK) == RD_IP_OK; }
@@ -123,6 +118,8 @@ static void tx_descr_init (void);
 	inline	void ResumeReceiveProcessing() {}
 
 #elif defined(CPU_XMC48)
+	inline void EnableMDI() { /*HW::GMAC->NCR |= GMAC_MPE;*/ }
+	inline void DisableMDI() { /*HW::GMAC->NCR &= ~GMAC_MPE;*/ }
 			bool IsReadyPHY() { return (HW::ETH0->GMII_ADDRESS & GMII_MB) == 0; }
 			u16 ResultPHY() { return HW::ETH0->GMII_DATA; }
 	inline	bool CheckStatusIP(u32 stat) { return (stat & RD_IP_ERR) == 0; }
@@ -130,13 +127,14 @@ static void tx_descr_init (void);
 	inline	void ResumeReceiveProcessing() { HW::ETH0->STATUS = ETH_STATUS_RU_Msk; HW::ETH0->RECEIVE_POLL_DEMAND = 0; }
 #endif
 
-inline bool IsBusyPHY() { return !IsReadyPHY(); }
+	void HW_EMAC_StartLink() { linkState = 0; }
+	inline bool IsBusyPHY() { return !IsReadyPHY(); }
 
 #else
 
 	inline bool CheckStatusUDP(u32 stat) { return true; }
-	static const u16 udpInPort = ReverseWord(HW_EMAC_GetUdpInPort());
-	static const u16 udpOutPort = ReverseWord(HW_EMAC_GetUdpOutPort());
+//	static const u16 udpInPort = ReverseWord(HW_EMAC_GetUdpInPort());
+//	static const u16 udpOutPort = ReverseWord(HW_EMAC_GetUdpOutPort());
 
 #endif
 
@@ -148,6 +146,14 @@ SysEthBuf* GetSysEthBuffer()
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HugeTx* GetHugeTxBuffer()
+{
+	return HugeTx::Alloc();
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 #ifndef WIN32
 
 static Transmit_Desc* GetTxDesc()
@@ -525,7 +531,7 @@ static bool RequestDHCP(EthBuf *mb)
 	t->dhcp.secs = 0;
 	t->dhcp.flags = 0;
 	t->dhcp.ciaddr = 0;
-	t->dhcp.yiaddr = HW_EMAC_GetDhcpIpAdr(); // New client IP
+	t->dhcp.yiaddr = DHCP_IP_ADDR; // New client IP
 	t->dhcp.siaddr = ipAdr;
 	t->dhcp.giaddr = 0;
 	t->dhcp.chaddr = h->dhcp.chaddr; //h->eth.src;
@@ -559,22 +565,9 @@ static bool RequestDHCP(EthBuf *mb)
 	u16 ipLen = sizeof(EthDhcp) - sizeof(t->dhcp.options) + (p.b - (byte*)t->dhcp.options);
 
 	t->eth.dest = hwBroadCast;
-//	t->eth.src  = hwAdr;
-
-//	t->eth.protlen = ReverseWord(PROT_IP);
-
-	//t->iph.hl_v = 0x45;	
-	//t->iph.tos = 0;		
-//	t->iph.len = ReverseWord(ipLen);		
 	t->iph.id = GetIpID(); //h->iph.id;		
-//	t->iph.off = 0;		
-//	t->iph.ttl = 64;		
 	t->iph.p = PROT_UDP;		
-//	t->iph.sum = 0;		
-//	t->iph.src = ipAdr;		
 	t->iph.dst = -1; //BroadCast	
-
-//	t->iph.sum = IpChkSum((u16*)&t->iph, 10);
 
 	t->udp.src = BOOTPS;
 	t->udp.dst = BOOTPC;
@@ -590,43 +583,6 @@ static bool RequestDHCP(EthBuf *mb)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-//static void RequestMyUDP(EthUdp *h, u32 stat)
-//{
-//	Buf_Desc *buf = GetTxDesc();
-//
-//	if (buf == 0) return;
-//
-//
-//	EthUdp *t = (EthUdp*)buf->addr;
-//
-//	t->eth.dest = h->eth.src;
-//	t->eth.src  = hwAdr;
-//
-//	t->eth.protlen = SWAP16(PROT_IP);
-//
-//	t->iph.hl_v = 0x45;	
-//	t->iph.tos = 0;		
-//	t->iph.len = h->iph.len;		
-//	t->iph.id = h->iph.id;		
-//	t->iph.off = 0;		
-//	t->iph.ttl = 64;		
-//	t->iph.p = PROT_UDP;		
-//	t->iph.sum = 0;		
-//	t->iph.src = ipAdr;		
-//	t->iph.dst = h->iph.src;	
-//
-//	t->iph.sum = IpChkSum((u16*)&t->iph, 10);
-//
-//	t->udp.src = udpInPort;
-//	t->udp.dst = udpOutPort;
-//	t->udp.len = h->udp.len;
-//	t->udp.xsum = 0;
-//
-//	TransmitPacket(buf, ReverseWord(t->iph.len) + sizeof(t->eth));
-//}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 static bool RequestUDP(EthBuf* mb)
 {
 	EthUdp *h = (EthUdp*)&mb->eth;
@@ -636,7 +592,7 @@ static bool RequestUDP(EthBuf* mb)
 	switch (h->udp.dst)
 	{
 		case BOOTPS:	c = RequestDHCP(mb);		break;
-		default:		c = HW_EMAC_RequestUDP(mb);	break;
+		case udpInPort:	c = HW_EMAC_RequestUDP(mb);	break;
 	};
 
 	reqUdpCount++;
@@ -1145,105 +1101,6 @@ bool InitEMAC()
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#ifndef WIN32
-
-static bool CheckLink() // Если нет связи, то результат false
-{
-	static byte state = 0;
-
-	bool result = true;
-
-	switch (state)
-	{
-		case 0:		
-
-			ReqReadPHY(PHY_REG_BMSR);
-
-			state++;
-
-			break;
-
-		case 1:
-
-			if (IsReadyPHY())
-			{
-				result = ((ResultPHY() & BMSR_LINKST) != 0);
-
-				if (!result) SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_YELLOW "Ethernet Link Down\n");
-
-				state = 0;
-			};
-
-			break;
-	};
-
-	return result;
-}
-
-#endif
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-void UpdateEMAC()
-{
-	static byte i = 0;
-
-#ifndef WIN32
-
-	switch(stateEMAC)
-	{
-		case LINKING:
-
-			if (HW_EMAC_UpdateLink())
-			{
-				stateEMAC = CONNECTED;
-
-				#ifdef CPU_SAME53	
-					HW::GMAC->NCR |= GMAC_RXEN;
-				#elif defined(CPU_XMC48)
-					HW::ETH0->MAC_CONFIGURATION |= MAC_RE;
-				#endif
-
-				emacConnected = true;
-			};
-			
-			break;
-
-		case CONNECTED:
-
-			if (!CheckLink())
-			{
-				#ifdef CPU_SAME53
-					HW::GMAC->NCR &= ~GMAC_RXEN;
-				#elif defined(CPU_XMC48)
-					HW::ETH0->MAC_CONFIGURATION &= ~MAC_RE;
-				#endif
-
-				HW_EMAC_StartLink();
-				stateEMAC = LINKING;
-				emacConnected = false;
-			}
-			else
-			{
-				switch(i++)
-				{
-					case 0:	RecieveFrame();		break;
-					case 1: UpdateTransmit();	break;
-				};
-
-				i &= 1;
-			};
-
-			break;
-	};
-
-#else
-
-	RecieveFrame();
-
-#endif
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1376,6 +1233,205 @@ void ReqReadPHY(byte PhyReg)
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #endif
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ifndef WIN32
+
+bool HW_EMAC_UpdateLink()
+{
+	bool result = false;
+
+	switch(linkState)
+	{
+		case 0:		
+
+			ReqReadPHY(PHY_REG_BMSR);
+
+			linkState++;
+
+			break;
+
+		case 1:
+
+			if (IsReadyPHY())
+			{
+				if (ResultPHY() & BMSR_LINKST)
+				{
+					linkState++;
+				}
+				else
+				{
+					linkState = 0;
+				};
+			};
+
+			break;
+
+		case 2:
+
+			ReqWritePHY(PHY_REG_BMCR, BMCR_ANENABLE|BMCR_FULLDPLX);
+
+			linkState++;
+
+			break;
+
+		case 3:
+
+			if (IsReadyPHY())
+			{
+//				ReqReadPHY(PHY_REG_BMSR);
+				ReqReadPHY(PHY_REG_PHYCON1);
+
+				linkState++;
+			};
+
+			break;
+
+		case 4:
+
+			if (IsReadyPHY())
+			{
+				if (ResultPHY() & PHYCON1_OP_MODE_MASK /*BMSR_LINKST*/)
+				{
+					#ifdef CPU_SAME53	
+						HW::GMAC->NCFGR &= ~(GMAC_SPD|GMAC_FD);
+					#elif defined(CPU_XMC48)
+						HW::ETH0->MAC_CONFIGURATION &= ~(MAC_DM|MAC_FES);
+					#endif
+
+					if (ResultPHY() & PHYCON1_OP_MODE_100BTX /*ANLPAR_100*/)	// Speed 100Mbit is enabled.
+					{
+						#ifdef CPU_SAME53	
+							HW::GMAC->NCFGR |= GMAC_SPD;
+						#elif defined(CPU_XMC48)
+							HW::ETH0->MAC_CONFIGURATION |= MAC_FES;
+						#endif
+					};
+
+					if (ResultPHY() & 4 /*ANLPAR_DUPLEX*/)	//  Full duplex is enabled.
+					{
+						#ifdef CPU_SAME53	
+							HW::GMAC->NCFGR |= GMAC_FD;
+						#elif defined(CPU_XMC48)
+							HW::ETH0->MAC_CONFIGURATION |= MAC_DM;
+						#endif
+					};
+
+					result = true;
+
+					linkState++;
+				}
+				else
+				{
+					linkState = 3;
+				};
+			};
+
+			break;
+	};
+
+	return result;
+}
+
+#endif
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ifndef WIN32
+
+static bool CheckLink() // Если нет связи, то результат false
+{
+	static byte state = 0;
+
+	bool result = true;
+
+	switch (state)
+	{
+		case 0:		
+
+			ReqReadPHY(PHY_REG_BMSR);
+
+			state++;
+
+			break;
+
+		case 1:
+
+			if (IsReadyPHY())
+			{
+				result = ((ResultPHY() & BMSR_LINKST) != 0);
+
+				if (!result) SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_YELLOW "Ethernet Link Down\n");
+
+				state = 0;
+			};
+
+			break;
+	};
+
+	return result;
+}
+
+#endif
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void UpdateEMAC()
+{
+	static byte i = 0;
+
+#ifndef WIN32
+
+	switch(stateEMAC)
+	{
+		case LINKING:
+
+			if (HW_EMAC_UpdateLink())
+			{
+				stateEMAC = CONNECTED;
+
+				#ifdef CPU_SAME53	
+					HW::GMAC->NCR |= GMAC_RXEN;
+				#elif defined(CPU_XMC48)
+					HW::ETH0->MAC_CONFIGURATION |= MAC_RE;
+				#endif
+
+				emacConnected = true;
+			};
+			
+			break;
+
+		case CONNECTED:
+
+			if (!CheckLink())
+			{
+				#ifdef CPU_SAME53
+					HW::GMAC->NCR &= ~GMAC_RXEN;
+				#elif defined(CPU_XMC48)
+					HW::ETH0->MAC_CONFIGURATION &= ~MAC_RE;
+				#endif
+
+				HW_EMAC_StartLink();
+				stateEMAC = LINKING;
+				emacConnected = false;
+			}
+			else
+			{
+				switch(i++)
+				{
+					case 0:	RecieveFrame();		break;
+					case 1: UpdateTransmit();	break;
+				};
+
+				i &= 1;
+			};
+
+			break;
+	};
+
+#else
+
+	RecieveFrame();
+
+#endif
+}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

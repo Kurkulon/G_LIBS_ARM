@@ -17,24 +17,6 @@
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-__packed struct HugeTx : public EthBuf
-{
-	IPheader	iph; // 20
-	UdpHdr		udp; // 8
-	byte		data[IP_MTU - sizeof(UdpHdr)];
-
-	static List<HugeTx> freeList;
-
-	static	HugeTx*		Alloc()		{ return freeList.Get(); }
-	virtual	u32			MaxLen()	{ return sizeof(eth) + sizeof(data); }
-	virtual void		Free()		{ freeList.Add(this); }
-
-						HugeTx()	{ freeList.Init(); freeList.Add(this); }
-
-};
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 extern bool RequestTrap(EthBuf *mb);
 //extern void InitTraps();
 extern void UpdateTraps();

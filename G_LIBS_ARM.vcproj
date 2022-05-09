@@ -140,10 +140,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\cpp\emac.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\cpp\flash.cpp"
 				>
 			</File>
@@ -177,6 +173,10 @@
 			</File>
 			<File
 				RelativePath=".\cpp\SEGGER_RTT_printf.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\tftp.cpp"
 				>
 			</File>
 			<File
@@ -234,6 +234,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\emac_imp.h"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\extern_def.h"
 				>
 			</File>
@@ -275,6 +279,14 @@
 			</File>
 			<File
 				RelativePath=".\cpp\SPI.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\tftp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\tftp_def.h"
 				>
 			</File>
 			<File

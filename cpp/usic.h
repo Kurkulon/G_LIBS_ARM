@@ -17,6 +17,10 @@
 
 #define USIC_NUM 8
 
+#elif defined(WIN32)
+
+#define USIC_NUM 8
+
 #endif 
 
 

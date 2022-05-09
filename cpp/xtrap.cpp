@@ -44,8 +44,6 @@ static u32 ComputerOldIpAddr	= 0;
 static u16 ComputerOldUDPPort	= 0;
 bool ComputerFind = false;
 
-List<HugeTx> HugeTx::freeList;
-static HugeTx	hugeTxBuf[8];
 
 
 
@@ -137,13 +135,6 @@ void SendTrap(EthBuf *p)
 void SendFragTrap(EthBuf *p)
 {
 	txList.Add(p);
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-HugeTx* GetHugeTxBuffer()
-{
-	return HugeTx::Alloc();
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

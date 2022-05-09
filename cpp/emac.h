@@ -7,18 +7,18 @@
 
 extern bool	InitEMAC();
 extern void	UpdateEMAC();
-extern bool	HW_EMAC_Init();
-extern void HW_EMAC_StartLink();
-extern bool	HW_EMAC_UpdateLink();
+//extern bool	HW_EMAC_Init();
+//extern void HW_EMAC_StartLink();
+//extern bool	HW_EMAC_UpdateLink();
 
 inline u16 GetIpID() {extern u16 txIpID; return ReverseWord(txIpID++); }
 
-extern void WritePHY(byte PhyReg, u16 Value);
-extern u16  ReadPHY(byte PhyReg);
-extern void ReqWritePHY(byte PhyReg, u16 Value);
-extern void ReqReadPHY(byte PhyReg);
-extern bool IsReadyPHY();
-extern u16 ResultPHY();
+//extern void WritePHY(byte PhyReg, u16 Value);
+//extern u16  ReadPHY(byte PhyReg);
+//extern void ReqWritePHY(byte PhyReg, u16 Value);
+//extern void ReqReadPHY(byte PhyReg);
+//extern bool IsReadyPHY();
+//extern u16 ResultPHY();
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -365,19 +365,38 @@ __packed struct SysEthBuf : public EthBuf
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+__packed struct HugeTx : public EthBuf
+{
+	IPheader	iph; // 20
+	UdpHdr		udp; // 8
+	byte		data[IP_MTU - sizeof(UdpHdr)];
+
+	static List<HugeTx> freeList;
+
+	static	HugeTx*		Alloc()		{ return freeList.Get(); }
+	virtual	u32			MaxLen()	{ return sizeof(eth) + sizeof(data); }
+	virtual void		Free()		{ freeList.Add(this); }
+
+						HugeTx()	{ freeList.Init(); freeList.Add(this); }
+
+};
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 extern bool TransmitEth(EthBuf *b);
 extern bool TransmitIp(EthBuf *b);
 extern bool TransmitFragIp(EthBuf *b);
 //extern bool TransmitUdp(EthBuf *b);
 extern bool TransmitFragUdp(EthBuf *b, u16 src, u16 dst);
 extern SysEthBuf* GetSysEthBuffer();
-extern const MAC& HW_EMAC_GetHwAdr();
-extern byte HW_EMAC_GetAdrPHY();
-extern u32  HW_EMAC_GetIpAdr();
-extern u32  HW_EMAC_GetIpMask();
-extern u32  HW_EMAC_GetDhcpIpAdr();
-extern u16  HW_EMAC_GetUdpInPort();
-extern u16  HW_EMAC_GetUdpOutPort();
+extern HugeTx* GetHugeTxBuffer();
+//extern const MAC& HW_EMAC_GetHwAdr();
+//extern byte HW_EMAC_GetAdrPHY();
+//extern u32  HW_EMAC_GetIpAdr();
+//extern u32  HW_EMAC_GetIpMask();
+//extern u32  HW_EMAC_GetDhcpIpAdr();
+//extern u16  HW_EMAC_GetUdpInPort();
+//extern u16  HW_EMAC_GetUdpOutPort();
 extern bool HW_EMAC_RequestUDP(EthBuf* mb);
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
