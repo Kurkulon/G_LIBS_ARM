@@ -1,3 +1,5 @@
+#ifndef WIN32
+
 #include "time.h"
 #include <string.h>
 #include "tftp_def.h"
@@ -548,78 +550,4 @@ bool TFTP_Idle()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static void TFTP_Idle_old()
-{
-    if(tftp_read_block > tftp_read_block_ready) // запрос на чтение
-	{
-		switch (tftp_read_command)
-		{
-			case TFTP_COMMAND_VERSION:
-
-//				*((unsigned short *)tftp_data_buffer) = VERSION;
-                tftp_read_block_size = sizeof(unsigned short);
-				break;
-
-			case TFTP_COMMAND_MODE:
-
-//				*((unsigned char *)tftp_data_buffer) = FLASH_Get_Mode();
-				tftp_read_block_size = sizeof(unsigned char);
-				break;
-
-			case TFTP_COMMAND_PROGRAMM:
-				
-				//tftp_read_block_size = FLASH_Read((unsigned char *)((tftp_read_block - 1) * TFTP_DATA_CHUNK_SIZE), tftp_data_buffer, TFTP_DATA_CHUNK_SIZE);
-				break;
-
-			default:
-
-				TFTP_SendError(TFTP_ERRORCODE_ILLEGAL_OPERATION, "");
-				tftp_read_block = 0;
-				break;
-		};
-
-		if(tftp_read_block)
-		{
-//			TFTP_SendData(tftp_read_block, tftp_data_buffer, tftp_read_block_size);
-			tftp_read_block_ready = tftp_read_block;
-			if(tftp_read_block_size < TFTP_DATA_CHUNK_SIZE) tftp_read_block = 0;
-		}
-	};
-
-    if(tftp_write_block > tftp_write_block_ready) // запрос на запись
-	{
-		switch (tftp_write_command)
-		{
-			case TFTP_COMMAND_MODE:
-
-				//FLASH_Set_Mode(*((unsigned char *)tftp_data_buffer));
-				break;
-
-			case TFTP_COMMAND_PROGRAMM:
-
-//				if(!FLASH_Write((unsigned char *)((tftp_write_block - 1) * TFTP_DATA_CHUNK_SIZE), tftp_data_buffer, tftp_write_block_size))
-				{
-				    TFTP_SendError(TFTP_ERRORCODE_DISK_FULL, "");
-					tftp_write_block = 0;
-				};
-
-				break;
-
-			default:
-
-				TFTP_SendError(TFTP_ERRORCODE_ILLEGAL_OPERATION, "");
-				tftp_read_block = 0;
-
-				break;
-		};
-
-		if(tftp_write_block)
-		{
-			tftp_write_block_ready = tftp_write_block;
-		 	TFTP_SendAck(tftp_write_block_ready);
-			if(tftp_write_block_size < TFTP_DATA_CHUNK_SIZE) tftp_write_block = 0;
-		};
-	};
-}
-
-
+#endif // #ifndef WIN32

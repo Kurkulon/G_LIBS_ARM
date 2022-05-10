@@ -3,15 +3,10 @@
 
 #include "core.h"
 
-
-/* EMAC Memory Buffer configuration. */
-#define NUM_RX_BUF          8          /* 0x2000 for Rx (64*128=8K)         */
+#define NUM_RX_BUF          8          
 #define ETH_RX_DRBS			8
-#define ETH_RX_BUF_SIZE     (ETH_RX_DRBS * 64)       /* EMAC Receive buffer size.         */
-
-
-#define NUM_TX_DSC          16         /* 0x0600 for Tx                     */
-//#define ETH_TX_BUF_SIZE     1536        /* EMAC Transmit buffer size         */
+#define ETH_RX_BUF_SIZE     (ETH_RX_DRBS * 64)       
+#define NUM_TX_DSC          16        
 
 #ifndef WIN32
 #define IP_MTU				1480
@@ -48,34 +43,7 @@
 #define	DHCPRELEASE		7  
 #define DHCPCOOKIE		0x63538263
 
-///* Absolute IO access macros */
-//#define pEMAC   AT91C_BASE_EMACB
-//#define pPIOA   AT91C_BASE_PIOA
-//#define pRSTC   AT91C_BASE_RSTC
-//#define pAIC    AT91C_BASE_AIC
-//#define pPMC    AT91C_BASE_PMC
-
-//#define PHYA 0
-
 #define IP32(b1, b2, b3, b4) (((u32)b1&0xFF)|(((u32)b2&0xFF)<<8)|(((u32)b3&0xFF)<<16)|(((u32)b4&0xFF)<<24))
-
-#ifdef CPU_SAME53	
-
-	#define OWNERSHIP_BIT		1
-	#define WRAP_BIT			2
-
-
-#elif defined(CPU_XMC48)
-
-
-#endif
-
-
-
-
-
-
-
 
 
 /* DP83848C PHY Registers */

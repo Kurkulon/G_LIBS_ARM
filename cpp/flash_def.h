@@ -9,10 +9,10 @@
 //#define NAND_SAMSUNG
 #define NAND_MICRON
 
-#define FLASH_MAX_CHIP		(1<<3)
+//#define NAND_MAX_CHIP		(1<<3)
 
-#define K9K8_CHIP_BITS		3
-#define K9K8_MAX_CHIP		(1<<3)
+#define K9K8_CHIP_BITS		NAND_CHIP_BITS
+#define K9K8_MAX_CHIP		(1<<K9K8_CHIP_BITS)
 #define K9K8_CHIP_MASK		(K9K8_MAX_CHIP-1)
 #define K9K8_COL_BITS		11
 #define K9K8_BLOCK_BITS		13
@@ -23,8 +23,8 @@
 #define K9K8_RAWBLOCK_MASK	((1 << (K9K8_CHIP_BITS + K9K8_BLOCK_BITS)) - 1)
 #define K9K8_RAWADR_MASK	(((u64)1 << (K9K8_COL_BITS + K9K8_PAGE_BITS + K9K8_CHIP_BITS + K9K8_BLOCK_BITS)) - 1)
 
-#define MT29_CHIP_BITS		3
-#define MT29_MAX_CHIP		(1<<3)
+#define MT29_CHIP_BITS		NAND_CHIP_BITS
+#define MT29_MAX_CHIP		(1<<MT29_CHIP_BITS)
 #define MT29_CHIP_MASK		(MT29_MAX_CHIP-1)
 #define MT29_COL_BITS		13
 #define MT29_BLOCK_BITS		12
@@ -112,10 +112,10 @@ struct NandMemSize
  	u64 fl;	// full
 	u16 mask;
 
-	byte	chipDataBusMask[FLASH_MAX_CHIP]; // ≈сли проблема по линии данных, то соответствующи бит равен 0
+	byte	chipDataBusMask[NAND_MAX_CHIP]; // ≈сли проблема по линии данных, то соответствующи бит равен 0
 
-	NandID	id[FLASH_MAX_CHIP];
-	u16		integrityCRC[FLASH_MAX_CHIP];
+	NandID	id[NAND_MAX_CHIP];
+	u16		integrityCRC[NAND_MAX_CHIP];
 };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -172,11 +172,11 @@ struct FLADR
 
 //	const NandMemSize& sz;
 
-	static byte	chipValidNext[FLASH_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ следующий хороший чип
-	static byte	chipValidPrev[FLASH_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ предыдущий хороший чип
+	static byte	chipValidNext[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ следующий хороший чип
+	static byte	chipValidPrev[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ предыдущий хороший чип
 
-	static u32	chipOffsetNext[FLASH_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на следующий хороший чип
-	static u32	chipOffsetPrev[FLASH_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на предыдущий хороший чип
+	static u32	chipOffsetNext[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на следующий хороший чип
+	static u32	chipOffsetPrev[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на предыдущий хороший чип
 
 	inline void operator=(const FLADR &a) { raw = a.raw; }
 
@@ -297,29 +297,29 @@ __packed struct SpareArea
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-extern bool NAND_BUSY(); 
-extern bool NAND_CmdBusy();
-extern void NAND_WriteDataDMA(volatile void *src, u16 len);
-//extern void NAND_WriteDataPIO(volatile void *src, u16 len);
-extern void NAND_ReadDataDMA(volatile void *dst, u16 len);
-extern void NAND_ReadDataDMA2(volatile void *dst, u16 len);
-//extern void NAND_ReadDataPIO(volatile void *dst, u16 len);
-extern bool NAND_CheckDataComplete();
-extern void NAND_Chip_Select(byte chip);
-extern void NAND_Chip_Disable();
-extern void NAND_WRITE(byte data);
-extern void NAND_CopyDataDMA(volatile void *src, volatile void *dst, u16 len);
-extern bool NAND_CheckCopyComplete();
-
-extern void NAND_CmdEraseBlock(u32 bl);
-extern void NAND_CmdRandomRead(u16 col);
-extern void NAND_CmdReadPage(u16 col, u32 bl, u16 pg);
-extern void NAND_CmdWritePage(u16 col, u32 bl, u16 pg);
-extern void NAND_CmdWritePage2();
-extern byte NAND_CmdReadStatus();
-
-inline const NandMemSize* NAND_GetMemSize() { extern NandMemSize nandSize; return &nandSize; } 
-inline u32 NAND_GetGoodChipMask() { extern NandMemSize nandSize; return nandSize.mask; } 
+//extern bool NAND_BUSY(); 
+//extern bool NAND_CmdBusy();
+//extern void NAND_WriteDataDMA(volatile void *src, u16 len);
+////extern void NAND_WriteDataPIO(volatile void *src, u16 len);
+//extern void NAND_ReadDataDMA(volatile void *dst, u16 len);
+//extern void NAND_ReadDataDMA2(volatile void *dst, u16 len);
+////extern void NAND_ReadDataPIO(volatile void *dst, u16 len);
+//extern bool NAND_CheckDataComplete();
+//extern void NAND_Chip_Select(byte chip);
+//extern void NAND_Chip_Disable();
+//extern void NAND_WRITE(byte data);
+//extern void NAND_CopyDataDMA(volatile void *src, volatile void *dst, u16 len);
+//extern bool NAND_CheckCopyComplete();
+//
+//extern void NAND_CmdEraseBlock(u32 bl);
+//extern void NAND_CmdRandomRead(u16 col);
+//extern void NAND_CmdReadPage(u16 col, u32 bl, u16 pg);
+//extern void NAND_CmdWritePage(u16 col, u32 bl, u16 pg);
+//extern void NAND_CmdWritePage2();
+//extern byte NAND_CmdReadStatus();
+//
+//inline const NandMemSize* NAND_GetMemSize() { extern NandMemSize nandSize; return &nandSize; } 
+//inline u32 NAND_GetGoodChipMask() { extern NandMemSize nandSize; return nandSize.mask; } 
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

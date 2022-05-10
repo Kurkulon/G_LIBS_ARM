@@ -1,14 +1,15 @@
+#ifndef FLASH_IMP_H__10_05_2022__14_57
+#define FLASH_IMP_H__10_05_2022__14_57
+
 #include "flash.h"
 #include "vector.h"
 #include "list.h"
-#include "trap_def.h"
 #include "trap.h"
 #include "PointerCRC.h"
-#include "xtrap.h"
 #include "SEGGER_RTT.h"
 
 #include "flash_def.h"
-#include "extern_def.h"
+//#include "extern_def.h"
 
 #include "i2c.h"
 #include "spi.h"
@@ -18,14 +19,15 @@
 //#pragma O3
 //#pragma Otime
 
+extern u16 CRC_CCITT_DMA(const void *data, u32 len, u16 init);
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static u32 FRAM_SPI_SESSIONS_ADR = 0;
-static u32 FRAM_I2C_SESSIONS_ADR = 0;
+//static u32 FRAM_SPI_SESSIONS_ADR = 0;
+//static u32 FRAM_I2C_SESSIONS_ADR = 0;
 
-static bool FRAM_SPI_PRESENT = false;
-static bool FRAM_I2C_PRESENT = false;
+//static bool FRAM_SPI_PRESENT = false;
+//static bool FRAM_I2C_PRESENT = false;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -232,7 +234,7 @@ static u32 lastFlashTime = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static const NandMemSize *nandSZ;
+//static const NandMemSize *nandSZ;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -244,10 +246,10 @@ static u32 invalidBlocks = 0;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-byte	FLADR::chipValidNext[FLASH_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ следующий хороший чип
-byte	FLADR::chipValidPrev[FLASH_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ предыдущий хороший чип
-u32		FLADR::chipOffsetNext[FLASH_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на следующий хороший чип
-u32		FLADR::chipOffsetPrev[FLASH_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на предыдущий хороший чип
+byte	FLADR::chipValidNext[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ следующий хороший чип
+byte	FLADR::chipValidPrev[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ предыдущий хороший чип
+u32		FLADR::chipOffsetNext[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на следующий хороший чип
+u32		FLADR::chipOffsetPrev[NAND_MAX_CHIP]; // ≈сли чип битый, то по индексу находитс€ смещение адреса на предыдущий хороший чип
 byte 	FLADR::COL_BITS;
 byte 	FLADR::PAGE_BITS;		
 byte 	FLADR::BLOCK_BITS;		
@@ -270,16 +272,16 @@ void	FLADR::InitVaildTables(u16 mask)
 {
 	u32 blocksize = 1UL << CHIP_OFF;
 
-	for(byte chip = 0; chip < FLASH_MAX_CHIP; chip++)
+	for(byte chip = 0; chip < NAND_MAX_CHIP; chip++)
 	{
 		chipValidNext[chip] = 0;
 		chipValidPrev[chip] = 0;
 
 		u32 offset = 0;
 
-		for (byte i = 0; i < FLASH_MAX_CHIP; i++)
+		for (byte i = 0; i < NAND_MAX_CHIP; i++)
 		{
-			byte cn = chip+i; if (cn >= FLASH_MAX_CHIP) cn = 0;
+			byte cn = chip+i; if (cn >= NAND_MAX_CHIP) cn = 0;
 
 			if (mask & (1<<cn))
 			{
@@ -293,9 +295,9 @@ void	FLADR::InitVaildTables(u16 mask)
 
 		offset = 0;
 
-		for (byte i = 0; i < FLASH_MAX_CHIP; i++)
+		for (byte i = 0; i < NAND_MAX_CHIP; i++)
 		{
-			byte cp = chip-i; if (cp >= FLASH_MAX_CHIP) cp = FLASH_MAX_CHIP - 1;
+			byte cp = chip-i; if (cp >= NAND_MAX_CHIP) cp = NAND_MAX_CHIP - 1;
 
 			if (mask & (1<<cp))
 			{
@@ -676,7 +678,7 @@ void Write::Init()
 	spare.v1.fbb = 0;		
 	spare.v1.fbp = 0;		
 
-	spare.v1.chipMask = nandSZ->mask;
+	spare.v1.chipMask = nandSize.mask;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -704,7 +706,7 @@ void Write::Init(u32 bl, u32 file, u32 prfile)
 	spare.v1.fbb = 0;		
 	spare.v1.fbp = 0;		
 
-	spare.v1.chipMask = nandSZ->mask;
+	spare.v1.chipMask = nandSize.mask;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -938,7 +940,7 @@ bool Write::Update()
 				spare.validBlock = ~0;
 				spare.badPages = ~0;
 				spare.v1.rawPage = wr.GetRawPage();
-				spare.v1.chipMask = nandSZ->mask;
+				spare.v1.chipMask = nandSize.mask;
 
 				spare.v1.UpdateCRC();
 
@@ -1160,7 +1162,7 @@ bool Write::Update()
 			spare.v1.fbb = 0;		
 			spare.v1.fbp = 0;		
 
-			spare.v1.chipMask = nandSZ->mask;	
+			spare.v1.chipMask = nandSize.mask;	
 
 			SaveSession();
 
@@ -2412,7 +2414,7 @@ void NAND_Idle()
 
 		case NAND_STATE_FULL_ERASE_START:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-			t = eb = nandSZ->fl >> er.CHIP_OFF; // blocks count
+			t = eb = nandSize.fl >> er.CHIP_OFF; // blocks count
 
 			er.SetRawAdr(0);
 
@@ -2487,7 +2489,7 @@ void NAND_Idle()
 		case NAND_STATE_SEND_BAD_BLOCKS:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 			if (TRAP_TRACE_PrintString("NAND chip mask: 0x%02hX; Bad Blocks: %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu", 
-				NAND_GetMemSize()->mask, nvv.badBlocks[0], nvv.badBlocks[1], nvv.badBlocks[2], nvv.badBlocks[3], nvv.badBlocks[4], nvv.badBlocks[5], nvv.badBlocks[6], nvv.badBlocks[7]))
+				nandSize.mask, nvv.badBlocks[0], nvv.badBlocks[1], nvv.badBlocks[2], nvv.badBlocks[3], nvv.badBlocks[4], nvv.badBlocks[5], nvv.badBlocks[6], nvv.badBlocks[7]))
 			{
 				nandState = NAND_STATE_SEND_PAGE_ERRORS;
 			};
@@ -2506,7 +2508,7 @@ void NAND_Idle()
 
 		case NAND_STATE_SEND_DATABUS_MASK:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-			const byte* p = NAND_GetMemSize()->chipDataBusMask;
+			const byte* p = nandSize.chipDataBusMask;
 
 			if (TRAP_TRACE_PrintString("NAND DataBus Mask: 0x%02hX, 0x%02hX, 0x%02hX, 0x%02hX, 0x%02hX, 0x%02hX, 0x%02hX, 0x%02hX", p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7]))
 			{
@@ -2563,7 +2565,7 @@ u64 FLASH_Current_Adress_Get()
 
 u64 FLASH_Full_Size_Get()
 {
-	return nandSZ->fl;
+	return nandSize.fl;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -2584,7 +2586,7 @@ i64 FLASH_Empty_Size_Get()
 
 u16 FLASH_Chip_Mask_Get()
 {
-	return nandSZ->mask;
+	return nandSize.mask;
 }
 
 
@@ -3187,12 +3189,12 @@ static void LoadSessions()
 
 void FLASH_Init()
 {
-	nandSZ = NAND_GetMemSize();
+	NAND_Init();
 
-	FRAM_SPI_PRESENT = (Get_FRAM_SPI_SessionsAdr() >= 0);
-	FRAM_I2C_PRESENT = (Get_FRAM_I2C_SessionsAdr() >= 0);
-	FRAM_SPI_SESSIONS_ADR = Get_FRAM_SPI_SessionsAdr();
-	FRAM_I2C_SESSIONS_ADR = Get_FRAM_I2C_SessionsAdr();
+//	FRAM_SPI_PRESENT = (Get_FRAM_SPI_SessionsAdr() >= 0);
+//	FRAM_I2C_PRESENT = (Get_FRAM_I2C_SessionsAdr() >= 0);
+//	FRAM_SPI_SESSIONS_ADR = Get_FRAM_SPI_SessionsAdr();
+//	FRAM_I2C_SESSIONS_ADR = Get_FRAM_I2C_SessionsAdr();
 
 	LoadVars();
 
@@ -3211,3 +3213,5 @@ void FLASH_Update()
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#endif // FLASH_IMP_H__10_05_2022__14_57

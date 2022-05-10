@@ -140,10 +140,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\cpp\flash.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\cpp\GetCRC16.cpp"
 				>
 			</File>
@@ -250,6 +246,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\flash_imp.h"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\hw_nand_imp.h"
 				>
 			</File>
@@ -259,6 +259,14 @@
 			</File>
 			<File
 				RelativePath=".\cpp\list.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\manch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\manch_imp.h"
 				>
 			</File>
 			<File

@@ -26,7 +26,7 @@ struct DSCI2C
 extern void I2C_Init();
 extern bool I2C_AddRequest(DSCI2C *d);
 extern bool I2C_Update();
-extern i32	Get_FRAM_I2C_SessionsAdr();
+//extern i32	Get_FRAM_I2C_SessionsAdr();
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

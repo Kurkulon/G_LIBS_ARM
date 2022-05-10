@@ -2564,7 +2564,8 @@ namespace T_HW
 	#define TD_LAST_BUF         (1U << 15)  /* Last buffer in TX frame           */
 	#define TD_LENGTH_MASK      0x1FFF      /* Length of frame mask              */
 
-	#define AT91C_OWNERSHIP_BIT 0x00000001  /* Buffer owned by software          */
+	#define OWNERSHIP_BIT		1
+	#define WRAP_BIT			2
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

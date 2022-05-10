@@ -24,7 +24,7 @@ struct DSCSPI
 extern void SPI_Init();
 extern bool SPI_AddRequest(DSCSPI *d);
 extern bool SPI_Update();
-extern i32	Get_FRAM_SPI_SessionsAdr();
+//extern i32	Get_FRAM_SPI_SessionsAdr();
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
