@@ -397,7 +397,7 @@ bool TRAP_MEMORY_SendSession(u16 session, i64 size, i64 last_adress, RTC_type st
 
 	SendTrap(buf);
 
-	if (__trace) { TRAP_TRACE_PrintString(__func__); };
+	if (__trace) { TRAP_TRACE_PrintString("TRAP_MEMORY_SendSession ses=%hu, size=%08X %08X, adr=%08X %08X", session, (u32)(size>>32), (u32)size, (u32)(last_adress>>32), (u32)(last_adress)); };
 
 	return true;
 }
