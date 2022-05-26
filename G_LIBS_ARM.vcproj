@@ -140,6 +140,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\DMA.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\GetCRC16.cpp"
 				>
 			</File>
@@ -219,6 +223,10 @@
 			</File>
 			<File
 				RelativePath=".\cpp\CRC32.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\DMA.h"
 				>
 			</File>
 			<File

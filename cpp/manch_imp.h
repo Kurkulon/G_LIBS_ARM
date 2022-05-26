@@ -96,7 +96,15 @@ inline u16 CheckParity(u16 x)
 	return (y ^ (y >> 8))^1;
 }
 
+#endif
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#ifdef MAN_TRANSMIT_V1
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#ifndef WIN32
 
 static __irq void ManTrmIRQ()
 {
@@ -242,8 +250,6 @@ static __irq void ManTrmIRQ()
 	Pin_ManTrmIRQ_Clr();
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 #endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -315,6 +321,7 @@ bool SendManData(MTB *mtb)
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 #ifndef WIN32
 
 void InitManTransmit()
@@ -371,7 +378,14 @@ void InitManTransmit()
 	ManDisable();
 }
 
+#endif
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#else // #ifdef MAN_TRANSMIT_V1
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ifndef WIN32
 
 static __irq void ManTrmIRQ2()
 {
@@ -572,7 +586,7 @@ static __irq void ManTrmIRQ2()
 #endif
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool SendManData2(MTB* mtb)
+bool SendManData(MTB* mtb)
 {
 #ifndef WIN32
 	if (trmBusy || rcvBusy || mtb == 0 || mtb->data1 == 0 || mtb->len1 == 0)
@@ -624,9 +638,9 @@ bool SendManData2(MTB* mtb)
 	ManT_SET_PR(US2MT(50)-1); //trmHalfPeriod - 1;
 	ManT1->CR2S = (~0); ManT2->CR1S = (0); ManT2->CR2S = (0); ManT3->CR1S = (~0);
 
-	ManT1->PSC = ManT_PSC; //0.08us
-	ManT2->PSC = ManT_PSC; //0.08us
-	ManT3->PSC = ManT_PSC; //0.08us
+	ManT1->PSC = ManRT_PSC; //0.08us
+	ManT2->PSC = ManRT_PSC; //0.08us
+	ManT3->PSC = ManRT_PSC; //0.08us
 
 	//ManT1->PSL = ManT1_PSL;
 	//ManT2->PSL = ManT2_PSL;
@@ -676,7 +690,7 @@ bool SendManData2(MTB* mtb)
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #ifndef WIN32
 
-void InitManTransmit2()
+void InitManTransmit()
 {
 	using namespace HW;
 
@@ -742,6 +756,12 @@ void InitManTransmit2()
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+#endif // #else // #ifdef MAN_TRANSMIT_V1
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 static void ManRcvEnd(bool ok)
 {
 #ifdef CPU_SAME53	
@@ -756,12 +776,11 @@ static void ManRcvEnd(bool ok)
 
 	rcvManLen12 = (rcvManCount12 != 0) ? (rcvManSum12 / rcvManCount12) : 0;
 
-	rcvManQuality = (rcvManLen12 > MT(12)) ? 0 : (((MT(12) - rcvManLen12) * 100 + MT(6))/MT(12));
+	rcvManQuality = (rcvManLen12 > US2MT(12)) ? 0 : (((US2MT(12) - rcvManLen12) * 100 + US2MT(6))/US2MT(12));
 
 	rcvBusy = false;
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 static RTM manRcvTime;
@@ -801,17 +820,17 @@ static __irq void ManRcvIRQ2()
 
 	_state = !_state;
 
-	if (len <= MT(60))
+	if (len <= US2MT(60))
 	{
 		i16 dl;
 
-		if (len <= MT(36))
+		if (len <= US2MT(36))
 		{
-			_length += 1; dl = len - MT(24); 
+			_length += 1; dl = len - US2MT(24); 
 		}
 		else
 		{
-			_length += 2; dl = len - MT(48);
+			_length += 2; dl = len - US2MT(48);
 		};
 
 		if (dl < 0) dl = -dl; rcvManSum12 += dl; rcvManCount12++;
@@ -823,7 +842,7 @@ static __irq void ManRcvIRQ2()
 	}
 	else
 	{
-		if(len > MT(108))
+		if(len > US2MT(108))
 		{
 			_sync = false;
 		}
@@ -839,13 +858,13 @@ static __irq void ManRcvIRQ2()
 
 			i16 dl;
 
-			if (len <= MT(84))
+			if (len <= US2MT(84))
 			{
-				_length = 1; dl = len - MT(72); 
+				_length = 1; dl = len - US2MT(72); 
 			}
 			else
 			{
-				_length = 2; dl = len - MT(96); 
+				_length = 2; dl = len - US2MT(96); 
 			};
 
 			if (dl < 0) dl = -dl; rcvManSum12 += dl; rcvManCount12++;
@@ -1026,11 +1045,11 @@ void InitManRecieve()
 
 	ManCCU->GIDLC = ManCCU_GIDLC;//CCU4_CS1I|CCU4_CS2I|CCU4_SPRB;
 
-	ManRT->PRS = MT(12) - 1;
-	ManRT->CRS = MT(12) - 1;
+	ManRT->PRS = US2MT(12) - 1;
+	ManRT->CRS = US2MT(12) - 1;
 	ManRT->PSC = ManRT_PSC; //1.28us
 
-	ManTmr->PRS = MT(250);
+	ManTmr->PRS = US2MT(250);
 	ManTmr->PSC = ManRT_PSC; //1.28us
 
 	ManCCU->GCSS = ManCCU_GCSS;//CCU4_S1SE|CCU4_S2SE;  
@@ -1042,7 +1061,7 @@ void InitManRecieve()
 	ManRT->INTE = 0;//CC4_PME;
 	ManRT->SRS = 0;//ManRT_SRS;//CC4_POSR(2);
 
-	ManTmr->INS = CC4_EV0IS(15) | CC4_EV0EM_RISING_EDGE;
+	ManTmr->INS = ManTmr_INS; //CC4_EV0IS(15) | CC4_EV0EM_RISING_EDGE;
 	ManTmr->CMC = CC4_CAP0S_EVENT0|CC4_STRTS_EVENT0;
 	ManTmr->SRS = CC4_E0SR(2);
 	ManTmr->TC = CC4_TSSM|CC4_CAPC_ALWAYS;
@@ -1106,6 +1125,7 @@ bool RcvManData(MRB *mrb)
 #endif
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #endif // MANCH_IMP_H__10_05_2022__16_55
