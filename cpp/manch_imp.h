@@ -559,6 +559,10 @@ static __irq void ManTrmIRQ2()
 
 			stateManTrans = 0;
 
+#ifdef CPU_SAME53	
+
+#elif defined(CPU_XMC48)
+
 			HW::SCU_GENERAL->CCUCON &= ~ManT_CCUCON;
 
 
@@ -570,7 +574,7 @@ static __irq void ManTrmIRQ2()
 			ManT_CCU8->GCSS = ManT_OUT_GCSS;
 			ManT_CCU8->GCSC = ManT_OUT_GCSC;
 			//ManT_CCU8->GIDLS = ManT_CCU8_GIDLS;
-
+#endif
 			manTB->ready = true;
 			trmBusy = false;
 
