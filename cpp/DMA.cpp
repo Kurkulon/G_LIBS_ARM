@@ -8,35 +8,35 @@ __align(16) T_HW::DMADESC DMA_CH::_DmaWRB[32];
 	
 #elif defined(CPU_XMC48)
 
-DMA_CH		DMA_CH0		(HW::DMA0,	0, 1UL<<0	);
-DMA_CH		DMA_CH1		(HW::DMA0,	1, 1UL<<1	);
-DMA_CH		DMA_CH2		(HW::DMA0,	2, 1UL<<2	);
-DMA_CH		DMA_CH3		(HW::DMA0,	3, 1UL<<3	);
-DMA_CH		DMA_CH4		(HW::DMA0,	4, 1UL<<4	);
-DMA_CH		DMA_CH5		(HW::DMA0,	5, 1UL<<5	);
-DMA_CH		DMA_CH6		(HW::DMA0,	6, 1UL<<6	);
-DMA_CH		DMA_CH7		(HW::DMA0,	7, 1UL<<7	);
+DMA_CH		DMA_CH0		(HW::DMA0,	0, 	1UL<<0	);
+DMA_CH		DMA_CH1		(HW::DMA0,	1, 	1UL<<1	);
+DMA_CH		DMA_CH2		(HW::DMA0,	2, 	1UL<<2	);
+DMA_CH		DMA_CH3		(HW::DMA0,	3, 	1UL<<3	);
+DMA_CH		DMA_CH4		(HW::DMA0,	4, 	1UL<<4	);
+DMA_CH		DMA_CH5		(HW::DMA0,	5, 	1UL<<5	);
+DMA_CH		DMA_CH6		(HW::DMA0,	6, 	1UL<<6	);
+DMA_CH		DMA_CH7		(HW::DMA0,	7, 	1UL<<7	);
 																
-DMA_CH		DMA_CH8		(HW::DMA1,	0, 1UL<<8	);
-DMA_CH		DMA_CH9		(HW::DMA1,	1, 1UL<<9	);
-DMA_CH		DMA_CH10	(HW::DMA1,	2, 1UL<<10	);
-DMA_CH		DMA_CH11	(HW::DMA1,	3, 1UL<<11	);
+DMA_CH		DMA_CH8		(HW::DMA1,	8,	1UL<<8	);
+DMA_CH		DMA_CH9		(HW::DMA1,	9,	1UL<<9	);
+DMA_CH		DMA_CH10	(HW::DMA1,	10,	1UL<<10	);
+DMA_CH		DMA_CH11	(HW::DMA1,	11,	1UL<<11	);
 
 #endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void DMA_CH::MemCopy(volatile void *src, volatile void *dst, u16 len)
+void DMA_CH::_MemCopy(volatile void *src, volatile void *dst, u16 len, u32 ctrl)
 {
 	using namespace HW;
 
 #ifdef CPU_SAME53
 	
-	_dmadsc->SRCADDR = (byte*)src+len;
-	_dmadsc->DSTADDR = (byte*)dst+len;
+	_dmadsc->SRCADDR = src;
+	_dmadsc->DSTADDR = dst;
 	_dmadsc->DESCADDR = 0;
 	_dmadsc->BTCNT = len;
-	_dmadsc->BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC|DMDSC_SRCINC;
+	_dmadsc->BTCTRL = ctrl;
 
 	_dmach->INTENCLR = ~0;
 	_dmach->INTFLAG = ~0;
@@ -48,7 +48,7 @@ void DMA_CH::MemCopy(volatile void *src, volatile void *dst, u16 len)
 
 	_GPDMA->DMACFGREG = 1;
 
-	_InitLLI(src, dst, len, DST_INC|SRC_INC|TT_FC_M2M_GPDMA|DEST_MSIZE_1|SRC_MSIZE_1);
+	_InitLLI(src, dst, len, ctrl); //DST_INC|SRC_INC|TT_FC_M2M_GPDMA|DEST_MSIZE_1|SRC_MSIZE_1|LLP_DST_EN|LLP_SRC_EN
 	
 	_dmach->CFGL = 0;
 	_dmach->CFGH = PROTCTL(1);
@@ -193,19 +193,13 @@ void DMA_CH::_InitLLI(volatile void *src, volatile void *dst, u16 len, u32 ctrl)
 {
 	using namespace HW;
 
-	_dmach->SAR = (u32)src;
-	_dmach->DAR = (u32)dst;
+	_dmach->SAR = _startSrcAdr = (u32)src;
+	_dmach->DAR = _startDstAdr = (u32)dst;
 
-	if (_chnum < 2)
+	if (_chnumabs < 2)
 	{
 		if (len > BLOCK_TS(~0))
 		{
-			_dmach->CTLH = BLOCK_TS(~0);
-			_dmach->CTLL = ctrl;
-			((T_HW::GPDMA0_CH_Type*)_dmach)->LLP = (u32)&_lli[0];
-
-			len -= BLOCK_TS(~0);
-
 			u32 i = 0;
 
 			LLI *lli = &_lli[0];
@@ -223,6 +217,8 @@ void DMA_CH::_InitLLI(volatile void *src, volatile void *dst, u16 len, u32 ctrl)
 					lli->LLP = _lli+i+1;
 					lli->CTLH = BLOCK_TS(~0);
 					len -= BLOCK_TS(~0);
+					*((byte**)&src) += BLOCK_TS(~0);
+					*((byte**)&dst) += BLOCK_TS(~0);
 				}
 				else
 				{
@@ -234,6 +230,10 @@ void DMA_CH::_InitLLI(volatile void *src, volatile void *dst, u16 len, u32 ctrl)
 			};
 
 			lli->LLP = 0;
+
+			_dmach->CTLH = BLOCK_TS(~0);
+			_dmach->CTLL = ctrl;
+			((T_HW::GPDMA0_CH_Type*)_dmach)->LLP = (u32)&_lli[0];
 
 			_dataLen = len;
 		}
