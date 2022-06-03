@@ -48,18 +48,18 @@ protected:
 	u32		_startDstAdr;
 	u16		_dataLen;
 	
-	void _InitLLI(volatile void *src, volatile void *dst, u16 len, u32 ctrl);
+	void _InitLLI(const volatile void *src, volatile void *dst, u16 len, u32 ctrl);
 
 #endif
 
 	const byte		_chnum;
 
-	void _MemCopy(volatile void *src, volatile void *dst, u16 len, u32 ctrl);
+	void _MemCopy(const volatile void *src, volatile void *dst, u16 len, u32 ctrl);
 
 public:
 
-	void WritePeripheral(volatile void *src, volatile void *dst, u16 len, u32 ctrl1, u32 ctrl2);
-	void ReadPeripheral(volatile void *src, volatile void *dst, u16 len, u32 ctrl1, u32 ctrl2);
+	void WritePeripheral(const volatile void *src, volatile void *dst, u16 len, u32 ctrl1, u32 ctrl2);
+	void ReadPeripheral(const volatile void *src, volatile void *dst, u16 len, u32 ctrl1, u32 ctrl2);
 	
 
 #ifdef CPU_SAME53
@@ -90,12 +90,12 @@ public:
 	void Disable() { _GPDMA->CHENREG = (1<<GPDMA0_CHENREG_WE_CH_Pos) << _chnum; HW::DLR->LNEN &= ~_dlr_lnen_mask; }
 	bool CheckComplete() { return (_GPDMA->CHENREG & ((1<<GPDMA0_CHENREG_CH_Pos)<<_chnum)) == 0; }
 	
-	void WritePeripheralByte(volatile void *src, volatile void *dst, u16 len)	{ WritePeripheral(src, dst, len, DST_TR_WIDTH_8|SRC_TR_WIDTH_8|DST_NOCHANGE|SRC_INC|DEST_MSIZE_1|SRC_MSIZE_1|TT_FC_M2P_GPDMA|LLP_DST_EN, 0); }
-	void ReadPeripheralByte(volatile void *src, volatile void *dst, u16 len)	{ ReadPeripheral(src, dst, len, DST_TR_WIDTH_8|SRC_TR_WIDTH_8|DST_INC|SRC_NOCHANGE|DEST_MSIZE_1|SRC_MSIZE_1|TT_FC_P2M_GPDMA|LLP_SRC_EN, 0); }
+	void WritePeripheralByte(const volatile void *src, void *dst, u16 len)	{ WritePeripheral(src, dst, len, DST_TR_WIDTH_8|SRC_TR_WIDTH_8|DST_NOCHANGE|SRC_INC|DEST_MSIZE_1|SRC_MSIZE_1|TT_FC_M2P_GPDMA|LLP_DST_EN, 0); }
+	void ReadPeripheralByte(const volatile void *src, void *dst, u16 len)	{ ReadPeripheral(src, dst, len, DST_TR_WIDTH_8|SRC_TR_WIDTH_8|DST_INC|SRC_NOCHANGE|DEST_MSIZE_1|SRC_MSIZE_1|TT_FC_P2M_GPDMA|LLP_SRC_EN, 0); }
 	
-	void MemCopy(volatile void *src, volatile void *dst, u16 len)		{ _MemCopy(src, dst, len, DST_INC|SRC_INC|TT_FC_M2M_GPDMA|DEST_MSIZE_1|SRC_MSIZE_1|LLP_DST_EN|LLP_SRC_EN); }
-	void MemCopySrcInc(volatile void *src, volatile void *dst, u16 len) { _MemCopy(src, dst, len, DST_NOCHANGE|SRC_INC|TT_FC_M2M_GPDMA|DEST_MSIZE_1|SRC_MSIZE_1|LLP_SRC_EN); }
-	void MemCopyDstInc(volatile void *src, volatile void *dst, u16 len) { _MemCopy(src, dst, len, DST_INC|SRC_NOCHANGE|TT_FC_M2M_GPDMA|DEST_MSIZE_1|SRC_MSIZE_1|LLP_DST_EN); }
+	void MemCopy(const volatile void *src, volatile void *dst, u16 len)		{ _MemCopy(src, dst, len, DST_INC|SRC_INC|TT_FC_M2M_GPDMA|DEST_MSIZE_1|SRC_MSIZE_1|LLP_DST_EN|LLP_SRC_EN); }
+	void MemCopySrcInc(const volatile void *src, volatile void *dst, u16 len) { _MemCopy(src, dst, len, DST_NOCHANGE|SRC_INC|TT_FC_M2M_GPDMA|DEST_MSIZE_1|SRC_MSIZE_1|LLP_SRC_EN); }
+	void MemCopyDstInc(const volatile void *src, volatile void *dst, u16 len) { _MemCopy(src, dst, len, DST_INC|SRC_NOCHANGE|TT_FC_M2M_GPDMA|DEST_MSIZE_1|SRC_MSIZE_1|LLP_DST_EN); }
 	bool CheckMemCopyComplete();
 
 	u32 GetSrcCounter()	{ return _dmach->SAR - _startSrcAdr; }

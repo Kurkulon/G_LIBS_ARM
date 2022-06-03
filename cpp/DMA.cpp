@@ -26,7 +26,7 @@ DMA_CH		DMA_CH11	(HW::DMA1,	11,	1UL<<11	);
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void DMA_CH::_MemCopy(volatile void *src, volatile void *dst, u16 len, u32 ctrl)
+void DMA_CH::_MemCopy(const volatile void *src, volatile void *dst, u16 len, u32 ctrl)
 {
 	using namespace HW;
 
@@ -95,7 +95,7 @@ bool DMA_CH::CheckMemCopyComplete()
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void DMA_CH::WritePeripheral(volatile void *src, volatile void *dst, u16 len, u32 ctrl1, u32 ctrl2)
+void DMA_CH::WritePeripheral(const volatile void *src, volatile void *dst, u16 len, u32 ctrl1, u32 ctrl2)
 {
 	using namespace HW;
 
@@ -133,7 +133,7 @@ void DMA_CH::WritePeripheral(volatile void *src, volatile void *dst, u16 len, u3
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void DMA_CH::ReadPeripheral(volatile void *src, volatile void *dst, u16 len, u32 ctrl1, u32 ctrl2)
+void DMA_CH::ReadPeripheral(const volatile void *src, volatile void *dst, u16 len, u32 ctrl1, u32 ctrl2)
 {
 	using namespace HW;
 
@@ -189,7 +189,7 @@ void DMA_CH::SystemInit()
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void DMA_CH::_InitLLI(volatile void *src, volatile void *dst, u16 len, u32 ctrl)
+void DMA_CH::_InitLLI(const volatile void *src, volatile void *dst, u16 len, u32 ctrl)
 {
 	using namespace HW;
 
@@ -208,7 +208,7 @@ void DMA_CH::_InitLLI(volatile void *src, volatile void *dst, u16 len, u32 ctrl)
 			{
 				lli = _lli+i;
 
-				lli->SAR = src;
+				lli->SAR = (void*)src;
 				lli->CTLL = ctrl;
 				lli->DAR = dst;
 

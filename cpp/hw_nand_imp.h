@@ -7,6 +7,7 @@
 #include "SEGGER_RTT.h"
 #include "CRC16_8005.h"
 #include "flash_def.h"
+#include "DMA.h"
 
 #ifdef WIN32
 
@@ -481,23 +482,7 @@ static bool NAND_CheckDataComplete()
 	
 	#elif defined(CPU_XMC48)
 
-		if ((NAND_DMA->CHENREG & NAND_DMA_CHST) == 0)
-		{
-			if (nandWriteDataLen > 0) 
-			{
-				NAND_WriteDataDMA(nandWriteDataSrc, nandWriteDataLen);
-			}
-			else if (nandReadDataLen > 0) 
-			{
-				NAND_ReadDataDMA(nandReadDataDst, nandReadDataLen);
-			}
-			else
-			{
-				return true;
-			};
-		};
-
-		return false;
+		return NAND_DMA.CheckMemCopyComplete();
 
 	#elif defined(WIN32)
 
@@ -1077,7 +1062,7 @@ void NAND_Init()
 
 	HW::Peripheral_Enable(PID_DMA0);
 
-	NAND_DMA->DMACFGREG = 1;
+	//NAND_DMA->DMACFGREG = 1;
 
 	EBU->CLC = 0;
 	EBU->MODCON = /*EBU_ARBSYNC|*/EBU_ARBMODE(3);
@@ -1395,32 +1380,7 @@ void NAND_WriteDataDMA(volatile void *src, u16 len)
 
 	#elif defined(CPU_XMC48)
 
-		if (len > BLOCK_TS(~0))
-		{
-			nandWriteDataSrc = ((byte*)src) + BLOCK_TS(~0);
-			nandWriteDataLen = len - BLOCK_TS(~0);
-			len = BLOCK_TS(~0);
-		}
-		else
-		{
-			nandWriteDataLen = 0;
-		};
-
-		nandReadDataLen = 0;
-
-		NAND_DMA->DMACFGREG = 1;
-
-		NAND_DMACH->CTLL = DST_NOCHANGE|SRC_INC|TT_FC_M2M_GPDMA|DEST_MSIZE_8|SRC_MSIZE_8;
-		NAND_DMACH->CTLH = BLOCK_TS(len);
-
-		NAND_DMACH->SAR = (u32)src;
-		NAND_DMACH->DAR = (u32)FLD;	//0x1FFE8000;//;
-		NAND_DMACH->CFGL = 0;
-		NAND_DMACH->CFGH = PROTCTL(1);
-
-		NAND_DMA->CHENREG = NAND_DMA_CHEN;
-
-//		NAND_WriteDataPIO(src, len);
+		NAND_DMA.MemCopySrcInc(src, FLD, len);
 
 	#endif
 
@@ -1569,30 +1529,7 @@ void NAND_ReadDataDMA(volatile void *dst, u16 len)
 
 	#elif defined(CPU_XMC48)
 
-		if (len > BLOCK_TS(~0))
-		{
-			nandReadDataDst = ((byte*)dst) + BLOCK_TS(~0);
-			nandReadDataLen = len - BLOCK_TS(~0);
-			len = BLOCK_TS(~0);
-		}
-		else
-		{
-			nandReadDataLen = 0;
-		};
-
-		nandWriteDataLen = 0;
-
-		NAND_DMA->DMACFGREG = 1;
-
-		NAND_DMACH->CTLL = DST_INC|SRC_NOCHANGE|TT_FC(0);
-		NAND_DMACH->CTLH = BLOCK_TS(len);
-
-		NAND_DMACH->SAR = (u32)FLD;
-		NAND_DMACH->DAR = (u32)dst;
-		NAND_DMACH->CFGL = 0;
-		NAND_DMACH->CFGH = PROTCTL(1);
-
-		NAND_DMA->CHENREG = NAND_DMA_CHEN;
+		NAND_DMA.MemCopyDstInc(FLD, dst, len);
 
 	#endif
 
@@ -1668,31 +1605,7 @@ void NAND_CopyDataDMA(volatile void *src, volatile void *dst, u16 len)
 
 	#elif defined(CPU_XMC48)
 
-//		register u32 t __asm("r0");
-
-		if (len > BLOCK_TS(~0))
-		{
-			nandCopyDataSrc = ((byte*)src) + BLOCK_TS(~0);
-			nandCopyDataDst = ((byte*)dst) + BLOCK_TS(~0);
-			nandCopyDataLen = len - BLOCK_TS(~0);
-			len = BLOCK_TS(~0);
-		}
-		else
-		{
-			nandCopyDataLen = 0;
-		};
-
-		NAND_MEMCOPY_DMA->DMACFGREG = 1;
-
-		NAND_MEMCOPY_DMACH->CTLL = DST_INC|SRC_INC|TT_FC(0)|DEST_MSIZE(0)|SRC_MSIZE(0);
-		NAND_MEMCOPY_DMACH->CTLH = BLOCK_TS(len);
-
-		NAND_MEMCOPY_DMACH->SAR = (u32)src;
-		NAND_MEMCOPY_DMACH->DAR = (u32)dst;
-		NAND_MEMCOPY_DMACH->CFGL = 0;
-		NAND_MEMCOPY_DMACH->CFGH = PROTCTL(1);
-
-		NAND_MEMCOPY_DMA->CHENREG = NAND_MEMCOPY_DMA_CHEN;
+		NAND_MEMCOPY_DMA.MemCopy(src, dst, len);
 
 	#endif
 
@@ -1711,31 +1624,19 @@ void NAND_CopyDataDMA(volatile void *src, volatile void *dst, u16 len)
 
 static bool NAND_CheckCopyComplete()
 {
-	#ifdef CPU_SAME53
+#ifdef CPU_SAME53
 
-		return (HW::DMAC->CH[NAND_MEMCOPY_DMACH].CTRLA & DMCH_ENABLE) == 0 || (HW::DMAC->CH[NAND_MEMCOPY_DMACH].INTFLAG & DMCH_TCMPL);
+	return (HW::DMAC->CH[NAND_MEMCOPY_DMACH].CTRLA & DMCH_ENABLE) == 0 || (HW::DMAC->CH[NAND_MEMCOPY_DMACH].INTFLAG & DMCH_TCMPL);
 	
-	#elif defined(CPU_XMC48)
+#elif defined(CPU_XMC48)
 
-		if ((NAND_MEMCOPY_DMA->CHENREG & NAND_MEMCOPY_DMA_CHST) == 0)
-		{
-			if (nandCopyDataLen > 0) 
-			{
-				NAND_CopyDataDMA(nandCopyDataSrc, nandCopyDataDst, nandCopyDataLen);
-			}
-			else
-			{
-				return true;;
-			};
-		};
+	return NAND_MEMCOPY_DMA.CheckMemCopyComplete();
 
-		return false;
+#elif defined(WIN32)
 
-	#elif defined(WIN32)
+	return true;
 
-		return true;
-
-	#endif
+#endif
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

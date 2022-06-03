@@ -6,8 +6,6 @@
 #include "time.h"
 #include "CRC16.h"
 
-//#define NAND_SAMSUNG
-#define NAND_MICRON
 
 //#define NAND_MAX_CHIP		(1<<3)
 
@@ -215,6 +213,8 @@ struct FLADR
 
 	void	AddRaw(u32 v) { raw += v; raw += chipOffsetNext[GetChip()]; }
 	void	SubRaw(u32 v) { raw -= v; raw -= chipOffsetPrev[GetChip()]; }
+
+	bool	CheckOverflow() { return (raw & ~RAWADR_MASK); }
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
