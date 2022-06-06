@@ -2,9 +2,45 @@
 
 #ifdef CPU_SAME53
 
-__align(16) T_HW::DMADESC DMA_CH::_DmaTable[32];
-__align(16) T_HW::DMADESC DMA_CH::_DmaWRB[32];
+	__align(16) T_HW::DMADESC DmaTable[32];
+	__align(16) T_HW::DMADESC DmaWRB[32];
+//__align(16) T_HW::DMADESC DMA_CH::_DmaTable[32];
+//__align(16) T_HW::DMADESC DMA_CH::_DmaWRB[32];
 
+	__align(16) T_HW::DMADESC DMA_CH::_wr_dmadsc[32];
+
+DMA_CH		DMA_CH0		(0	);
+DMA_CH		DMA_CH1		(1	);
+DMA_CH		DMA_CH2		(2	);
+DMA_CH		DMA_CH3		(3	);
+DMA_CH		DMA_CH4		(4	);
+DMA_CH		DMA_CH5		(5	);
+DMA_CH		DMA_CH6		(6	);
+DMA_CH		DMA_CH7		(7	);
+DMA_CH		DMA_CH8		(0	);
+DMA_CH		DMA_CH9		(1	);
+DMA_CH		DMA_CH10	(10	);
+DMA_CH		DMA_CH11	(11	);
+DMA_CH		DMA_CH12	(12	);
+DMA_CH		DMA_CH13	(13	);
+DMA_CH		DMA_CH14	(14	);
+DMA_CH		DMA_CH15	(15	);
+DMA_CH		DMA_CH16	(16	);
+DMA_CH		DMA_CH17	(17	);
+DMA_CH		DMA_CH18	(18	);
+DMA_CH		DMA_CH19	(19	);
+DMA_CH		DMA_CH20	(20	);
+DMA_CH		DMA_CH21	(21	);
+DMA_CH		DMA_CH22	(22	);
+DMA_CH		DMA_CH23	(23	);
+DMA_CH		DMA_CH24	(24	);
+DMA_CH		DMA_CH25	(25	);
+DMA_CH		DMA_CH26	(26	);
+DMA_CH		DMA_CH27	(27	);
+DMA_CH		DMA_CH28	(28	);
+DMA_CH		DMA_CH29	(29	);
+DMA_CH		DMA_CH30	(30	);
+DMA_CH		DMA_CH31	(31	);
 	
 #elif defined(CPU_XMC48)
 
@@ -42,7 +78,7 @@ void DMA_CH::_MemCopy(const volatile void *src, volatile void *dst, u16 len, u32
 	_dmach->INTFLAG = ~0;
 	_dmach->CTRLA = DMCH_ENABLE|DMCH_TRIGACT_TRANSACTION;
 
-	DMAC->SWTRIGCTRL = 1UL<<_chnum;
+	SoftwareTrigger();
 
 #elif defined(CPU_XMC48)
 
@@ -107,7 +143,7 @@ void DMA_CH::WritePeripheral(const volatile void *src, volatile void *dst, u16 l
 	_dmadsc->DSTADDR = dst;
 	_dmadsc->DESCADDR = 0;
 	_dmadsc->BTCNT = len;
-	_dmadsc->BTCTRL = ctrl2 | DMDSC_VALID;//|DMDSC_BEATSIZE_BYTE|DMDSC_SRCINC;
+	_dmadsc->BTCTRL = ctrl2 | DMDSC_VALID|DMDSC_SRCINC;//|DMDSC_BEATSIZE_BYTE;
 
 	_dmach->INTENCLR = ~0;
 	_dmach->INTFLAG = ~0;
@@ -145,7 +181,10 @@ void DMA_CH::ReadPeripheral(const volatile void *src, volatile void *dst, u16 le
 		_dmadsc->DSTADDR = (byte*)dst+len;
 		_dmadsc->DESCADDR = 0;
 		_dmadsc->BTCNT = len;
-		_dmadsc->BTCTRL = ctrl2 | DMDSC_VALID; //|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC;
+		_dmadsc->BTCTRL = ctrl2 | DMDSC_VALID|DMDSC_DSTINC; //|DMDSC_BEATSIZE_BYTEC;
+
+		_dmach->INTENCLR = ~0;
+		_dmach->INTFLAG = ~0;
 
 		_dmach->CTRLA = ctrl1 | DMCH_ENABLE; //|DMCH_TRIGACT_BURST|_dma_trgsrc_rx;
 	
@@ -178,9 +217,42 @@ void DMA_CH::SystemInit()
 	HW::DMAC->CTRL = 0;
 	HW::DMAC->CTRL = DMAC_SWRST;
 	HW::DMAC->DBGCTRL = DMAC_DBGRUN;
-	HW::DMAC->BASEADDR	= _DmaTable;
-	HW::DMAC->WRBADDR	= _DmaWRB;
+	HW::DMAC->BASEADDR	= DmaTable;
+	HW::DMAC->WRBADDR	= DmaWRB;
 	HW::DMAC->CTRL = DMAC_DMAENABLE|DMAC_LVLEN0|DMAC_LVLEN1|DMAC_LVLEN2|DMAC_LVLEN3;
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void DMA_CH::WritePeripheral(const volatile void *src, volatile void *dst, u16 len, const volatile void *src2, u16 len2, u32 ctrl1, u32 ctrl2)
+{
+	using namespace HW;
+
+	_dmach->CTRLA = 0;
+
+	if (src2 != 0 && len2 > 0)
+	{
+		T_HW::DMADESC &wrdsc = _wr_dmadsc[_chnum];
+		wrdsc.SRCADDR = (byte*)src2+len2;
+		wrdsc.DSTADDR = dst;
+		wrdsc.BTCNT = len2;
+		wrdsc.BTCTRL = ctrl2 | DMDSC_VALID|DMDSC_SRCINC;//|DMDSC_BEATSIZE_BYTE;
+		_dmadsc->DESCADDR = &wrdsc;
+	}
+	else
+	{
+		_dmadsc->DESCADDR = 0;
+	};
+
+	_dmadsc->SRCADDR = (byte*)src+len;
+	_dmadsc->DSTADDR = dst;
+	_dmadsc->BTCNT = len;
+	_dmadsc->BTCTRL = ctrl2 | DMDSC_VALID|DMDSC_SRCINC;//|DMDSC_BEATSIZE_BYTE;
+
+	_dmach->INTENCLR = ~0;
+	_dmach->INTFLAG = ~0;
+
+	_dmach->CTRLA = ctrl1 | DMCH_ENABLE; //DMCH_TRIGACT_BURST|_dma_trgsrc_tx;
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

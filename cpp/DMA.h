@@ -13,8 +13,8 @@ protected:
 
 #ifdef CPU_SAME53
 
-	static T_HW::DMADESC _DmaTable[32];
-	static T_HW::DMADESC _DmaWRB[32];
+	//static T_HW::DMADESC _DmaTable[32];
+	//static T_HW::DMADESC _DmaWRB[32];
 
 	static void SystemInit();
 	
@@ -23,6 +23,7 @@ protected:
 	T_HW::DMADESC*				const _dmadsc;
 	T_HW::DMADESC*				const _dmawrb;
 
+	static T_HW::DMADESC		_wr_dmadsc[32];
 	
 #elif defined(CPU_XMC48)
 
@@ -64,7 +65,7 @@ public:
 
 #ifdef CPU_SAME53
 
-	DMA_CH(byte chnum) : _dmach(&HW::DMAC->CH[chnum]), _dmadsc(&_DmaTable[chnum]), _dmawrb(&_DmaWRB[chnum]), _chnum(chnum) {}
+	DMA_CH(byte chnum) : _dmach(&HW::DMAC->CH[chnum]), _dmadsc(&DmaTable[chnum]), _dmawrb(&DmaWRB[chnum]), _chnum(chnum) {}
 
 	//void Enable() {  }
 	
@@ -77,10 +78,29 @@ public:
 	void MemCopyDstInc(volatile void *src, volatile void *dst, u16 len) { _MemCopy(src, (byte*)dst+len, len, DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC); }
 	bool CheckMemCopyComplete() { return CheckComplete(); }
 
-	u32 GetSrcBytesReady()	{ return _dmach->SAR - _startSrcAdr; }
-	u32 GetDstBytesReady()	{ return _dmach->DAR - _startDstAdr; }
-	u32 GetSrcBytesLeft()	{ return u32 t = HW::DMAC->ACTIVE; return ((t & 0x9F00) == _dma_act_mask) ? (t >> 16) : _dmawrb->BTCNT; }
-	u32 GetDstBytesLeft()	{ return _dmach->DAR - _startDstAdr; }
+	u32 GetSrcBytesReady()	{ return 0; }
+	u32 GetDstBytesReady()	{ return 0; }
+	u32 GetSrcBytesLeft()	{ return 0; }
+	u32 GetDstBytesLeft()	{ return 0; }
+
+	u32 GetBytesReady()	{ return _dmadsc->BTCNT - _dmawrb->BTCNT; }
+
+	void SoftwareTrigger() { HW::DMAC->SWTRIGCTRL = 1UL<<_chnum; }
+	void SetEvCtrl(byte v) { _dmach->EVCTRL = v; }
+	void SetPriLvl(byte v) { _dmach->PRILVL = v; }
+
+	void WritePeripheral(const volatile void *src, volatile void *dst, u16 len, const volatile void *src2, u16 len2, u32 ctrl1, u32 ctrl2);
+
+	u16 Get_CRC_CCITT_Result() { return ReverseWord(HW::DMAC->CRCCHKSUM); }
+
+	void CRC_CCITT(const void* data, u16 len, u16 init)
+	{
+		HW::DMAC->CRCCTRL = DMAC_CRCBEATSIZE_BYTE | DMAC_CRCPOLY_CRC16 | DMAC_CRCMODE_CRCGEN | DMAC_CRCSRC(0x20 + _chnum);
+		WritePeripheral(data, (void*)init, len, 0, DMDSC_BEATSIZE_BYTE);
+		SoftwareTrigger(); //HW::DMAC->SWTRIGCTRL = 1UL << CRC_DMACH;
+	}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #elif defined(CPU_XMC48)
 
@@ -107,6 +127,43 @@ public:
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+#ifdef CPU_SAME53
+
+extern DMA_CH		DMA_CH0	;
+extern DMA_CH		DMA_CH1	;
+extern DMA_CH		DMA_CH2	;
+extern DMA_CH		DMA_CH3	;
+extern DMA_CH		DMA_CH4	;
+extern DMA_CH		DMA_CH5	;
+extern DMA_CH		DMA_CH6	;
+extern DMA_CH		DMA_CH7	;
+extern DMA_CH		DMA_CH8	;
+extern DMA_CH		DMA_CH9	;
+extern DMA_CH		DMA_CH10;
+extern DMA_CH		DMA_CH11;
+extern DMA_CH		DMA_CH12;
+extern DMA_CH		DMA_CH13;
+extern DMA_CH		DMA_CH14;
+extern DMA_CH		DMA_CH15;
+extern DMA_CH		DMA_CH16;
+extern DMA_CH		DMA_CH17;
+extern DMA_CH		DMA_CH18;
+extern DMA_CH		DMA_CH19;
+extern DMA_CH		DMA_CH20;
+extern DMA_CH		DMA_CH21;
+extern DMA_CH		DMA_CH22;
+extern DMA_CH		DMA_CH23;
+extern DMA_CH		DMA_CH24;
+extern DMA_CH		DMA_CH25;
+extern DMA_CH		DMA_CH26;
+extern DMA_CH		DMA_CH27;
+extern DMA_CH		DMA_CH28;
+extern DMA_CH		DMA_CH29;
+extern DMA_CH		DMA_CH30;
+extern DMA_CH		DMA_CH31;
+
+#elif defined(CPU_XMC48)
+
 extern DMA_CH		DMA_CH0;
 extern DMA_CH		DMA_CH1;
 extern DMA_CH		DMA_CH2;
@@ -119,6 +176,8 @@ extern DMA_CH		DMA_CH8;
 extern DMA_CH		DMA_CH9;
 extern DMA_CH		DMA_CH10;
 extern DMA_CH		DMA_CH11;
+
+#endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

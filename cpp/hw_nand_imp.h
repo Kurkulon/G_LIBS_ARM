@@ -440,19 +440,6 @@ bool NAND_Reset()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool NAND_CheckDataComplete_old()
-{
-	#ifdef CPU_SAME53	
-		return (HW::DMAC->CH[NAND_DMACH].CTRLA & DMCH_ENABLE) == 0;
-	#elif defined(CPU_XMC48)
-		return (HW::GPDMA1->CHENREG & (1<<3)) == 0;
-	#elif defined(WIN32)
-		return HasOverlappedIoCompleted(&_overlapped);
-	#endif
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 #ifdef CPU_XMC48	
 
 static byte *nandWriteDataSrc = 0;
@@ -466,7 +453,7 @@ static bool NAND_CheckDataComplete()
 {
 	#ifdef CPU_SAME53
 
-	if (((HW::DMAC->CH[NAND_DMACH].CTRLA & DMCH_ENABLE) == 0) || (HW::DMAC->CH[NAND_DMACH].INTFLAG & DMCH_TCMPL))
+		if (NAND_DMA.CheckComplete())
 		{
 			PIO_WE_RE->SET(WE|RE);
 			PIO_WE_RE->DIRSET = WE|RE;
@@ -1098,7 +1085,9 @@ void NAND_Init()
 
 		for (byte i = 0; i < ArraySize(checkBuf); i++)
 		{
+			NAND_DIR_OUT();
 			NAND_ADR_LATCH(checkBuf[i]);
+			NAND_DIR_IN();
 			readBuf[i] = NAND_ADR_READ();
 		};
 
@@ -1348,17 +1337,21 @@ void NAND_WriteDataDMA(volatile void *src, u16 len)
 		nandTCC->CTRLA = 0;
 		nandTCC->CTRLA = TC_SWRST;
 
-		DmaTable[NAND_DMACH].SRCADDR = (byte*)src+len;
-		DmaTable[NAND_DMACH].DSTADDR = &HW::PIOA->OUT;
-		DmaTable[NAND_DMACH].DESCADDR = 0;
-		DmaTable[NAND_DMACH].BTCNT = len;
-		DmaTable[NAND_DMACH].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_SRCINC|DMDSC_EVOSEL_BEAT;
+		NAND_DMA.SetEvCtrl(DMCH_EVOE);
+		NAND_DMA.SetPriLvl(DMCH_PRILVL_LVL3);
+		NAND_DMA.WritePeripheral(src, &HW::PIOA->OUT, len, DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TCC0_MC1, DMDSC_BEATSIZE_BYTE|DMDSC_EVOSEL_BEAT);
 
-		DMAC->CH[NAND_DMACH].INTENCLR = ~0;
-		DMAC->CH[NAND_DMACH].INTFLAG = ~0;
-		DMAC->CH[NAND_DMACH].EVCTRL = DMCH_EVOE;
-		DMAC->CH[NAND_DMACH].PRILVL = DMCH_PRILVL_LVL3;
-		DMAC->CH[NAND_DMACH].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TCC0_MC1;
+		//DmaTable[NAND_DMACH].SRCADDR = (byte*)src+len;
+		//DmaTable[NAND_DMACH].DSTADDR = &HW::PIOA->OUT;
+		//DmaTable[NAND_DMACH].DESCADDR = 0;
+		//DmaTable[NAND_DMACH].BTCNT = len;
+		//DmaTable[NAND_DMACH].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_SRCINC|DMDSC_EVOSEL_BEAT;
+
+		//DMAC->CH[NAND_DMACH].INTENCLR = ~0;
+		//DMAC->CH[NAND_DMACH].INTFLAG = ~0;
+		//DMAC->CH[NAND_DMACH].EVCTRL = DMCH_EVOE;
+		//DMAC->CH[NAND_DMACH].PRILVL = DMCH_PRILVL_LVL3;
+		//DMAC->CH[NAND_DMACH].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TCC0_MC1;
 
 		nandTCC->WAVE = TCC_WAVEGEN_NPWM|TCC_POL0;
 		nandTCC->DRVCTRL = TCC_NRE0|TCC_NRE1|TCC_NRV0|TCC_NRV1;
@@ -1376,7 +1369,7 @@ void NAND_WriteDataDMA(volatile void *src, u16 len)
 		nandTCC->CTRLBSET = TC_ONESHOT;
 		nandTCC->CTRLA = TC_ENABLE;
 
-		DMAC->SWTRIGCTRL = 1UL<<NAND_DMACH;
+		NAND_DMA.SoftwareTrigger(); // DMAC->SWTRIGCTRL = 1UL<<NAND_DMACH;
 
 	#elif defined(CPU_XMC48)
 
@@ -1492,17 +1485,21 @@ void NAND_ReadDataDMA(volatile void *dst, u16 len)
 		nandTCC->CTRLA = 0;
 		nandTCC->CTRLA = TC_SWRST;
 
-		DmaTable[NAND_DMACH].SRCADDR = &PIO_NAND_DATA->IN;
-		DmaTable[NAND_DMACH].DSTADDR = (byte*)dst+len;
-		DmaTable[NAND_DMACH].DESCADDR = 0;
-		DmaTable[NAND_DMACH].BTCNT = len;
-		DmaTable[NAND_DMACH].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC|DMDSC_EVOSEL_BLOCK;
+		NAND_DMA.SetEvCtrl(DMCH_EVOE);
+		NAND_DMA.SetPriLvl(DMCH_PRILVL_LVL3);
+		NAND_DMA.ReadPeripheral(&PIO_NAND_DATA->IN, dst, len, DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TCC0_MC0, DMDSC_BEATSIZE_BYTE|DMDSC_EVOSEL_BLOCK);
 
-		DMAC->CH[NAND_DMACH].INTENCLR = ~0;
-		DMAC->CH[NAND_DMACH].INTFLAG = ~0;
-		DMAC->CH[NAND_DMACH].EVCTRL = DMCH_EVOE;
-		DMAC->CH[NAND_DMACH].PRILVL = DMCH_PRILVL_LVL3;
-		DMAC->CH[NAND_DMACH].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TCC0_MC0;
+		//DmaTable[NAND_DMACH].SRCADDR = &PIO_NAND_DATA->IN;
+		//DmaTable[NAND_DMACH].DSTADDR = (byte*)dst+len;
+		//DmaTable[NAND_DMACH].DESCADDR = 0;
+		//DmaTable[NAND_DMACH].BTCNT = len;
+		//DmaTable[NAND_DMACH].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC|DMDSC_EVOSEL_BLOCK;
+
+		//DMAC->CH[NAND_DMACH].INTENCLR = ~0;
+		//DMAC->CH[NAND_DMACH].INTFLAG = ~0;
+		//DMAC->CH[NAND_DMACH].EVCTRL = DMCH_EVOE;
+		//DMAC->CH[NAND_DMACH].PRILVL = DMCH_PRILVL_LVL3;
+		//DMAC->CH[NAND_DMACH].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TCC0_MC0;
 
 		//PIO_WE_RE->EVCTRL.EV[0] = PIN_RE|PORT_PORTEI|PORT_EVACT_CLR;
 		//PIO_WE_RE->EVCTRL.EV[1] = PIN_RE|PORT_PORTEI|PORT_EVACT_SET;
@@ -1515,7 +1512,6 @@ void NAND_ReadDataDMA(volatile void *dst, u16 len)
 		nandTCC->CC[1] = NS2CLK(35); 
 
 		nandTCC->EVCTRL = TCC_OVFEO|TCC_MCEO0|TCC_TCEI1|TCC_EVACT1_STOP;
-
 
 		NAND_DIR_IN();
 		PIO_WE_RE->SET(WE|RE); 
@@ -1588,26 +1584,7 @@ void NAND_CopyDataDMA(volatile void *src, volatile void *dst, u16 len)
 {
 #ifndef WIN32
 
-	using namespace HW;
-
-	#ifdef CPU_SAME53	
-
-		DmaTable[NAND_MEMCOPY_DMACH].SRCADDR = (byte*)src+len;
-		DmaTable[NAND_MEMCOPY_DMACH].DSTADDR = (byte*)dst+len;
-		DmaTable[NAND_MEMCOPY_DMACH].DESCADDR = 0;
-		DmaTable[NAND_MEMCOPY_DMACH].BTCNT = len;
-		DmaTable[NAND_MEMCOPY_DMACH].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC|DMDSC_SRCINC;
-
-		DMAC->CH[NAND_MEMCOPY_DMACH].INTENCLR = ~0;
-		DMAC->CH[NAND_MEMCOPY_DMACH].INTFLAG = ~0;
-		DMAC->CH[NAND_MEMCOPY_DMACH].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_TRANSACTION;
-		DMAC->SWTRIGCTRL = 1UL<<NAND_DMACH;
-
-	#elif defined(CPU_XMC48)
-
-		NAND_MEMCOPY_DMA.MemCopy(src, dst, len);
-
-	#endif
+	NAND_MEMCOPY_DMA.MemCopy(src, dst, len);
 
 #else
 
@@ -1622,13 +1599,9 @@ void NAND_CopyDataDMA(volatile void *src, volatile void *dst, u16 len)
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool NAND_CheckCopyComplete()
+inline bool NAND_CheckCopyComplete()
 {
-#ifdef CPU_SAME53
-
-	return (HW::DMAC->CH[NAND_MEMCOPY_DMACH].CTRLA & DMCH_ENABLE) == 0 || (HW::DMAC->CH[NAND_MEMCOPY_DMACH].INTFLAG & DMCH_TCMPL);
-	
-#elif defined(CPU_XMC48)
+#ifndef WIN32
 
 	return NAND_MEMCOPY_DMA.CheckMemCopyComplete();
 
