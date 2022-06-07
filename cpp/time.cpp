@@ -200,6 +200,8 @@ void InitTimer(u32 cpuclk)
 {
 #ifndef WIN32
 
+	SEGGER_RTT_printf(0, RTT_CTRL_TEXT_BRIGHT_CYAN "System Timer Init CPUCLK = %u MHz ... ", (cpuclk+500000)/1000000);
+
 	enum { freq = 1000 };
 
 	timeBDC.day = 1;
@@ -215,7 +217,7 @@ void InitTimer(u32 cpuclk)
 
 #endif
 
-	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_CYAN "System Timer Init ... \n");
+	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_GREEN "OK\n");
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

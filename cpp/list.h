@@ -45,13 +45,13 @@ protected:
 
     enum {LOCK_IS_FREE = 0, LOCK_IS_TAKEN = 1};
 
-	void Lock()		{ while (_InterlockedCompareExchange(&locked, LOCK_IS_TAKEN, LOCK_IS_FREE) == LOCK_IS_TAKEN) locks_count++; }
-	void Unlock()	{ _InterlockedExchange(&locked, LOCK_IS_FREE);  }
+	__forceinline void Lock()		{ while (_InterlockedCompareExchange(&locked, LOCK_IS_TAKEN, LOCK_IS_FREE) == LOCK_IS_TAKEN) locks_count++; }
+	__forceinline void Unlock()	{ _InterlockedExchange(&locked, LOCK_IS_FREE);  }
 
 #else
 
-	void Lock()		{ }
-	void Unlock()	{ }
+	__forceinline void Lock()	{ __disable_irq(); }
+	__forceinline void Unlock()	{ __enable_irq();  }
 
 #endif
 

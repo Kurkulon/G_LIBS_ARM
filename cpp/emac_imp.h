@@ -113,7 +113,7 @@ static void tx_descr_init (void);
 	inline void DisableMDI() { HW::GMAC->NCR &= ~GMAC_MPE; }
 			bool IsReadyPHY() { return HW::GMAC->NSR & GMAC_IDLE; }
 			u16 ResultPHY() { return HW::GMAC->MAN; }
-	inline	bool CheckStatusIP(u32 stat) { return (stat & RD_IP_CHECK) == RD_IP_OK; }
+	inline	bool CheckStatusIP(u32 stat) { return (stat & RD_IP_CHECK); }
 	inline 	bool CheckStatusUDP(u32 stat) { return (stat & RD_IP_CHECK) == RD_IP_UDP_OK; }
 	inline	void ResumeReceiveProcessing() {}
 
@@ -920,7 +920,7 @@ bool InitEMAC()
 {
 #ifndef WIN32
 
-	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_CYAN "Init EMAC ...");
+	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_CYAN "Init EMAC ... ");
 
 	using namespace HW;
 	
@@ -1011,7 +1011,7 @@ bool InitEMAC()
 
 	HW_EMAC_StartLink();
 
-	SEGGER_RTT_WriteString(0, "OK\n");
+	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_GREEN "OK\n");
 
 #else
 

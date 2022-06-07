@@ -71,7 +71,7 @@ public:
 	
 	void Disable() { _dmach->CTRLA = 0; while (_dmach->CTRLA & DMCH_ENABLE); _dmach->CTRLA = DMCH_SWRST; }
 
-	bool CheckComplete() { return (_dmach->CTRLA & DMCH_ENABLE) == 0 || (_dmach->INTFLAG & DMCH_TCMPL); }
+	bool CheckComplete() { return (_dmach->CTRLA & DMCH_ENABLE) == 0 /*|| (_dmach->INTFLAG & DMCH_TCMPL)*/; }
 	
 	void MemCopy(volatile void *src, volatile void *dst, u16 len)		{ _MemCopy((byte*)src+len, (byte*)dst+len, len, DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC|DMDSC_SRCINC); }
 	void MemCopySrcInc(volatile void *src, volatile void *dst, u16 len) { _MemCopy((byte*)src+len, dst, len, DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_SRCINC); }
@@ -96,7 +96,7 @@ public:
 	void CRC_CCITT(const void* data, u16 len, u16 init)
 	{
 		HW::DMAC->CRCCTRL = DMAC_CRCBEATSIZE_BYTE | DMAC_CRCPOLY_CRC16 | DMAC_CRCMODE_CRCGEN | DMAC_CRCSRC(0x20 + _chnum);
-		WritePeripheral(data, (void*)init, len, 0, DMDSC_BEATSIZE_BYTE);
+		WritePeripheral(data, (void*)init, len, DMCH_TRIGACT_TRANSACTION, DMDSC_BEATSIZE_BYTE);
 		SoftwareTrigger(); //HW::DMAC->SWTRIGCTRL = 1UL << CRC_DMACH;
 	}
 

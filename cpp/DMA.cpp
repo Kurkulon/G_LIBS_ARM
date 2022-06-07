@@ -64,7 +64,7 @@ DMA_CH		DMA_CH11	(HW::DMA1,	11,	1UL<<11	);
 
 void DMA_CH::_MemCopy(const volatile void *src, volatile void *dst, u16 len, u32 ctrl)
 {
-	using namespace HW;
+	//using namespace HW;
 
 #ifdef CPU_SAME53
 	
@@ -133,7 +133,7 @@ bool DMA_CH::CheckMemCopyComplete()
 
 void DMA_CH::WritePeripheral(const volatile void *src, volatile void *dst, u16 len, u32 ctrl1, u32 ctrl2)
 {
-	using namespace HW;
+	//using namespace HW;
 
 #ifdef CPU_SAME53
 
@@ -171,7 +171,7 @@ void DMA_CH::WritePeripheral(const volatile void *src, volatile void *dst, u16 l
 
 void DMA_CH::ReadPeripheral(const volatile void *src, volatile void *dst, u16 len, u32 ctrl1, u32 ctrl2)
 {
-	using namespace HW;
+	//using namespace HW;
 
 #ifdef CPU_SAME53
 

@@ -62,7 +62,7 @@ __packed struct MAC
 			bool 	ChkWrap()					{ return *((u32*)&addr1) & WRAP_BIT; }
 			byte*	GetAdr()					{ return (byte*)((u32)addr1 & ~(OWNERSHIP_BIT|WRAP_BIT)); }
 			void	SetAdr(void *adr, u32 len)	{ addr1 = (void*)(((u32)addr1 & WRAP_BIT) | ((u32)adr & (~OWNERSHIP_BIT|WRAP_BIT))); }
-			void	ClrAdr()					{ *((u32*)&addr1) &= ~(OWNERSHIP_BIT|WRAP_BIT); ClrOwn(); }
+			void	ClrAdr()					{ *((u32*)&addr1) &= OWNERSHIP_BIT|WRAP_BIT; ClrOwn(); }
 			u32		GetStatus()					{ return stat; }
 	};
 
@@ -310,7 +310,7 @@ __packed struct EthBuf
 	EthBuf*		next;
 
 	u32			len;
-	u16			z_align;
+	//u16			z_align;
 
 	EthHdr		eth;
 
@@ -352,7 +352,7 @@ __packed struct EthUdpBuf : public EthIpBuf
 
 __packed struct SysEthBuf : public EthBuf
 {
-	byte data[ETH_RX_BUF_SIZE];
+	byte data[((ETH_RX_BUF_SIZE+3) & ~3) - sizeof(EthBuf::eth)];
 
 	static List<SysEthBuf> freeList;
 
