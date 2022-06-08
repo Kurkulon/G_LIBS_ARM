@@ -94,6 +94,7 @@ struct FLRB
 
 	u16		maxLen;
 	u16		len;
+	u16		crc;
 
 	byte	*data;
 };

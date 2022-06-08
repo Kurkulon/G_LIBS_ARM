@@ -805,7 +805,7 @@ static bool UpdateSendVector()
 	static u32 fragLen = 0;
 	static u32 fragOff = 0;
 	static u16 ipID = 0;
-	static u16 crc = 0;
+	//static u16 crc = 0;
 
 	static TM32 tm;
 
@@ -819,38 +819,6 @@ static bool UpdateSendVector()
 
 	__packed struct TRP { EthUdp eu; TrapVector tv; byte data[IP_MTU - sizeof(UdpHdr) - sizeof(TrapVector)]; };
 	__packed struct FR  { EthIp  ei; byte data[IP_MTU]; };
-
-	//TRP &et = *((TRP*)&t->eth);
-	//FR  &ef = *((FR*)&t->eth);
-
-	//TrapVector &trap = et.tv;
-
-	//if (tm.Check(1000))
-	//{
-	//	while((t = GetHugeTxBuffer()) == 0);
-	//	while((t2 = GetHugeTxBuffer()) == 0);
-
-	//	ipID = GetIpID(); 
-
-	//	t->iph.id = ipID;
-	//	t->iph.off = 0x2000;
-	//	t->len = sizeof(EthIp) + 1480;
-
-	//	SendFragTrap(t);
-
-	//	t2->iph.id = ipID;
-	//	t2->iph.off = (1480/8);
-	//	t2->len = sizeof(EthIp) + 1480;
-
-	//	SendFragTrap(t2);
-
-	//	return true;
-	//}
-	//else
-	//{
-	//	return true;
-	//};
-
 
 	switch (i)
 	{
@@ -895,11 +863,7 @@ static bool UpdateSendVector()
 			if (tm.Check(200))
 			{
 				FLASH_SendStatus(vecCount * (1<<22) / (size/1024), FLASH_STATUS_READ_VECTOR_IDLE);
-			}
-			//else
-			//{
-			//	break;
-			//};
+			};
 
 			if (stop)
 			{
@@ -960,11 +924,6 @@ static bool UpdateSendVector()
 					trap.rtc = flrb.hdr.rtc;
 					trap.flags = flrb.hdr.flags;
 
-					//if (trap.rtc.msec == 0)
-					//{
-					//	__breakpoint(0);
-					//};
-
 					vecCount += flrb.hdr.dataLen;
 
 					ipID = GetIpID(); 
@@ -974,7 +933,7 @@ static bool UpdateSendVector()
 
 					t->len = sizeof(et.eu) + sizeof(et.tv) + flrb.len;
 
-					crc = CRC_CCITT_DMA(flrb.data, flrb.len, 0xFFFF);	// GetCRC16(flrb.data, flrb.len, 0xFFFF, 0);
+					//crc = CRC_CCITT_DMA(flrb.data, flrb.len, 0xFFFF);	// GetCRC16(flrb.data, flrb.len, 0xFFFF, 0);
 
 					if (flrb.hdr.dataLen > flrb.maxLen)
 					{
@@ -989,19 +948,13 @@ static bool UpdateSendVector()
 					}
 					else
 					{
-						t->len -=  (crc != 0) ? flrb.len : 2;
+						t->len -=  (flrb.crc != 0) ? flrb.len : 2;
 
 						i = 1;
 					};
 
 					SendFragTrap(t);
 				};
-				//else
-				//{
-				//	// найти следующий вектор
-				//	__breakpoint(0);
-				//};
-
 			};
 
 			break;
@@ -1042,13 +995,13 @@ static bool UpdateSendVector()
 
 				t->len = sizeof(ef.ei) + flrb.len;
 
-				crc = CRC_CCITT_DMA(flrb.data, flrb.len, crc); //GetCRC16(flrb.data, flrb.len, crc, 0);
+				//crc = CRC_CCITT_DMA(flrb.data, flrb.len, crc); //GetCRC16(flrb.data, flrb.len, crc, 0);
 
 				if (fragLen > 0)
 				{ 
 					t->iph.off |= 0x2000; 
 				}
-				else if (crc != 0)
+				else if (flrb.crc != 0)
 				{
 					t->iph.off = 0;
 				}

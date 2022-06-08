@@ -926,6 +926,9 @@ bool InitEMAC()
 	
 	//PHYA = GetAdrPHY();
 
+	if (sizeof(SysEthBuf) & 3) __breakpoint(0);
+	if (sizeof(HugeTx) & 3) __breakpoint(0);
+
 	HW_EMAC_Init();
 
 	#ifdef CPU_SAME53	

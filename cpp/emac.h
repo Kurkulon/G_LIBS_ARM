@@ -369,7 +369,7 @@ __packed struct HugeTx : public EthBuf
 {
 	IPheader	iph; // 20
 	UdpHdr		udp; // 8
-	byte		data[IP_MTU - sizeof(UdpHdr)];
+	byte		data[IP_MTU - sizeof(UdpHdr) + (sizeof(EthBuf::eth) & 3)];
 
 	static List<HugeTx> freeList;
 

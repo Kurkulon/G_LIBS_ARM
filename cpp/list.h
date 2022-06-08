@@ -262,6 +262,8 @@ template <class T> Ptr<T> ListRef<T>::Get()
 
 	if (i != 0)
 	{
+		if (!HW::RamCheck(i)) __breakpoint(0); 
+
 		r = (T*)(i->item);
 
 		first = i->next;
@@ -288,6 +290,10 @@ template <class T> bool ListRef<T>::Add(const Ptr<T>& r)
 	ListItem *item = ListItem::Alloc(); 
 
 	if (item == 0) return false;
+
+	if (!HW::RamCheck(item)) __breakpoint(0); 
+	
+	if (!HW::RamCheck(r.ptr)) __breakpoint(0); 
 
 	item->item = r.ptr;
 
@@ -325,8 +331,8 @@ protected:
 
 	static	T*		Alloc()	{ T* p = (T*)_freeList.Get(); if (p != 0) p->count = 1; return p; };
 
-	virtual	void	_FreeCallBack() {}
-			void	Free()	{ if (count != 0) { count--; if (count == 0) _FreeCallBack(), _freeList.Add(this); }; }
+	//virtual	void	_FreeCallBack() {}
+			void	Free()	{ if (count != 0) { count--; if (count == 0) /*_FreeCallBack(),*/ _freeList.Add(this); }; }
 
 public:
 

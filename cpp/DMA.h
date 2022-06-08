@@ -65,13 +65,13 @@ public:
 
 #ifdef CPU_SAME53
 
-	DMA_CH(byte chnum) : _dmach(&HW::DMAC->CH[chnum]), _dmadsc(&DmaTable[chnum]), _dmawrb(&DmaWRB[chnum]), _chnum(chnum) {}
+	DMA_CH(byte chnum) : _dmach(&HW::DMAC->CH[chnum]), _dmadsc(&DmaTable[chnum]), _dmawrb(&DmaWRB[chnum]), _chnum(chnum) { _dmach->PRILVL = DMCH_PRILVL_LVL0; }
 
 	//void Enable() {  }
 	
 	void Disable() { _dmach->CTRLA = 0; while (_dmach->CTRLA & DMCH_ENABLE); _dmach->CTRLA = DMCH_SWRST; }
 
-	bool CheckComplete() { return (_dmach->CTRLA & DMCH_ENABLE) == 0 /*|| (_dmach->INTFLAG & DMCH_TCMPL)*/; }
+	bool CheckComplete() { if (_dmach->STATUS & DMCH_FERR) _dmach->CTRLB = DMCH_CMD_RESUME; return (_dmach->CTRLA & DMCH_ENABLE) == 0 /*|| (_dmach->INTFLAG & DMCH_TCMPL)*/; }
 	
 	void MemCopy(volatile void *src, volatile void *dst, u16 len)		{ _MemCopy((byte*)src+len, (byte*)dst+len, len, DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC|DMDSC_SRCINC); }
 	void MemCopySrcInc(volatile void *src, volatile void *dst, u16 len) { _MemCopy((byte*)src+len, dst, len, DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_SRCINC); }
@@ -87,7 +87,7 @@ public:
 
 	void SoftwareTrigger() { HW::DMAC->SWTRIGCTRL = 1UL<<_chnum; }
 	void SetEvCtrl(byte v) { _dmach->EVCTRL = v; }
-	void SetPriLvl(byte v) { _dmach->PRILVL = v; }
+	//void SetPriLvl(byte v) { _dmach->PRILVL = v; }
 
 	void WritePeripheral(const volatile void *src, volatile void *dst, u16 len, const volatile void *src2, u16 len2, u32 ctrl1, u32 ctrl2);
 
