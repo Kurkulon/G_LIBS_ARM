@@ -622,7 +622,7 @@ struct Write
 	EraseBlock eraseBlock;
 
 	u32	wrBuf[NAND_PAGE_SIZE/4];
-	//u32	rdBuf[(NAND_PAGE_SIZE+NAND_SPARE_SIZE)/4];
+	u32	rdBuf[(NAND_PAGE_SIZE+NAND_SPARE_SIZE)/4];
 
 	bool Start();
 	bool Update();
@@ -756,8 +756,6 @@ bool Write::Start()
 	};
 
 #endif
-
-	//if (!HW::RamCheck(curWrBuf)) __breakpoint(0); 
 
 	curWrBuf = writeFlBuf.Get();
 
@@ -997,9 +995,9 @@ bool Write::Update()
 
 					state = WRITE_PAGE_4;
 				}
-				else if (verifyWritePage)
+				else if (verifyWritePage || verifySpare)
 				{
-					NAND_CmdReadPage(wr.pg, wr.GetBlock(), wr.GetPage());
+					NAND_CmdReadPage((verifyWritePage) ? 0 : wr.pg, wr.GetBlock(), wr.GetPage());
 					
 					state = WRITE_PAGE_6;
 				}
@@ -1050,7 +1048,14 @@ bool Write::Update()
 
 			if(!NAND_BUSY())
 			{
-				NAND_ReadDataDMA(&rspare, sizeof(rspare));
+				if (verifyWritePage)
+				{
+					NAND_ReadDataDMA(&rdBuf, sizeof(rdBuf));
+				}
+				else
+				{
+					NAND_ReadDataDMA(&rspare, sizeof(rspare));
+				};
 
 				state = WRITE_PAGE_7;
 			};
@@ -1061,7 +1066,8 @@ bool Write::Update()
 
 			if (NAND_CheckDataComplete())
 			{
-				if (!__memcmp(&spare, &rspare, sizeof(spare)))
+				if ((verifyWritePage && (!__memcmp(wr_ptr, rdBuf, wr.pg) || !__memcmp(&spare, rdBuf+wr.pg/4, sizeof(spare)))) 
+					|| (!verifyWritePage && !__memcmp(&spare, &rspare, sizeof(spare))))
 				{
 					verifyFlashErrors += 1;
 
