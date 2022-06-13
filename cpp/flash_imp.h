@@ -1395,6 +1395,7 @@ struct Read2
 	bool Start();
 //	bool Start(FLRB *flrb, FLADR *adr);
 	bool Update();
+	bool UpdateFull() { bool c = Update(); return  c || statePage != 0; }
 	void End() { curRdBuf->ready = true; curRdBuf = 0; state = WAIT; }
 	void UpdatePage();
 };
@@ -2434,7 +2435,7 @@ static bool UpdateBlackBoxSendSessions()
 
 		case 5: //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-			if (!read.Update())
+			if (!read.UpdateFull())
 			{
 				if (flrb.ready && flrb.hdr.session == findFileNum && flrb.hdr.crc == 0)
 				{
@@ -2473,7 +2474,7 @@ static bool UpdateBlackBoxSendSessions()
 
 		case 7: //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-			if (!read.Update())
+			if (!read.UpdateFull())
 			{
 				if (flrb.ready && flrb.hdr.session == findFileNum && flrb.hdr.crc == 0)
 				{
