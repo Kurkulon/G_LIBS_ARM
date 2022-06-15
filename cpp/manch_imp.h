@@ -334,9 +334,7 @@ void InitManTransmit()
 
 #ifdef CPU_SAME53	
 
-	HW::GCLK->PCHCTRL[GCLK_TC0_TC1] = GCLK_GEN(GEN_1M)|GCLK_CHEN;
-
-	HW::MCLK->APBAMASK |= APBA_TC0;
+	MANTT_ClockEnable();
 
 	PIO_MANCH->DIRSET = L1|H1|L2|H2;
 
@@ -700,6 +698,29 @@ void InitManTransmit()
 
 	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_WHITE "Manchester transmit2 Init ... ");
 
+#ifdef CPU_SAME53	
+
+	MANTT_ClockEnable();
+
+	PIO_MANCH->DIRSET = L1|H1|L2|H2;
+
+	ManTT->CTRLA = TCC_SWRST;
+
+	while(ManTT->SYNCBUSY);
+
+	//SetTrmBoudRate(0);
+
+	ManTT->CTRLA = TC_MODE_COUNT8;
+	ManTT->WAVE = TC_WAVEGEN_NPWM;
+	ManTT->PER8 = GetTrmBaudRate(0) - 1;
+
+	ManTT->INTENCLR = ~TC_OVF;
+	ManTT->INTENSET = TC_OVF;
+
+	ManTT->INTFLAG = ~0;
+
+#elif defined(CPU_XMC48)
+
 	VectorTableExt[MANT_CCU8_IRQ] = ManTrmIRQ2;
 	CM4::NVIC->CLR_PR(MANT_CCU8_IRQ);
 	CM4::NVIC->SET_ER(MANT_CCU8_IRQ);
@@ -752,6 +773,7 @@ void InitManTransmit()
 	//ManT1->SWR = ~0;
 	//ManT_CCU8->GIDLC = ManT_CCU8_GIDLC;
 	//ManT->INTE = CC8_PME;
+#endif
 
 	SEGGER_RTT_WriteString(0, "OK\n");
 }
@@ -967,11 +989,8 @@ void InitManRecieve()
 
 #ifdef CPU_SAME53	
 
-	HW::GCLK->PCHCTRL[GCLK_TCC2_TCC3]	= GCLK_GEN(GEN_1M)|GCLK_CHEN;
-	HW::GCLK->PCHCTRL[GCLK_TC0_TC1]		= GCLK_GEN(GEN_1M)|GCLK_CHEN;
-
-	HW::MCLK->APBCMASK |= APBC_TCC2;
-	HW::MCLK->APBAMASK |= APBA_TC1;
+	MANRT_ClockEnable();
+	MANIT_ClockEnable();
 
 	HW::GCLK->PCHCTRL[EVENT_MANR_1+GCLK_EVSYS0] = GCLK_GEN(GEN_MCK)|GCLK_CHEN;
 	HW::GCLK->PCHCTRL[EVENT_MANR_2+GCLK_EVSYS0] = GCLK_GEN(GEN_MCK)|GCLK_CHEN;
