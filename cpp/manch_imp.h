@@ -6,24 +6,129 @@
 #include "SEGGER_RTT.h"
 
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// ++++++++++++++	MANCH TRANSMIT	++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#ifdef CPU_SAME53	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	#if defined(MANT_TC) && defined(MAN_TRANSMIT_V1)
+
+		#define MNTTC				HW::MANT_TC
+		#define MANT_GEN			CONCAT2(GEN_,MANT_TC)
+		#define MANT_GEN_CLK		CONCAT2(CLK_,MANT_TC) 
+		#define MANT_IRQ			CONCAT2(MANT_TC,_IRQ)
+		#define GCLK_MANT			CONCAT2(GCLK_,MANT_TC)
+		#define PID_MANT			CONCAT2(PID_,MANT_TC)
+
+		#if (MANT_GEN_CLK > 100000000)
+				#define MANT_PRESC_NUM		64
+		#elif (MANT_GEN_CLK > 50000000)
+				#define MANT_PRESC_NUM		16
+		#elif (MANT_GEN_CLK > 20000000)
+				#define MANT_PRESC_NUM		8
+		#elif (MANT_GEN_CLK > 10000000)
+				#define MANT_PRESC_NUM		4
+		#elif (MANT_GEN_CLK > 5000000)
+				#define MANT_PRESC_NUM		2
+		#else
+				#define MANT_PRESC_NUM		1
+		#endif
+
+		#define MANT_PRESC_DIV		CONCAT2(TC_PRESCALER_DIV,MANT_PRESC_NUM)
+
+		#define ManResetTransmit()		{ MNTTC->CTRLA = TC_SWRST; while(MNTTC->SYNCBUSY); }
+		#define ManDisableTransmit()	{ MNTTC->CTRLA = 0; MNTTC->INTENCLR = ~0; }
+		#define ManEndIRQ()				{ MNTTC->INTFLAG = ~0; }
+
+	#elif defined(MANT_TCC)
+		#define MNTTCC				HW::MANT_TCC
+		#define MANT_GEN			CONCAT2(GEN_,MANT_TCC)
+		#define MANT_GEN_CLK		CONCAT2(CLK_,MANT_TCC) 
+		#define MANT_IRQ			CONCAT2(MANT_TCC,_0_IRQ)
+		#define GCLK_MANT			CONCAT2(GCLK_,MANT_TCC)
+		#define PID_MANT			CONCAT2(PID_,MANT_TCC)
+	
+		#if (MANT_GEN_CLK > 100000000)
+				#define MANT_PRESC_NUM		64
+		#elif (MANT_GEN_CLK > 50000000)
+				#define MANT_PRESC_NUM		16
+		#elif (MANT_GEN_CLK > 20000000)
+				#define MANT_PRESC_NUM		8
+		#elif (MANT_GEN_CLK > 10000000)
+				#define MANT_PRESC_NUM		4
+		#elif (MANT_GEN_CLK > 5000000)
+				#define MANT_PRESC_NUM		2
+		#else
+				#define MANT_PRESC_NUM		1
+		#endif
+
+		#define MANT_PRESC_DIV		CONCAT2(TCC_PRESCALER_DIV,MANT_PRESC_NUM)
+		#define US2MT(v)			(((v)*(MANT_GEN_CLK/MANT_PRESC_NUM)+500000)/1000000)
+
+		#define ManResetTransmit()		{ MNTTCC->CTRLA = TC_SWRST; while(MNTTCC->SYNCBUSY); }
+		#define ManDisableTransmit()	{ MNTTCC->CTRLA = 0; MNTTCC->INTENCLR = ~0; }
+		#define ManEndIRQ()				{ MNTTCC->INTFLAG = ~0; }
+
+	#else
+		#error  Must defined MANT_TC or MANT_TCC
+	#endif
+	
+	#define BAUD2CLK(x)			((u32)(MANT_GEN_CLK/MANT_PRESC_NUM/(x)+0.5))
+
+	inline void MANTT_ClockEnable()  { HW::GCLK->PCHCTRL[GCLK_MANT] = MANT_GEN|GCLK_CHEN; HW::MCLK->ClockEnable(PID_MANT); }
+
+#elif defined(CPU_XMC48) //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+		#define ManResetTransmit()		
+		#define ManEndIRQ()				
+		inline void ManDisableTransmit()
+		{ 
+			HW::SCU_GENERAL->CCUCON &= ~ManT_CCUCON; 
+			ManT1->INTE = 0; 
+			ManT1->TCCLR = ManT2->TCCLR = ManT3->TCCLR = CC8_TRBC; 
+			ManT_CCU8->GCSS = ManT_OUT_GCSS;	
+			ManT_CCU8->GCSC = ManT_OUT_GCSC; 
+		}
+
+#endif	// #elif defined(CPU_XMC48)
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#ifdef MAN_TRANSMIT_V1
+
+	inline void ManDisable()	{ PIO_MANCH->CLR(L1|L2);	PIO_MANCH->SET(H1|H2);							} 
+	inline void ManZero()		{ PIO_MANCH->CLR(L2);		PIO_MANCH->SET(L1|H1);		PIO_MANCH->CLR(H2);	} 
+	inline void ManOne()		{ PIO_MANCH->CLR(L1);		PIO_MANCH->SET(L2|H2);		PIO_MANCH->CLR(H1);	} 
+	inline void ManDischarge()	{ PIO_MANCH->CLR(L1|L2);	PIO_MANCH->CLR(H1|H2);							} 
+
+#else	// #ifdef MAN_TRANSMIT_V1
+
+	//#define MANT_IRQ_2			TCC2_IRQ
+
+	#define ManT_SET_PR(v)			{ MNTTCC->PERBUF = (v); }
+	#define ManT_SET_CR(v)			{ MNTTCC->CCBUF[L1_WO_NUM] = (v); MNTTCC->CCBUF[L2_WO_NUM] = (v); }
+	#define ManT_SHADOW_SYNC()			
+
+	static u16 trmHalfPeriod = (BAUD2CLK(20833)+1)/2;
+	static u16 trmHalfPeriod2 = BAUD2CLK(20833);
+	static u16 trmHalfPeriod3 = (BAUD2CLK(20833)*3+1)/2;
+	static u16 trmHalfPeriod4 = BAUD2CLK(20833) * 2;
+	static u16 trmHalfPeriod6 = BAUD2CLK(20833) * 3;
+	static u16 trmHalfPeriod7 = (BAUD2CLK(20833) * 7 + 1) / 2;
+
+#endif	// #else	// #ifdef MAN_TRANSMIT_V1
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #ifndef WIN32
 
-inline void ManDisable()	{ PIO_MANCH->CLR(L1|L2);	PIO_MANCH->SET(H1|H2);							} 
-inline void ManZero()		{ PIO_MANCH->CLR(L2);		PIO_MANCH->SET(L1|H1);		PIO_MANCH->CLR(H2);	} 
-inline void ManOne()		{ PIO_MANCH->CLR(L1);		PIO_MANCH->SET(L2|H2);		PIO_MANCH->CLR(H1);	} 
-inline void ManDischarge()	{ PIO_MANCH->CLR(L1|L2);	PIO_MANCH->CLR(H1|H2);							} 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 static const u16 manbaud[5] = { BAUD2CLK(20833), BAUD2CLK(41666), BAUD2CLK(62500), BAUD2CLK(83333), BAUD2CLK(104166) };//0:20833Hz, 1:41666Hz,2:62500Hz,3:83333Hz
 
-static u16 trmHalfPeriod = (manbaud[0]+1)/2;
-static u16 trmHalfPeriod2 = manbaud[0];
-static u16 trmHalfPeriod3 = (manbaud[0]*3+1)/2;
-static u16 trmHalfPeriod4 = manbaud[0] * 2;
-static u16 trmHalfPeriod6 = manbaud[0] * 3;
-static u16 trmHalfPeriod7 = (manbaud[0] * 7 + 1) / 2;
 
 #endif 
 
@@ -74,6 +179,10 @@ inline u16 CheckParity(u16 x)
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #ifndef WIN32
+
+#pragma push
+#pragma O3
+#pragma Otime
 
 static __irq void ManTrmIRQ()
 {
@@ -197,8 +306,7 @@ static __irq void ManTrmIRQ()
 			stateManTrans = 0;
 
 			#ifdef CPU_SAME53	
-				MNTTC->CTRLA = 0;
-				MNTTC->INTENCLR = ~0;
+				ManDisableTransmit();
 			#elif defined(CPU_XMC48)
 				ManTT->TCCLR = CC4_TRBC;
 			#endif
@@ -212,12 +320,12 @@ static __irq void ManTrmIRQ()
 	}; // 	switch (stateManTrans)
 
 
-	#ifdef CPU_SAME53	
-		MNTTC->INTFLAG = ~0;//TCC_OVF;
-	#endif
+	ManEndIRQ();
 
 	Pin_ManTrmIRQ_Clr();
 }
+
+#pragma pop
 
 #endif
 
@@ -241,6 +349,7 @@ bool SendManData(MTB *mtb)
 	#ifdef CPU_SAME53	
 
 
+#ifdef MNTTC
 		MNTTC->CTRLA = TC_MODE_COUNT8|MANT_PRESC_DIV;
 		MNTTC->WAVE = TC_WAVEGEN_NPWM;
 		MNTTC->PER8 = GetTrmBaudRate(mtb->baud) - 1; //trmHalfPeriod-1;
@@ -252,17 +361,20 @@ bool SendManData(MTB *mtb)
 
 		MNTTC->CTRLA |= TC_ENABLE;
 		MNTTC->CTRLBSET = TC_CMD_RETRIGGER;
+#else
 
-		//ManTT->CTRLA = 0;
+		MNTTCC->CTRLA = MANT_PRESC_DIV;
+		MNTTCC->WAVE = TCC_WAVEGEN_NPWM;
 
-		//ManTT->PER = trmHalfPeriod-1;
+		MNTTCC->PER = GetTrmBaudRate(mtb->baud) - 1;
 
-		//ManTT->INTENCLR = ~TCC_OVF;
-		//ManTT->INTENSET = TCC_OVF;
+		MNTTCC->INTENCLR = ~TCC_OVF;
+		MNTTCC->INTENSET = TCC_OVF;
 
-		//ManTT->INTFLAG = ~0;
+		MNTTCC->INTFLAG = ~0;
 
-		//ManTT->CTRLA = TCC_ENABLE;
+		MNTTCC->CTRLA |= TCC_ENABLE;
+#endif
 
 	#elif defined(CPU_XMC48)
 
@@ -307,20 +419,7 @@ void InitManTransmit()
 
 	PIO_MANCH->DIRSET = L1|H1|L2|H2;
 
-	MNTTC->CTRLA = TC_SWRST;
-
-	while(MNTTC->SYNCBUSY);
-
-	//SetTrmBoudRate(0);
-
-	MNTTC->CTRLA = TC_MODE_COUNT8|MANT_PRESC_DIV;
-	MNTTC->WAVE = TC_WAVEGEN_NPWM;
-	MNTTC->PER8 = GetTrmBaudRate(0) - 1;
-
-	MNTTC->INTENCLR = ~TC_OVF;
-	MNTTC->INTENSET = TC_OVF;
-
-	MNTTC->INTFLAG = ~0;
+	ManResetTransmit();
 
 #elif defined(CPU_XMC48)
 
@@ -353,6 +452,10 @@ void InitManTransmit()
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #ifndef WIN32
+
+#pragma push
+#pragma O3
+#pragma Otime
 
 static __irq void ManTrmIRQ2()
 {
@@ -526,22 +629,8 @@ static __irq void ManTrmIRQ2()
 
 			stateManTrans = 0;
 
-#ifdef CPU_SAME53	
+			ManDisableTransmit();
 
-#elif defined(CPU_XMC48)
-
-			HW::SCU_GENERAL->CCUCON &= ~ManT_CCUCON;
-
-
-			ManT1->TCCLR = CC8_TRBC;
-			ManT1->INTE = 0;
-			ManT2->TCCLR = CC8_TRBC;
-			ManT3->TCCLR = CC8_TRBC;
-
-			ManT_CCU8->GCSS = ManT_OUT_GCSS;
-			ManT_CCU8->GCSC = ManT_OUT_GCSC;
-			//ManT_CCU8->GIDLS = ManT_CCU8_GIDLS;
-#endif
 			manTB->ready = true;
 			trmBusy = false;
 
@@ -550,112 +639,114 @@ static __irq void ManTrmIRQ2()
 
 	}; // 	switch (stateManTrans)
 
+	ManEndIRQ();
 
 	Pin_ManTrmIRQ_Clr();
 }
+
+#pragma pop
 
 #endif
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 bool SendManData(MTB* mtb)
 {
-#ifndef WIN32
-	if (trmBusy || rcvBusy || mtb == 0 || mtb->data1 == 0 || mtb->len1 == 0)
-	{
-		return false;
-	};
+	#ifndef WIN32
 
-	mtb->ready = false;
+		if (trmBusy || rcvBusy || mtb == 0 || mtb->data1 == 0 || mtb->len1 == 0)
+		{
+			return false;
+		};
 
-	manTB = mtb;
+		mtb->ready = false;
 
-	trmHalfPeriod = GetTrmBaudRate(mtb->baud);
-	trmHalfPeriod2 = trmHalfPeriod * 2 - 1;
-	trmHalfPeriod3 = trmHalfPeriod * 3 - 1;
-	trmHalfPeriod4 = trmHalfPeriod * 4 - 1;
-	trmHalfPeriod6 = trmHalfPeriod * 6 - 1;
-	trmHalfPeriod7 = trmHalfPeriod * 7 - 1;
+		manTB = mtb;
 
-	stateManTrans = 0;
+		trmHalfPeriod = GetTrmBaudRate(mtb->baud);
+		trmHalfPeriod2 = trmHalfPeriod * 2 - 1;
+		trmHalfPeriod3 = trmHalfPeriod * 3 - 1;
+		trmHalfPeriod4 = trmHalfPeriod * 4 - 1;
+		trmHalfPeriod6 = trmHalfPeriod * 6 - 1;
+		trmHalfPeriod7 = trmHalfPeriod * 7 - 1;
 
-#ifdef CPU_SAME53	
+		stateManTrans = 0;
 
+		#ifdef CPU_SAME53	
 
-	MNTTC->CTRLA = TC_MODE_COUNT8|MANT_PRESC_DIV;
-	MNTTC->WAVE = TC_WAVEGEN_NPWM;
-	MNTTC->PER8 = GetTrmBaudRate(mtb->baud) - 1; //trmHalfPeriod-1;
+			MNTTCC->CTRLA = MANT_PRESC_DIV;
+			MNTTCC->WAVE = TCC_WAVEGEN_NPWM;//|TCC_POL0;
+			MNTTCC->DRVCTRL = TCC_INVEN0 << L2_WO_NUM;
 
-	MNTTC->INTENCLR = ~TC_OVF;
-	MNTTC->INTENSET = TC_OVF;
+			MNTTCC->PER = US2MT(50)-1;
+			MNTTCC->CC[L1_WO_NUM] = 0; 
+			MNTTCC->CC[L2_WO_NUM] = ~0; 
 
-	MNTTC->INTFLAG = ~0;
+			MNTTCC->EVCTRL = 0;
 
-	MNTTC->CTRLA |= TC_ENABLE;
-	MNTTC->CTRLBSET = TC_CMD_RETRIGGER;
+			MNTTCC->INTENCLR = ~0;
+			MNTTCC->INTENSET = TCC_OVF;
+			MNTTCC->INTFLAG = TCC_OVF;
 
-	//ManTT->CTRLA = 0;
+			MNTTCC->CTRLA |= TCC_ENABLE;
+			MNTTCC->CTRLBSET = TCC_CMD_RETRIGGER;
 
-	//ManTT->PER = trmHalfPeriod-1;
+			PIO_MANCH->SetWRCONFIG(L1|L2, MANCH_PMUX|PORT_WRPMUX|PORT_WRPINCFG|PORT_PMUXEN);
+			PIO_MANCH->CLR(L1|L2);
+			PIO_MANCH->DIRSET = L1|L2;
 
-	//ManTT->INTENCLR = ~TCC_OVF;
-	//ManTT->INTENSET = TCC_OVF;
+		#elif defined(CPU_XMC48)
 
-	//ManTT->INTFLAG = ~0;
+			ManT_SET_PR(US2MT(50)-1); //trmHalfPeriod - 1;
+			ManT1->CR2S = (~0); ManT2->CR1S = (0); ManT2->CR2S = (0); ManT3->CR1S = (~0);
 
-	//ManTT->CTRLA = TCC_ENABLE;
+			ManT1->PSC = ManRT_PSC; //0.08us
+			ManT2->PSC = ManRT_PSC; //0.08us
+			ManT3->PSC = ManRT_PSC; //0.08us
 
-#elif defined(CPU_XMC48)
+			//ManT1->PSL = ManT1_PSL;
+			//ManT2->PSL = ManT2_PSL;
+			//ManT3->PSL = ManT3_PSL;
 
-	ManT_SET_PR(US2MT(50)-1); //trmHalfPeriod - 1;
-	ManT1->CR2S = (~0); ManT2->CR1S = (0); ManT2->CR2S = (0); ManT3->CR1S = (~0);
+			ManT1->INS = CC8_EV0IS(7) | CC4_EV0EM_RISING_EDGE;
+			ManT2->INS = CC8_EV0IS(7) | CC4_EV0EM_RISING_EDGE;
+			ManT3->INS = CC8_EV0IS(7) | CC4_EV0EM_RISING_EDGE;
 
-	ManT1->PSC = ManRT_PSC; //0.08us
-	ManT2->PSC = ManRT_PSC; //0.08us
-	ManT3->PSC = ManRT_PSC; //0.08us
+			ManT1->CMC = CC4_STRTS_EVENT0;
+			ManT2->CMC = CC4_STRTS_EVENT0;
+			ManT3->CMC = CC4_STRTS_EVENT0;
+			
+			ManT1->TC = CC8_STRM;
+			ManT2->TC = CC8_STRM;
+			ManT3->TC = CC8_STRM;
 
-	//ManT1->PSL = ManT1_PSL;
-	//ManT2->PSL = ManT2_PSL;
-	//ManT3->PSL = ManT3_PSL;
+			ManT1->SWR = ~0;
+			ManT2->SWR = ~0;
+			ManT3->SWR = ~0;
 
-	ManT1->INS = CC8_EV0IS(7) | CC4_EV0EM_RISING_EDGE;
-	ManT2->INS = CC8_EV0IS(7) | CC4_EV0EM_RISING_EDGE;
-	ManT3->INS = CC8_EV0IS(7) | CC4_EV0EM_RISING_EDGE;
+			ManT1->CHC = ManT1_CHC;
+			ManT2->CHC = ManT2_CHC;
+			ManT3->CHC = ManT3_CHC;
 
-	ManT1->CMC = CC4_STRTS_EVENT0;
-	ManT2->CMC = CC4_STRTS_EVENT0;
-	ManT3->CMC = CC4_STRTS_EVENT0;
-	
-	ManT1->TC = CC8_STRM;
-	ManT2->TC = CC8_STRM;
-	ManT3->TC = CC8_STRM;
+			ManT1->INTE = CC8_PME;
+			ManT2->INTE = 0;
+			ManT3->INTE = 0;
 
-	ManT1->SWR = ~0;
-	ManT2->SWR = ~0;
-	ManT3->SWR = ~0;
+			ManT_CCU8->GCSS = ManT_CCU8_GCSS;
+			ManT_CCU8->GIDLC = ManT_CCU8_GIDLC;
 
-	ManT1->CHC = ManT1_CHC;
-	ManT2->CHC = ManT2_CHC;
-	ManT3->CHC = ManT3_CHC;
+			HW::SCU_GENERAL->CCUCON |= ManT_CCUCON;
 
-	ManT1->INTE = CC8_PME;
-	ManT2->INTE = 0;
-	ManT3->INTE = 0;
+		#endif
 
-	ManT_CCU8->GCSS = ManT_CCU8_GCSS;
-	ManT_CCU8->GIDLC = ManT_CCU8_GIDLC;
+		return trmBusy = true;
 
-	HW::SCU_GENERAL->CCUCON |= ManT_CCUCON;
+	#else
 
-#endif
+		mtb->ready = true;
 
-	return trmBusy = true;
-#else
+		return true;
 
-	mtb->ready = true;
-
-	return true;
-
-#endif
+	#endif
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -669,24 +760,18 @@ void InitManTransmit()
 
 #ifdef CPU_SAME53	
 
+	VectorTableExt[MANT_IRQ] = ManTrmIRQ2;
+	CM4::NVIC->CLR_PR(MANT_IRQ);
+	CM4::NVIC->SET_ER(MANT_IRQ);
+
 	MANTT_ClockEnable();
 
 	PIO_MANCH->DIRSET = L1|H1|L2|H2;
+	PIO_MANCH->CLR(L1|L2);
+	PIO_MANCH->SET(H1|H2);
+	PIO_MANCH->SetWRCONFIG(L1|L2, PORT_WRPINCFG);
 
-	MNTTC->CTRLA = TCC_SWRST;
-
-	while(MNTTC->SYNCBUSY);
-
-	//SetTrmBoudRate(0);
-
-	MNTTC->CTRLA = TC_MODE_COUNT8|MANT_PRESC_DIV;
-	MNTTC->WAVE = TC_WAVEGEN_NPWM;
-	MNTTC->PER8 = GetTrmBaudRate(0) - 1;
-
-	MNTTC->INTENCLR = ~TC_OVF;
-	MNTTC->INTENSET = TC_OVF;
-
-	MNTTC->INTFLAG = ~0;
+	ManResetTransmit();
 
 #elif defined(CPU_XMC48)
 
@@ -753,8 +838,74 @@ void InitManTransmit()
 
 #endif // #else // #ifdef MAN_TRANSMIT_V1
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// ++++++++++++++	MANCH RECIEVER	++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#ifdef CPU_SAME53	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	#define MANR_GEN			CONCAT2(GEN_,MANR_TCC)
+	#define MANR_GEN_CLK		CONCAT2(CLK_,MANR_TCC) 
+	#define MANR_IRQ			CONCAT2(MANR_TCC,_1_IRQ)
+
+	#if (MANR_GEN_CLK > 100000000)
+			#define MANR_PRESC_NUM		64
+	#elif (MANR_GEN_CLK > 50000000)
+			#define MANR_PRESC_NUM		16
+	#elif (MANR_GEN_CLK > 20000000)
+			#define MANR_PRESC_NUM		8
+	#elif (MANR_GEN_CLK > 10000000)
+			#define MANR_PRESC_NUM		4
+	#elif (MANR_GEN_CLK > 5000000)
+			#define MANR_PRESC_NUM		2
+	#else
+			#define MANR_PRESC_NUM		1
+	#endif
+
+	#define MANR_PRESC_DIV		CONCAT2(TCC_PRESCALER_DIV,MANR_PRESC_NUM)
+	#define US2MR(v)			(((v)*(MANR_GEN_CLK/MANR_PRESC_NUM)+500000)/1000000)
+
+	#define MANI_GEN			CONCAT2(GEN_,MANI_TC)
+	#define MANI_GEN_CLK		CONCAT2(CLK_,MANI_TC) 
+
+	#if (MANI_GEN_CLK > 100000000)
+			#define MANI_PRESC_NUM		64
+	#elif (MANI_GEN_CLK > 50000000)
+			#define MANI_PRESC_NUM		16
+	#elif (MANI_GEN_CLK > 20000000)
+			#define MANI_PRESC_NUM		8
+	#elif (MANI_GEN_CLK > 10000000)
+			#define MANI_PRESC_NUM		4
+	#elif (MANI_GEN_CLK > 5000000)
+			#define MANI_PRESC_NUM		2
+	#else
+			#define MANI_PRESC_NUM		1
+	#endif
+
+	#define MANI_PRESC_DIV		CONCAT2(TC_PRESCALER_DIV,MANI_PRESC_NUM)
+	#define US2MI(v)			(((v)*(MANI_GEN_CLK/MANI_PRESC_NUM)+500000)/1000000)
+
+	#define MANIT_EVSYS_USER	CONCAT3(EVSYS_USER_, MANI_TC, _EVU)
+	#define MANRT_EVENT_GEN		CONCAT3(EVGEN_, MANI_TC, _OVF)
+	#define MANRT_EVSYS_USER	CONCAT3(EVSYS_USER_,MANR_TCC,_MC_0)
+
+	#define MNITC				HW::MANI_TC
+	#define MNRTCC				HW::MANR_TCC
+
+	#define MANR_EXTINT			(PIN_RXD&15)
+
+	inline void MANRT_ClockEnable()  { HW::GCLK->PCHCTRL[CONCAT2(GCLK_,MANR_TCC)]	= MANR_GEN|GCLK_CHEN; HW::MCLK->ClockEnable(CONCAT2(PID_,MANR_TCC)); }
+	inline void MANIT_ClockEnable()  { HW::GCLK->PCHCTRL[CONCAT2(GCLK_,MANI_TC)]	= MANI_GEN|GCLK_CHEN; HW::MCLK->ClockEnable(CONCAT2(PID_,MANI_TC)); }
+
+#elif defined(CPU_XMC48)	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+#endif	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 //static u16 rcvCount = 0;
 byte stateManRcvr = 0;
@@ -771,7 +922,9 @@ static MRB *manRB = 0;
 static u16 rcvManLen12 = 0;
 static u32 rcvManSum12 = 0;
 static u16 rcvManCount12 = 0;
+//u32 rcvManMax12 = 0;
 u16 rcvManQuality = 0;
+static RTM manRcvTime;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -788,18 +941,19 @@ static void ManRcvEnd(bool ok)
 	manRB->len = rcvManLen;
 
 	rcvManLen12 = (rcvManCount12 != 0) ? (rcvManSum12 / rcvManCount12) : 0;
-
 	rcvManQuality = (rcvManLen12 > US2MR(12)) ? 0 : (((US2MR(12) - rcvManLen12) * 100 + US2MR(6))/US2MR(12));
+	
+	//rcvManQuality = (rcvManMax12 > US2MR(12)) ? 0 : (((US2MR(12) - rcvManMax12) * 100 + US2MR(6))/US2MR(12));
 
 	rcvBusy = false;
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-static RTM manRcvTime;
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #ifndef WIN32
+
+#pragma push
+#pragma O3
+#pragma Otime
 
 static __irq void ManRcvIRQ2()
 {
@@ -938,6 +1092,9 @@ static __irq void ManRcvIRQ2()
 
 	Pin_ManRcvIRQ_Clr();
 }
+
+#pragma pop
+
 #endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -996,13 +1153,13 @@ void InitManRecieve()
 	EVSYS->CH[EVENT_MANR_2].CHANNEL = MANRT_EVENT_GEN|EVSYS_PATH_ASYNCHRONOUS|EVSYS_EDGSEL_RISING_EDGE;;
 	EVSYS->USER[MANRT_EVSYS_USER] = EVENT_MANR_2+1;
 
-	PIO_MANCHRX->DIRCLR = MANCHRX;
-	PIO_MANCHRX->CTRL |= MANCHRX;
+	//PIO_MANCHRX->DIRCLR = MANCHRX;
+	//PIO_MANCHRX->CTRL |= MANCHRX;
 
 	PIO_RXD->DIRCLR = RXD;
 	PIO_RXD->CTRL |= RXD;
 
-	PIO_MANCHRX->SetWRCONFIG(	MANCHRX,	PORT_PMUX_A|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_INEN);
+	//PIO_MANCHRX->SetWRCONFIG(	MANCHRX,	PORT_PMUX_A|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_INEN);
 	PIO_RXD->SetWRCONFIG(		RXD,		PORT_PMUX_A|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_INEN);
 
 	MNRTCC->CTRLA = TCC_SWRST;
