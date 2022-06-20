@@ -63,8 +63,11 @@ class USIC // Universal Serial Interface Channel
 
 		bool Usic_Connect(byte num);
 		void Usic_Update();
+		void Usic_Lock()	{ _busy_mask |= _usic_mask; }
+		void Usic_Unlock()	{ _busy_mask &= ~_usic_mask; }
 
 		void RequestReset() { _req_reset_mask |= _usic_mask; }
+		bool CheckReset()	{ return _req_reset_mask & _usic_mask; }
 
 		virtual void InitHW() {}
 };

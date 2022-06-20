@@ -1518,6 +1518,12 @@ namespace T_HW
 	#define TCC_SWAP2           	(1<<26)           /**< \brief (TCC_WAVE) Swap DTI Output Pair 2 */
 	#define TCC_SWAP3           	(1<<27)           /**< \brief (TCC_WAVE) Swap DTI Output Pair 3 */
 
+	#define TCC0_CC_NUM				6
+	#define TCC1_CC_NUM				4
+	#define TCC2_CC_NUM				3
+	#define TCC3_CC_NUM				2
+	#define TCC4_CC_NUM				2
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	struct S_EIC

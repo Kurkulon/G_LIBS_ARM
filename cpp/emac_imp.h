@@ -920,7 +920,7 @@ bool InitEMAC()
 {
 #ifndef WIN32
 
-	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_CYAN "Init EMAC ... ");
+	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_GREEN "Init EMAC ... ");
 
 	using namespace HW;
 	

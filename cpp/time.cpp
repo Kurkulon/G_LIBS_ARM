@@ -222,9 +222,37 @@ void InitTimer(u32 cpuclk)
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+static void InitCycleCountTimer()
+{
+#ifndef WIN32
+
+	CM4::CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+
+	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_WHITE "Cycle Count Timer Init ... ");
+
+	__dsb(15);
+
+	if ((CM4::DWT->CTRL & DWT_CTRL_NOCYCCNT_Msk) == 0)
+	{
+		CM4::DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
+		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_GREEN "OK\n");
+	}
+	else
+	{
+		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_RED "!!! ERROR !!! Cycle counter not supported\n");
+	};
+
+#endif
+
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 void Init_time(u32 cpuclk)
 {
 	InitTimer(cpuclk);
+	InitCycleCountTimer();
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

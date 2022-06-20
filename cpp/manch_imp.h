@@ -16,12 +16,12 @@
 
 	#if defined(MANT_TC) && defined(MAN_TRANSMIT_V1)
 
-		#define MNTTC				HW::MANT_TC
-		#define MANT_GEN			CONCAT2(GEN_,MANT_TC)
-		#define MANT_GEN_CLK		CONCAT2(CLK_,MANT_TC) 
-		#define MANT_IRQ			CONCAT2(MANT_TC,_IRQ)
-		#define GCLK_MANT			CONCAT2(GCLK_,MANT_TC)
-		#define PID_MANT			CONCAT2(PID_,MANT_TC)
+		#define MNTTC						HW::MANT_TC
+		#define MANT_GEN					CONCAT2(GEN_,MANT_TC)
+		#define MANT_GEN_CLK				CONCAT2(CLK_,MANT_TC) 
+		#define MANT_IRQ					CONCAT2(MANT_TC,_IRQ)
+		#define GCLK_MANT					CONCAT2(GCLK_,MANT_TC)
+		#define PID_MANT					CONCAT2(PID_,MANT_TC)
 
 		#if (MANT_GEN_CLK > 100000000)
 				#define MANT_PRESC_NUM		64
@@ -37,19 +37,20 @@
 				#define MANT_PRESC_NUM		1
 		#endif
 
-		#define MANT_PRESC_DIV		CONCAT2(TC_PRESCALER_DIV,MANT_PRESC_NUM)
+		#define MANT_PRESC_DIV				CONCAT2(TC_PRESCALER_DIV,MANT_PRESC_NUM)
 
-		#define ManResetTransmit()		{ MNTTC->CTRLA = TC_SWRST; while(MNTTC->SYNCBUSY); }
-		#define ManDisableTransmit()	{ MNTTC->CTRLA = 0; MNTTC->INTENCLR = ~0; }
-		#define ManEndIRQ()				{ MNTTC->INTFLAG = ~0; }
+		#define ManResetTransmit()			{ MNTTC->CTRLA = TC_SWRST; while(MNTTC->SYNCBUSY); }
+		#define ManDisableTransmit()		{ MNTTC->CTRLA = 0; MNTTC->INTENCLR = ~0; }
+		#define ManEndIRQ()					{ MNTTC->INTFLAG = ~0; }
 
 	#elif defined(MANT_TCC)
-		#define MNTTCC				HW::MANT_TCC
-		#define MANT_GEN			CONCAT2(GEN_,MANT_TCC)
-		#define MANT_GEN_CLK		CONCAT2(CLK_,MANT_TCC) 
-		#define MANT_IRQ			CONCAT2(MANT_TCC,_0_IRQ)
-		#define GCLK_MANT			CONCAT2(GCLK_,MANT_TCC)
-		#define PID_MANT			CONCAT2(PID_,MANT_TCC)
+
+		#define MNTTCC						HW::MANT_TCC
+		#define MANT_GEN					CONCAT2(GEN_,MANT_TCC)
+		#define MANT_GEN_CLK				CONCAT2(CLK_,MANT_TCC) 
+		#define MANT_IRQ					CONCAT2(MANT_TCC,_0_IRQ)
+		#define GCLK_MANT					CONCAT2(GCLK_,MANT_TCC)
+		#define PID_MANT					CONCAT2(PID_,MANT_TCC)
 	
 		#if (MANT_GEN_CLK > 100000000)
 				#define MANT_PRESC_NUM		64
@@ -65,20 +66,25 @@
 				#define MANT_PRESC_NUM		1
 		#endif
 
-		#define MANT_PRESC_DIV		CONCAT2(TCC_PRESCALER_DIV,MANT_PRESC_NUM)
-		#define US2MT(v)			(((v)*(MANT_GEN_CLK/MANT_PRESC_NUM)+500000)/1000000)
+		#define MANT_PRESC_DIV				CONCAT2(TCC_PRESCALER_DIV,MANT_PRESC_NUM)
+		#define US2MT(v)					(((v)*(MANT_GEN_CLK/MANT_PRESC_NUM)+500000)/1000000)
 
-		#define ManResetTransmit()		{ MNTTCC->CTRLA = TC_SWRST; while(MNTTCC->SYNCBUSY); }
-		#define ManDisableTransmit()	{ MNTTCC->CTRLA = 0; MNTTCC->INTENCLR = ~0; }
-		#define ManEndIRQ()				{ MNTTCC->INTFLAG = ~0; }
+		#define ManResetTransmit()			{ MNTTCC->CTRLA = TC_SWRST; while(MNTTCC->SYNCBUSY); }
+		#define ManDisableTransmit()		{ MNTTCC->CTRLA = 0; MNTTCC->INTENCLR = ~0; }
+		#define ManEndIRQ()					{ MNTTCC->INTFLAG = ~0; }
+
+		#define MANT_CC_NUM					CONCAT2(MANT_TCC,_CC_NUM)
+
+		#define L1_CC_NUM					(L1_WO_NUM % MANT_CC_NUM)
+		#define L2_CC_NUM					(L2_WO_NUM % MANT_CC_NUM)
 
 	#else
 		#error  Must defined MANT_TC or MANT_TCC
 	#endif
 	
-	#define BAUD2CLK(x)			((u32)(MANT_GEN_CLK/MANT_PRESC_NUM/(x)+0.5))
+	#define BAUD2CLK(x)						((u32)(MANT_GEN_CLK/MANT_PRESC_NUM/(x)+0.5))
 
-	inline void MANTT_ClockEnable()  { HW::GCLK->PCHCTRL[GCLK_MANT] = MANT_GEN|GCLK_CHEN; HW::MCLK->ClockEnable(PID_MANT); }
+	inline void MANTT_ClockEnable()			{ HW::GCLK->PCHCTRL[GCLK_MANT] = MANT_GEN|GCLK_CHEN; HW::MCLK->ClockEnable(PID_MANT); }
 
 #elif defined(CPU_XMC48) //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -109,7 +115,7 @@
 	//#define MANT_IRQ_2			TCC2_IRQ
 
 	#define ManT_SET_PR(v)			{ MNTTCC->PERBUF = (v); }
-	#define ManT_SET_CR(v)			{ MNTTCC->CCBUF[L1_WO_NUM] = (v); MNTTCC->CCBUF[L2_WO_NUM] = (v); }
+	#define ManT_SET_CR(v)			{ MNTTCC->CCBUF[L1_CC_NUM] = (v); MNTTCC->CCBUF[L2_CC_NUM] = (v); }
 	#define ManT_SHADOW_SYNC()			
 
 	static u16 trmHalfPeriod = (BAUD2CLK(20833)+1)/2;
@@ -678,8 +684,8 @@ bool SendManData(MTB* mtb)
 			MNTTCC->DRVCTRL = TCC_INVEN0 << L2_WO_NUM;
 
 			MNTTCC->PER = US2MT(50)-1;
-			MNTTCC->CC[L1_WO_NUM] = 0; 
-			MNTTCC->CC[L2_WO_NUM] = ~0; 
+			MNTTCC->CC[L1_CC_NUM] = 0; 
+			MNTTCC->CC[L2_CC_NUM] = ~0; 
 
 			MNTTCC->EVCTRL = 0;
 
@@ -756,7 +762,7 @@ void InitManTransmit()
 {
 	using namespace HW;
 
-	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_WHITE "Manchester transmit2 Init ... ");
+	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_WHITE "Manchester Transmiter Init ... ");
 
 #ifdef CPU_SAME53	
 

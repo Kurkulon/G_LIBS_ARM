@@ -62,15 +62,7 @@ void USIC::Usic_Update()
 {
 	if ((_req_reset_mask & _usic_mask) && !(_busy_mask & _usic_mask))
 	{
-		HW::MCLK->ClockEnable(_upid);
-
-		_uhw->CTRLA = I2C_SWRST;
-
-		while (_uhw->SYNCBUSY & I2C_SWRST);
-
 		InitHW();
-
-		_req_reset_mask &= ~_usic_mask;
 	};
 }
 

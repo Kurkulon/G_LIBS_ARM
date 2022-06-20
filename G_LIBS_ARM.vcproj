@@ -164,6 +164,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\i2c.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\PointerCRC.cpp"
 				>
 			</File>
