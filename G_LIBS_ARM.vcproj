@@ -180,6 +180,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\spi.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\tftp.cpp"
 				>
 			</File>
@@ -205,6 +209,14 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\cpp\at25df021.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\at25df021_imp.h"
+				>
+			</File>
 			<File
 				RelativePath=".\cpp\cm4.h"
 				>

@@ -15,7 +15,7 @@
 
 #define USIC_NUM 8
 
-typedef T_HW::S_I2C0 USICHWT;
+typedef T_HW::SERCOM USICHWT;
 
 #elif defined(CPU_XMC48)
 
@@ -42,7 +42,7 @@ class USIC // Universal Serial Interface Channel
 		static  const byte	_usic_pid[USIC_NUM];
 		static	USIC*		_usic[USIC_NUM];
 
-		static	USICHWT*	const _usic_hw[USIC_NUM];
+		static	USICHWT		const _usic_hw[USIC_NUM];
 
 #ifdef CPU_SAME53
 
@@ -55,7 +55,7 @@ class USIC // Universal Serial Interface Channel
 		u32					_usic_mask;
 
 		u32					_upid;
-		USICHWT*			_uhw;
+		USICHWT				_uhw;
 
 	public:
 

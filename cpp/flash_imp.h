@@ -3485,7 +3485,7 @@ static void LoadSessions()
 			{
 				c2 = false;
 			}
-			else
+			else if (nv2.timeStamp > nv1.timeStamp)
 			{
 				c1 = false;
 			};

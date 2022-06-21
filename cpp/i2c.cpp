@@ -15,7 +15,7 @@ void S_I2C::InitHW()
 	_PIO_SCL->SET(_MASK_SCL);
 	_PIO_SDA->SET(_MASK_SDA);
 
-	T_HW::S_I2C* i2c = _uhw;
+	T_HW::S_I2C* i2c = _uhw.i2c;
 
 	i2c->CTRLA = I2C_SWRST;
 
@@ -138,8 +138,6 @@ bool S_I2C::AddRequest(DSCI2C *d)
 	d->next = 0;
 	d->ready = false;
 
-	d->ready = false;
-
 	if (d->wdata2 == 0 || d->wlen2 == 0) d->wdata2 = 0, d->wlen2 = 0;
 
 	_reqList.Add(d);
@@ -165,7 +163,7 @@ bool S_I2C::Update()
 	//static u16	wrCount2 = 0;
 	//static byte adr = 0;
 
-	T_HW::S_I2C* &i2c = _uhw;
+	T_HW::S_I2C* &i2c = _uhw.i2c;
 
 	switch (_state)
 	{

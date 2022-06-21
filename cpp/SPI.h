@@ -24,7 +24,7 @@ struct DSCSPI
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class S_SPI : public USIC
+class S_SPIM : public USIC
 {
 protected:
 
@@ -63,7 +63,7 @@ protected:
 	List<DSCSPI>	_reqList;
 	DSCSPI*			_dsc;
 
-	enum STATE { WAIT = 0, WRITE, READ, STOP };
+	enum STATE { WAIT = 0, WRITE, STOP };
 
 	STATE _state;
 
@@ -72,7 +72,7 @@ protected:
 
 public:
 
-	S_SPI(T_HW::S_PORT* pspck, T_HW::S_PORT* pmosi, T_HW::S_PORT* pmiso, T_HW::S_PORT* pcs, 
+	S_SPIM(T_HW::S_PORT* pspck, T_HW::S_PORT* pmosi, T_HW::S_PORT* pmiso, T_HW::S_PORT* pcs, 
 		u32 mspck, u32 mmosi, u32 mmiso, 
 		u32 muxspck, u32 muxmosi, u32 muxmiso,
 		u32* mcs, u32 mcslen, u32 dipo, u32 dopo,

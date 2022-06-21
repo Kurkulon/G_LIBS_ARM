@@ -2615,6 +2615,19 @@ namespace T_HW
 	#define RSTC_BBPS   	(1<<2)   /**< (RSTC_BKUPEXIT) Battery Backup Power Switch Position */
 	#define RSTC_HIB    	(1<<7)   /**< (RSTC_BKUPEXIT) Hibernate Position */
 
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	union SERCOM
+	{
+		S_USART		*usart;
+		S_SPI		*spi;
+		S_I2C		*i2c;
+
+		SERCOM()			: usart(0)	{}
+		SERCOM(S_USART *p)	: usart(p)	{}
+		SERCOM(S_SPI *p)	: spi(p)	{}
+		SERCOM(S_I2C *p)	: i2c(p)	{}
+	};
 };
 
 
