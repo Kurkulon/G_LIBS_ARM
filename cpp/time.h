@@ -52,6 +52,8 @@ extern void GetTime(RTC *t);
 
 extern RTC timeBDC;
 
+inline u32 GetCYCCNT() { return CM4::DWT->CYCCNT; }
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 inline u32 GetMilliseconds()
@@ -86,6 +88,18 @@ struct TM32
 	bool Check(u32 v) { u32 t = GetMilliseconds(); if ((t - pt) >= v) { pt = t; return true; } else { return false; }; }
 	bool Timeout(u32 v) { return (GetMilliseconds() - pt) >= v; }
 	void Reset() { pt = GetMilliseconds(); }
+};
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+struct CTM32
+{
+	u32 pt;
+
+	//TM32() : pt(0) {}
+	bool Check(u32 v) { u32 t = GetCYCCNT(); if ((t - pt) >= v) { pt = t; return true; } else { return false; }; }
+	bool Timeout(u32 v) { return (GetCYCCNT() - pt) >= v; }
+	void Reset() { pt = GetCYCCNT(); }
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
