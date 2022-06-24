@@ -28,19 +28,13 @@ USICHWT*	const USIC::_uhw[USIC_NUM] = { HW_USIC0, HW_USIC1, HW_USIC2, HW_USIC3, 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool USIC::Usic_Connect(byte num)
+bool USIC::Usic_Connect()
 {
-	u32 mask = (1UL<<num);
+	if (_usic_num >= USIC_NUM || (_alloc_mask & _usic_mask) || _usic[_usic_num] != 0) return false;
 
-	if (num >= USIC_NUM || (_alloc_mask & mask) || _usic[num] != 0) return false;
-
-	_usic_mask = mask;
 	_alloc_mask |= _usic_mask;
 
-	_usic_num = num;
-
 	_usic[_usic_num] = this;
-	_upid = _usic_pid[_usic_num];
 	_uhw = _usic_hw[_usic_num];
 
 #ifdef CPU_SAME53
@@ -50,6 +44,14 @@ bool USIC::Usic_Connect(byte num)
 #endif
 
 	return true;
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void USIC::Usic_Disconnect()
+{
+	_alloc_mask &= ~_usic_mask;
+	_usic[_usic_num] = 0;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

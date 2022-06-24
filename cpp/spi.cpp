@@ -6,50 +6,56 @@
 
 void S_SPIM::InitHW()
 {
-	HW::GCLK->PCHCTRL[_ugclk] = GCLK_GEN(_GEN_SRC)|GCLK_CHEN;	// 25 MHz
+	#ifdef CPU_SAME53	
 
-	HW::MCLK->ClockEnable(_upid);
+		HW::GCLK->PCHCTRL[_ugclk] = GCLK_GEN(_GEN_SRC)|GCLK_CHEN;	// 25 MHz
+
+		HW::MCLK->ClockEnable(_upid);
+		
+		T_HW::S_SPI* spi = _uhw.spi;
+		
+		_PIO_SPCK->SetWRCONFIG(_MASK_SPCK, _PMUX_SPCK|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX);
+		_PIO_MOSI->SetWRCONFIG(_MASK_MOSI, _PMUX_MOSI|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX);
+		_PIO_MISO->SetWRCONFIG(_MASK_MISO, _PMUX_MISO|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX);
+		_PIO_CS->DIRSET = _MASK_CS_ALL; 
+		_PIO_CS->SetWRCONFIG(_MASK_CS_ALL, PORT_WRPINCFG|PORT_WRPMUX);
+		_PIO_CS->SET(_MASK_CS_ALL); 
+
+		spi->CTRLA = SPI_SWRST;
+
+		while(spi->SYNCBUSY);
+
+		spi->CTRLA = SERCOM_MODE_SPI_MASTER;
+
+		spi->CTRLA = SERCOM_MODE_SPI_MASTER|_DIPO|_DOPO;
+		spi->CTRLB = 0;
+		spi->CTRLC = 1;
+		spi->BAUD = _baud;
+
+		spi->DBGCTRL = 1;
+
+		spi->CTRLA |= SPI_ENABLE;
+
+		while(spi->SYNCBUSY);
+
+		spi->STATUS = ~0;
+
+	#elif defined(CPU_XMC48)
 	
-	T_HW::S_SPI* spi = _uhw.spi;
-	
-	_PIO_SPCK->SetWRCONFIG(_MASK_SPCK, _PMUX_SPCK|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX);
-	_PIO_MOSI->SetWRCONFIG(_MASK_MOSI, _PMUX_MOSI|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX);
-	_PIO_MISO->SetWRCONFIG(_MASK_MISO, _PMUX_MISO|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX);
-	_PIO_CS->DIRSET = _MASK_CS_ALL; 
-	_PIO_CS->SetWRCONFIG(_MASK_CS_ALL, PORT_WRPINCFG|PORT_WRPMUX);
-	_PIO_CS->SET(_MASK_CS_ALL); 
-
-	spi->CTRLA = SPI_SWRST;
-
-	while(spi->SYNCBUSY);
-
-	spi->CTRLA = SERCOM_MODE_SPI_MASTER;
-
-	spi->CTRLA = SERCOM_MODE_SPI_MASTER|_DIPO|_DOPO;
-	spi->CTRLB = 0;
-	spi->CTRLC = 1;
-	spi->BAUD = _baud;
-
-	spi->DBGCTRL = 1;
-
-	spi->CTRLA |= SPI_ENABLE;
-
-	while(spi->SYNCBUSY);
-
-	spi->STATUS = ~0;
+	#endif
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool S_SPIM::Connect(byte num, u32 baudrate)
+bool S_SPIM::Connect(u32 baudrate)
 {
 #ifndef WIN32
 
 	using namespace HW;
 
-	SEGGER_RTT_printf(0, RTT_CTRL_TEXT_BRIGHT_GREEN "SPI%u Init ... ", num);
+	SEGGER_RTT_printf(0, RTT_CTRL_TEXT_BRIGHT_GREEN "SPI%u Init ... ", _usic_num);
 
-	if (!Usic_Connect(num) || _MASK_CS == 0 || _MASK_CS_LEN == 0)
+	if (!Usic_Connect() || _MASK_CS == 0 || _MASK_CS_LEN == 0)
 	{
 		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_RED "!!! ERROR !!!\n");
 
@@ -167,7 +173,7 @@ bool S_SPIM::Update()
 {
 	bool result = false;
 
-	T_HW::S_SPI* &spi = _uhw.spi;
+	T_HW::S_SPI* spi = _uhw.spi;
 
 #ifdef CPU_SAME53
 

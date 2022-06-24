@@ -38,15 +38,15 @@ void S_I2C::InitHW()
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool S_I2C::Connect(byte num, u32 baudrate)
+bool S_I2C::Connect(u32 baudrate)
 {
 #ifndef WIN32
 
 	using namespace HW;
 
-	SEGGER_RTT_printf(0, RTT_CTRL_TEXT_BRIGHT_CYAN "I2C%u Init ... ", num);
+	SEGGER_RTT_printf(0, RTT_CTRL_TEXT_BRIGHT_CYAN "I2C%u Init ... ", _usic_num);
 
-	if (!Usic_Connect(num))
+	if (!Usic_Connect())
 	{
 		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_RED "!!! ERROR !!!\n");
 
@@ -163,7 +163,7 @@ bool S_I2C::Update()
 	//static u16	wrCount2 = 0;
 	//static byte adr = 0;
 
-	T_HW::S_I2C* &i2c = _uhw.i2c;
+	T_HW::S_I2C* i2c = _uhw.i2c;
 
 	switch (_state)
 	{

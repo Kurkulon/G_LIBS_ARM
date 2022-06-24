@@ -51,17 +51,18 @@ class USIC // Universal Serial Interface Channel
 		byte				_ugclk;
 
 #endif
-		byte				_usic_num;
-		u32					_usic_mask;
+		const byte			_usic_num;
+		const u32			_usic_mask;
 
-		u32					_upid;
+		const u32			_upid;
 		USICHWT				_uhw;
 
 	public:
 
-		USIC() : _usic_num(~0), _usic_mask(0) {}
+		USIC(byte num) : _usic_num(num), _usic_mask(1UL<<num), _upid(_usic_pid[num]) {}
 
-		bool Usic_Connect(byte num);
+		bool Usic_Connect();
+		void Usic_Disconnect();
 		void Usic_Update();
 		void Usic_Lock()	{ _busy_mask |= _usic_mask; }
 		void Usic_Unlock()	{ _busy_mask &= ~_usic_mask; }

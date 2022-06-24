@@ -222,6 +222,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\ComPort.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\ComPort_imp.h"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\core.h"
 				>
 			</File>
