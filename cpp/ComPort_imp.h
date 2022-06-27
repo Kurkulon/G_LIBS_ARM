@@ -486,9 +486,9 @@ void ComPort::EnableReceive(void* dst, word count)
 
 		//_chdma->CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|_dma_trgsrc_rx;
 
-		_uhw.usart->CTRLB = _CTRLB|USART_RXEN;
+		_DMA->ReadPeripheral(&_uhw.usart->DATA, dst, _prevDmaCounter = count, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_RX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
 
-		_DMA->ReadPeripheral(&_uhw.usart->DATA, dst, count, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_RX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
+		_uhw.usart->CTRLB = _CTRLB|USART_RXEN;
 
 		//_dmawrb->BTCNT = _prevDmaCounter = count;
 		//_dma_act_mask = 0x8000|(_dmaCh<<8);
@@ -644,7 +644,7 @@ bool ComPort::Update()
 
 			if (_prevDmaCounter == t)
 			{
-				if (_rtm.Timeout(_readTimeout) || _prevDmaCounter == 0)
+				if (_rtm.Timeout(_readTimeout))
 				{
 //					READ_PIN_CLR();
 

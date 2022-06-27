@@ -81,7 +81,7 @@ class ComPort : public USIC
 		u32 _CTRLB;
 		u32 _CTRLC;
 
-		bool IsTransmited() { return (_uhw.usart->INTFLAG & (USART_TXC|USART_DRE))/* && _DMA->CheckComplete()*/; }
+		bool IsTransmited() { return (_uhw.usart->INTFLAG & (USART_TXC|USART_DRE)) && _DMA->CheckComplete(); }
 		u32	GetDmaCounter() { return _DMA->GetBytesLeft(); }
 		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _prevDmaCounter; }
 
