@@ -1317,7 +1317,6 @@ namespace T_HW
 	#define USART_CPOL				(1<<29)		/**< \brief (SERCOM_USART_CTRLA) Clock Polarity */
 	#define USART_DORD				(1<<30)		/**< \brief (SERCOM_USART_CTRLA) Data Order */
 
-
 	#define USART_CHSIZE_8 			(0<<0)            /**< \brief (SERCOM_USART_CTRLB) Character Size */
 	#define USART_CHSIZE_9 			(1<<0)            /**< \brief (SERCOM_USART_CTRLB) Character Size */
 	#define USART_CHSIZE_5 			(5<<0)            /**< \brief (SERCOM_USART_CTRLB) Character Size */
@@ -1340,6 +1339,9 @@ namespace T_HW
 	#define USART_RXBRK  			(1<<5)            /**< \brief (SERCOM_USART_INTFLAG) Break Received Interrupt */
 	#define USART_ERROR  			(1<<7)            /**< \brief (SERCOM_USART_INTFLAG) Combined Error Interrupt */
 
+	#define USART_CTRLB				(1<<2)            /**< \brief (SERCOM_USART_SYNCBUSY) CTRLB Synchronization Busy */
+	#define USART_RXERRCNT			(1<<3)            /**< \brief (SERCOM_USART_SYNCBUSY) RXERRCNT Synchronization Busy */
+	#define USART_LENGTH			(1<<4)            /**< \brief (SERCOM_USART_SYNCBUSY) LENGTH Synchronization Busy */
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

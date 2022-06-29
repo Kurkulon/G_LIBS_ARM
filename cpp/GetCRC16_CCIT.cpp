@@ -33,7 +33,7 @@ word GetCRC16_CCIT_refl(const void *data, u32 len, word init)
 		CRC.w = tableCRC_CCIT[CRC.b[1] ^ *(s++)] ^ (CRC.w<<8);
 	};
 
-	return CRC.w;
+	return (CRC.w<<8)|(CRC.b[1]);
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

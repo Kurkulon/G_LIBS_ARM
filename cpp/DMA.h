@@ -72,7 +72,7 @@ public:
 
 	//void Enable() {  }
 	
-	void Disable() { _dmach->CTRLA = 0; while (_dmach->CTRLA & DMCH_ENABLE); _dmach->CTRLA = DMCH_SWRST; }
+	void Disable() { while (_dmach->CTRLA & DMCH_ENABLE) _dmach->CTRLA &= ~DMCH_ENABLE; /*_dmach->CTRLA = DMCH_SWRST;*/ }
 
 	bool CheckComplete() { if (_dmach->STATUS & DMCH_FERR) _dmach->CTRLB = DMCH_CMD_RESUME; return (_dmach->CTRLA & DMCH_ENABLE) == 0 /*|| (_dmach->INTFLAG & DMCH_TCMPL)*/; }
 	

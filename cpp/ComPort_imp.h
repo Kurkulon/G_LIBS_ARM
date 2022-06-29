@@ -169,6 +169,8 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 				break;
 		};
 
+		//_CTRLB |= USART_RXEN;
+
 		InitHW();
 
 	#elif defined(CPU_XMC48)
@@ -328,30 +330,14 @@ void ComPort::EnableTransmit(void* src, word count)
 
 	#ifdef CPU_SAME53	
 
-		//if (_chdma->CTRLA & DMCH_ENABLE)
-		//{
-		//	__breakpoint(0);
-		//};
-
-		//_chdma->CTRLA = 0;
-
-		//_dmadsc->SRCADDR = (byte*)src+count;
-		//_dmadsc->DSTADDR = &_SU->DATA;
-		//_dmadsc->DESCADDR = 0;
-		//_dmadsc->BTCNT = count;
-		//_dmadsc->BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_SRCINC;
-
-		//_chdma->INTENCLR = ~0;
-		//_chdma->INTFLAG = ~0;
-
-		//_chdma->CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|_dma_trgsrc_tx;
+		_status = 0;
 
 		_DMA->WritePeripheral(src, &_uhw.usart->DATA, count, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_TX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE); 
 
-		_uhw.usart->CTRLB = _CTRLB|USART_TXEN;
-		_uhw.usart->INTFLAG = USART_TXC;
+		//while (_uhw.usart->SYNCBUSY & USART_CTRLB);
 
-		//HW::DMAC->SWTRIGCTRL = 1 << _dmaCh;
+		_uhw.usart->CTRLB = _CTRLB|USART_TXEN;
+		_uhw.usart->INTFLAG = ~0;
 
 	#elif defined(CPU_XMC48)
 
@@ -444,9 +430,11 @@ void ComPort::DisableTransmit()
 
 	#ifdef CPU_SAME53	
 
-		_DMA->Disable(); 
+		//while (_uhw.usart->SYNCBUSY & USART_CTRLB);
 
 		_uhw.usart->CTRLB = _CTRLB;	// Disable transmit and receive
+
+		_DMA->Disable(); 
 
 	#elif defined(CPU_XMC48)
 
@@ -471,29 +459,14 @@ void ComPort::EnableReceive(void* dst, word count)
 
 	#ifdef CPU_SAME53	
 
-		//if (_chdma->CTRLA & DMCH_ENABLE)
-		//{
-		//	__breakpoint(0);
-		//};
-
-		//_chdma->CTRLA = 0;
-
-		//_dmadsc->SRCADDR = &_SU->DATA;
-		//_dmadsc->DSTADDR = (byte*)dst+count;
-		//_dmadsc->DESCADDR = 0;
-		//_dmadsc->BTCNT = count;
-		//_dmadsc->BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC;
-
-		//_chdma->CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|_dma_trgsrc_rx;
+		_status = 0;
 
 		_DMA->ReadPeripheral(&_uhw.usart->DATA, dst, _prevDmaCounter = count, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_RX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
 
+		//while (_uhw.usart->SYNCBUSY & USART_CTRLB);
+
 		_uhw.usart->CTRLB = _CTRLB|USART_RXEN;
-
-		//_dmawrb->BTCNT = _prevDmaCounter = count;
-		//_dma_act_mask = 0x8000|(_dmaCh<<8);
-
-//		HW::DMAC->SWTRIGCTRL = 1 << _dmaCh;
+		_uhw.usart->INTFLAG = ~0;
 
 	#elif defined(CPU_XMC48)
 
@@ -589,9 +562,11 @@ void ComPort::DisableReceive()
 
 	#ifdef CPU_SAME53	
 
-		_DMA->Disable();
+		//while (_uhw.usart->SYNCBUSY & USART_CTRLB);
 
 		_uhw.usart->CTRLB = _CTRLB;
+
+		_DMA->Disable();
 
 	#elif defined(CPU_XMC48)
 
@@ -641,27 +616,29 @@ bool ComPort::Update()
 		case WAIT_READ: //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		{
 			u32 t = GetDmaCounter();
+			//u32 s = _uhw.usart->INTFLAG & USART_ERROR;
 
-			if (_prevDmaCounter == t)
+			if (_prevDmaCounter != t /*|| s*/)
+			{
+				//if(s) __breakpoint(0);
+
+				//_status |= s;
+				//_uhw.usart->INTFLAG = s;
+
+				_prevDmaCounter = t;
+				_rtm.Reset();
+				_readTimeout = _postReadTimeout;
+			}
+			else
 			{
 				if (_rtm.Timeout(_readTimeout))
 				{
-//					READ_PIN_CLR();
-
 					DisableReceive();
 					_pReadBuffer->len = GetRecievedLen();
 					_pReadBuffer->recieved = _pReadBuffer->len > 0;
 					_status485 = READ_END;
 					r = false;
 				};
-			}
-			else
-			{
-//				READ_PIN_SET();
-
-				_prevDmaCounter = t;
-				_rtm.Reset();
-				_readTimeout = _postReadTimeout;
 			};
 
 		};
