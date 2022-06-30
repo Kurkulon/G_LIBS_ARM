@@ -587,7 +587,7 @@ bool EraseBlock::Update()
 
 struct Write
 {
-	enum {	WAIT = 0,				CRC_START,				CRC_UPDATE,				WRITE_START,			WRITE_BUFFER,			
+	enum {	WAIT = 0,				CRC_START,				CRC_UPDATE,				VECTOR_UPDATE,				WRITE_START,			WRITE_BUFFER,			
 			WRITE_PAGE,				WRITE_PAGE_0,			WRITE_PAGE_1,			WRITE_PAGE_2,			WRITE_PAGE_3,			
 			WRITE_PAGE_4,			WRITE_PAGE_5,			WRITE_PAGE_6,			WRITE_PAGE_7,			WRITE_PAGE_8,			
 			ERASE,			
@@ -775,7 +775,7 @@ bool Write::Start()
 		vector = (VecData*)(curWrBuf->data + curWrBuf->dataOffset - sizeof(VecData::Hdr));
 		vector->h.dataLen = curWrBuf->dataLen;
 
-		state = CRC_START;
+		state = (vector->h.flags) ? CRC_START : VECTOR_UPDATE;
 
 		return true;
 	}
@@ -842,28 +842,37 @@ bool Write::Update()
 
 				*p.w = crc;
 
-				Vector_Make(vector, vector->h.dataLen + 2);
+				vector->h.dataLen += 2;
 
-				wr_data = (byte*)vector;
-				wr_count = vector->h.dataLen + sizeof(vector->h);
+				state = VECTOR_UPDATE;
+			}
+			else
+			{
+				break;
+			};
+		};
 
-				prWrAdr = wr.GetRawAdr();
+		case VECTOR_UPDATE:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++		
+		{
+			Vector_Make(vector, vector->h.dataLen);
 
-				if (spare.v1.vecFstOff == 0xFFFF)
-				{
-					spare.v1.vecFstOff = wr.GetCol();
-					spare.v1.vecFstLen = wr_count;
-				};
+			wr_data = (byte*)vector;
+			wr_count = vector->h.dataLen + sizeof(vector->h);
 
-				spare.v1.vecLstOff = wr.GetCol();
-				spare.v1.vecLstLen = wr_count;
+			prWrAdr = wr.GetRawAdr();
 
-				spare.v1.vectorCount += 1;
-
-				state = WRITE_START;
+			if (spare.v1.vecFstOff == 0xFFFF)
+			{
+				spare.v1.vecFstOff = wr.GetCol();
+				spare.v1.vecFstLen = wr_count;
 			};
 
-			break;
+			spare.v1.vecLstOff = wr.GetCol();
+			spare.v1.vecLstLen = wr_count;
+
+			spare.v1.vectorCount += 1;
+
+			state = WRITE_START;
 		};
 
 		case WRITE_START:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
@@ -3006,7 +3015,7 @@ bool FLASH_UnErase_Full()
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool RequestFlashWrite(Ptr<UNIBUF> &fwb, u16 devID)
+bool RequestFlashWrite(Ptr<UNIBUF> &fwb, u16 devID, bool updateCRC)
 {
 	bool result = false;
 
@@ -3029,6 +3038,7 @@ bool RequestFlashWrite(Ptr<UNIBUF> &fwb, u16 devID)
 			//fwb->dataLen += 2;
 
 			vd->h.device = deviceID = devID;
+			vd->h.flags = updateCRC;
 
 			result = writeFlBuf.Add(fwb);
 		};
