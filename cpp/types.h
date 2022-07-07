@@ -49,7 +49,9 @@ inline bool dIsValid(float v) { return (((u32*)&v)[2] & 0x7FF0) != 0x7FF0; }
 #define GD(adr, t, i) (*(((t*)adr)+i))
 #define GB(adr,i) (*(((byte*)adr)+i))
 
-inline void COPY(const void *src, void *dst, u32 size) { const byte *s = (const byte*)src; byte *d = (byte*)dst;  while(size--) *d++ = *s++; }
+__forceinline void COPY(const void *src, void *dst, u32 size) { const byte *s = (const byte*)src; byte *d = (byte*)dst;  while(size--) *d++ = *s++; }
+
+__forceinline void delay(u32 cycles) { while(cycles--) __nop();}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

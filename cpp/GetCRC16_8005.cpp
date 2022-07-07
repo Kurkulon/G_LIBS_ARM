@@ -6,7 +6,7 @@
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-word GetCRC16_8005(const void *data, u32 len, word init)
+word GetCRC16_8005(const void *data, u32 len, word init, bool revres)
 {
 	DataCRC CRC = { init };
 
@@ -17,12 +17,12 @@ word GetCRC16_8005(const void *data, u32 len, word init)
 		CRC.w = tableCRC_8005[CRC.b[0] ^ *(s++)] ^ CRC.b[1];
 	};
 
-	return CRC.w;
+	return (revres) ? ReverseWord(CRC.w) : CRC.w;
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-word GetCRC16_8005_refl(const void *data, u32 len, word init)
+word GetCRC16_8005_refl(const void *data, u32 len, word init, bool revres)
 {
 	DataCRC CRC = { init };
 
@@ -33,7 +33,7 @@ word GetCRC16_8005_refl(const void *data, u32 len, word init)
 		CRC.w = tableCRC_8005[CRC.b[1] ^ *(s++)] ^ (CRC.w<<8);
 	};
 
-	return (CRC.w<<8)|(CRC.b[1]);
+	return (revres) ? CRC.w : ReverseWord(CRC.w);
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
