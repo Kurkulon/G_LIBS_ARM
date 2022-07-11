@@ -332,6 +332,15 @@ void ComPort::EnableTransmit(void* src, word count)
 
 		_status = 0;
 
+		_uhw.usart->CTRLA = _CTRLA;
+		_uhw.usart->CTRLB = _CTRLB;
+		_uhw.usart->CTRLC = _CTRLC;
+		_uhw.usart->BAUD = _BaudRateRegister;
+
+		_uhw.usart->CTRLA |= USART_ENABLE;
+
+		while(_uhw.usart->SYNCBUSY);
+
 		_DMA->WritePeripheral(src, &_uhw.usart->DATA, count, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_TX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE); 
 
 		//while (_uhw.usart->SYNCBUSY & USART_CTRLB);
@@ -432,7 +441,9 @@ void ComPort::DisableTransmit()
 
 		//while (_uhw.usart->SYNCBUSY & USART_CTRLB);
 
-		_uhw.usart->CTRLB = _CTRLB;	// Disable transmit and receive
+		_uhw.usart->CTRLA = USART_SWRST;
+
+		//_uhw.usart->CTRLB = _CTRLB;	// Disable transmit and receive
 
 		_DMA->Disable(); 
 
@@ -460,6 +471,15 @@ void ComPort::EnableReceive(void* dst, word count)
 	#ifdef CPU_SAME53	
 
 		_status = 0;
+
+		_uhw.usart->CTRLA = _CTRLA;
+		_uhw.usart->CTRLB = _CTRLB;
+		_uhw.usart->CTRLC = _CTRLC;
+		_uhw.usart->BAUD = _BaudRateRegister;
+
+		_uhw.usart->CTRLA |= USART_ENABLE;
+
+		while(_uhw.usart->SYNCBUSY);
 
 		_DMA->ReadPeripheral(&_uhw.usart->DATA, dst, _prevDmaCounter = count, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_RX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
 
@@ -564,7 +584,9 @@ void ComPort::DisableReceive()
 
 		//while (_uhw.usart->SYNCBUSY & USART_CTRLB);
 
-		_uhw.usart->CTRLB = _CTRLB;
+		_uhw.usart->CTRLA = USART_SWRST;
+
+		//_uhw.usart->CTRLB = _CTRLB;
 
 		_DMA->Disable();
 
@@ -616,14 +638,14 @@ bool ComPort::Update()
 		case WAIT_READ: //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		{
 			u32 t = GetDmaCounter();
-			//u32 s = _uhw.usart->INTFLAG & USART_ERROR;
+			u32 s = _uhw.usart->INTFLAG & USART_ERROR;
 
-			if (_prevDmaCounter != t /*|| s*/)
+			if (_prevDmaCounter != t || s)
 			{
 				//if(s) __breakpoint(0);
 
 				//_status |= s;
-				//_uhw.usart->INTFLAG = s;
+				_uhw.usart->INTFLAG = s;
 
 				_prevDmaCounter = t;
 				_rtm.Reset();

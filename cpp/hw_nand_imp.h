@@ -1120,8 +1120,6 @@ void NAND_Init()
 
 		u32 chipSize = 0;
 
-		__breakpoint(0);
-
 		if((id.maker == 0xEC) && (id.device == 0xD3))
 		{
 			byte col_bits = id.pageSize + 10;
