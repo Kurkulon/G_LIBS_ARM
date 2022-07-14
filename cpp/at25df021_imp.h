@@ -24,8 +24,13 @@
 #define SPI_PP              (0x02)  //Program Data into memory
 #define SPI_SE              (0x20)  //Erase one sector in memory
 #define SPI_BE              (0xC7)  //Erase all memory
-#define WIP					(0x1)	//Check the write in progress bit of the SPI status register
+#define RDY_BSY 			(0x1)	//Check the write in progress bit of the SPI status register
 #define WEL					(0x2)	//Check the write enable bit of the SPI status register
+#define SWP					(0xC)	//Software Protection Status
+#define WPP					(0x10)	//Write Protect (WP) Pin Status
+#define EPE					(0x20)	//Erase/Program Error
+#define SPRL				(0x80)	//Sector Protection Registers Locked
+
 #define SPI_UPS				(0x39)  //Unprotect Sector 
 #define SPI_PRS				(0x36)  //Protect Sector 
 
@@ -94,199 +99,7 @@ static void GlobalUnProtect();
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-ERROR_CODE at25df021_Read(byte *data, u32 stAdr, u16 count )
-{
-    ERROR_CODE Result = NO_ERR;
-
-	//SetupSPI();
-
- //       /* send the bulk erase command to the flash */
- //   WriteFlash(SPI_FAST_READ);
- //   WriteFlash((stAdr) >> 16);
- //   WriteFlash((stAdr) >> 8);
- //   WriteFlash(stAdr);
- //   WriteFlash(0);
-
-	//for ( ; count > 0; count--)
-	//{
-	//	*data++ = ReadFlash();
-	//};
-
- //   SPI_OFF();
-
-	return(Result);
-}
-
-
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-ERROR_CODE WritePage(byte *data, u32 stAdr, u16 count )
-{
-    ERROR_CODE Result = NO_ERR;
-
-	//if ((stAdr & 0xFF) != 0 || count > 256 || count == 0)
-	//{
-	//	return INVALID_BLOCK;
-	//};
-
- //   SendSingleCommand(SPI_WREN);
-
- //   Result = Wait_For_WEL();
-
- //   if( POLL_TIMEOUT == Result )
-	//{
-	//	return Result;
-	//}
- //   else
- //   {
- //       SetupSPI();
-
- //       /* send the bulk erase command to the flash */
- //       WriteFlash(SPI_PP );
- //       WriteFlash((stAdr) >> 16);
- //       WriteFlash((stAdr) >> 8);
- //       WriteFlash(stAdr);
-
-	//	for ( ; count > 0; count--)
-	//	{
-	//        WriteFlash(*data++);
-	//	};
-
- //       SPI_OFF();
- //   };
-
-	return Result;//Wait_For_Status(WIP);
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-ERROR_CODE VerifyPage(byte *data, u32 stAdr, u16 count )
-{
-    ERROR_CODE Result = NO_ERR;
-
-	//SetupSPI();
-
- //       /* send the bulk erase command to the flash */
- //   WriteFlash(SPI_FAST_READ);
- //   WriteFlash((stAdr) >> 16);
- //   WriteFlash((stAdr) >> 8);
- //   WriteFlash(stAdr);
- //   WriteFlash(0);
-
-	//for ( ; count > 0; count--)
-	//{
-	//	if (*data++ != ReadFlash())
-	//	{
-	//		Result = VERIFY_WRITE;
-	//		break;
-	//	};
-	//};
-
- //   SPI_OFF();
-
-	return(Result);
-}
-
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-ERROR_CODE at25df021_Write(byte *data, u32 stAdr, u32 count, bool verify)
-{
-    ERROR_CODE Result = NO_ERR;
-
-	//u32 c;
-
-	//while (count > 0)
-	//{
-	//	u16 c = (count >= 256) ? 256 : count;
-
-	//	count -= c;
-
-	//	Result = WritePage(data, stAdr, c);
-
-	//	if (Result != NO_ERR) break;
-
-	//	if (verify)
-	//	{
-	//		Result = VerifyPage(data, stAdr, c);
-	//		if (Result != NO_ERR) break;
-	//	};
-
-	//	data += c;
-	//	stAdr += c;
-
- //   };
-
-    return(Result);
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-static void GlobalUnProtect()
-{
-	//ERROR_CODE 	  ErrorCode   = NO_ERR;	
-
-	//SetupSPI();
-
-	//WriteFlash(SPI_WREN );
-
-	//SPI_OFF();
-
-	//SetupSPI();
-
-	//WriteFlash(SPI_WRSR);
-	//WriteFlash(0);
-
-	//SPI_OFF();
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-ERROR_CODE EraseBlock(u32 adr)
-{
-	ERROR_CODE 	  ErrorCode   = NO_ERR;		//tells us if there was an error erasing flash
-// 	unsigned long ulSectStart = 0x0;		//stores the sector start offset
-// 	unsigned long ulSectEnd   = 0x0;		//stores the sector end offset(however we do not use it here)
-//
-//	// Get the sector start offset
-//	// we get the end offset too however we do not actually use it for Erase sector
-////	GetSectorStartEnd( &ulSectStart, &ulSectEnd, nBlock );
-//
-//	GlobalUnProtect();
-//	GlobalUnProtect();
-//
-//	SetupSPI();
-//
-//	// send the write enable instruction
-//	WriteFlash(SPI_WREN );
-//
-//	SPI_OFF();
-//
-//	SetupSPI();
-//
-//	//send the erase block command to the flash
-//	WriteFlash(SPI_SE );
-//
-//	WriteFlash(adr>>16);
-//	WriteFlash(adr>>8);
-//	WriteFlash(adr);
-//
-//	SPI_OFF();
-//
-//	// Poll the status register to check the Write in Progress bit
-//	// Sector erase takes time
-//	ErrorCode = Wait_For_Status(WIP);
-//
-//
-//
-// 	// block erase should be complete
-	return ErrorCode;
-}
-
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

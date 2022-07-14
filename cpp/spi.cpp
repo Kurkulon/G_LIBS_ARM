@@ -47,6 +47,34 @@ void S_SPIM::InitHW()
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+void S_SPIM::Disconnect()
+{
+	#ifdef CPU_SAME53	
+		
+		T_HW::S_SPI* spi = _uhw.spi;
+		
+		_PIO_SPCK->SetWRCONFIG(_MASK_SPCK, PORT_WRPMUX);
+		_PIO_MOSI->SetWRCONFIG(_MASK_MOSI, PORT_WRPMUX);
+		_PIO_MISO->SetWRCONFIG(_MASK_MISO, PORT_WRPMUX);
+		_PIO_CS->SET(_MASK_CS_ALL); 
+		_PIO_CS->DIRCLR = _MASK_CS_ALL; 
+		_PIO_CS->SetWRCONFIG(_MASK_CS_ALL, PORT_PULLEN|PORT_WRPINCFG|PORT_WRPMUX);
+
+		spi->CTRLA = SPI_SWRST;
+
+		while(spi->SYNCBUSY);
+
+		HW::MCLK->ClockDisable(_upid);
+
+		Usic_Disconnect();
+
+	#elif defined(CPU_XMC48)
+	
+	#endif
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 bool S_SPIM::Connect(u32 baudrate)
 {
 #ifndef WIN32
@@ -146,6 +174,133 @@ bool S_SPIM::Connect(u32 baudrate)
 #endif
 
 	return true;
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void S_SPIM::WritePIO(void *data, u16 count)
+{
+	byte *p = (byte*)data;
+
+	#ifdef CPU_SAME53	
+
+		while (count != 0)
+		{
+			_uhw.spi->DATA = *(p++); count--;
+
+			while((_uhw.spi->INTFLAG & SPI_DRE) == 0);
+		};
+
+		while((_uhw.spi->INTFLAG & SPI_TXC) == 0);
+
+	#elif defined(CPU_XMC48)
+		
+	#endif
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void S_SPIM::WriteAsyncDMA(void *data, u16 count)
+{
+	#ifdef CPU_SAME53	
+
+		_uhw.spi->INTFLAG = ~0;
+		_uhw.spi->INTENCLR = ~0;
+		_uhw.spi->CTRLB &= ~SPI_RXEN; while(_uhw.spi->SYNCBUSY);
+
+		_DMATX->WritePeripheral(data, &_uhw.spi->DATA, count, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_TX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
+
+	#elif defined(CPU_XMC48)
+	
+	#endif
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void S_SPIM::WriteSyncDMA(void *data, u16 count)
+{
+	WriteAsyncDMA(data, count);
+
+	while (!CheckWriteComplete());
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void S_SPIM::ReadPIO(void *data, u16 count)
+{
+	volatile register byte t;
+	byte *p = (byte*)data;
+
+	#ifdef CPU_SAME53	
+
+		_uhw.spi->CTRLB |= SPI_RXEN; while(_uhw.spi->SYNCBUSY);
+
+		do t = _uhw.spi->DATA; while(_uhw.spi->INTFLAG & SPI_RXC); 
+
+		while (count != 0)
+		{
+			_uhw.spi->DATA = 0;
+
+			while((_uhw.spi->INTFLAG & SPI_RXC) == 0);
+
+			*(p++) = _uhw.spi->DATA; count--;
+		};
+
+	#elif defined(CPU_XMC48)
+		
+	#endif
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void S_SPIM::ReadAsyncDMA(void *data, u16 count)
+{
+	#ifdef CPU_SAME53	
+
+		_uhw.spi->INTFLAG = ~0;
+		_uhw.spi->INTENCLR = ~0;
+		_uhw.spi->CTRLB |= SPI_RXEN; while(_uhw.spi->SYNCBUSY);
+
+		_DMARX->ReadPeripheral(&_uhw.spi->DATA, data, count,	DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_RX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
+		_DMATX->WritePeripheral(data, &_uhw.spi->DATA, count+1, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_TX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
+
+	#elif defined(CPU_XMC48)
+	
+	#endif
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void S_SPIM::ReadSyncDMA(void *data, u16 count)
+{
+	ReadAsyncDMA(data, count);
+
+	while (!CheckReadComplete());
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+byte S_SPIM::WriteReadByte(byte v)
+{
+	volatile register byte t;
+
+	#ifdef CPU_SAME53	
+
+		//_uhw.spi->INTFLAG = ~0;
+
+		_uhw.spi->CTRLB |= SPI_RXEN; while(_uhw.spi->SYNCBUSY);
+
+		do t = _uhw.spi->DATA; while(_uhw.spi->INTFLAG & SPI_RXC); 
+
+		_uhw.spi->DATA = v;
+
+		while((_uhw.spi->INTFLAG & SPI_RXC) == 0);
+
+		return _uhw.spi->DATA; 
+
+	#elif defined(CPU_XMC48)
+		
+	#endif
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

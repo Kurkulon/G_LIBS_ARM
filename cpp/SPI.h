@@ -83,8 +83,24 @@ public:
 		_GEN_SRC(gen_src), _GEN_CLK(gen_clk), _DMATX(dmatx), _DMARX(dmarx) {}
 
 			bool Connect(u32 baudrate);
+			void Disconnect();
 			bool AddRequest(DSCSPI *d);
 			bool Update();
+			
+			byte WriteReadByte(byte v);
+
+			void WritePIO(void *data, u16 count);
+			void WriteAsyncDMA(void *data, u16 count);
+			void WriteSyncDMA(void *data, u16 count);
+			bool CheckWriteComplete() { return _DMATX->CheckComplete() && (_uhw.spi->INTFLAG & SPI_TXC); }
+
+			void ReadPIO(void *data, u16 count);
+			void ReadAsyncDMA(void *data, u16 count);
+			void ReadSyncDMA(void *data, u16 count);
+			bool CheckReadComplete() { return _DMATX->CheckComplete() && _DMARX->CheckComplete(); }
+
+			void ChipSelect(byte num)	{ _PIO_CS->CLR(_MASK_CS[num]); }
+			void ChipDisable()			{ _PIO_CS->SET(_MASK_CS_ALL); }
 	virtual	void InitHW();
 };
 

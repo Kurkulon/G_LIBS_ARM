@@ -29,11 +29,26 @@ enum ERROR_CODE
 	NUM_ERROR_CODES
 };
 
-//extern ERROR_CODE at25df021_Read(byte *data, u32 stAdr, u16 count );
+struct ADI_BOOT_HEADER
+{
+    u32   dBlockCode;
+    void* pTargetAddress;
+    u32   dByteCount;
+    u32   dArgument;
+    
+}; 
+
+extern bool BlackFin_CheckFlash(u16 *crc, u16 *len);
+extern bool at25df021_Init(u32 baudrate);
+extern void at25df021_Destroy();
+
+
+extern ERROR_CODE at25df021_Read(void *data, u32 stAdr, u16 count );
 //extern ERROR_CODE at25df021_Read_DMA(byte *data, u32 stAdr, u16 count, bool *ready);
 //extern ERROR_CODE at25df021_Read_IRQ(byte *data, u32 stAdr, u16 count, bool *ready);
 //
-//extern ERROR_CODE at25df021_Write(byte *data, u32 stAdr, u32 count, bool verify);
+extern ERROR_CODE at25df021_Write(const byte *data, u32 stAdr, u32 count, bool verify);
+
 //
 //extern ERROR_CODE at25df021_GetCRC16_IRQ(u32 stAdr, u16 count, bool *ready, u16 *crc);
 //extern u16 at25df021_GetCRC16(u32 stAdr, u16 count);
