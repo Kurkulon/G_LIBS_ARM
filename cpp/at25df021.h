@@ -51,7 +51,7 @@ extern ERROR_CODE at25df021_Write(const byte *data, u32 stAdr, u32 count, bool v
 
 //
 //extern ERROR_CODE at25df021_GetCRC16_IRQ(u32 stAdr, u16 count, bool *ready, u16 *crc);
-//extern u16 at25df021_GetCRC16(u32 stAdr, u16 count);
+extern u16 at25df021_GetCRC16(u16 count);
 //
 //
 //extern ERROR_CODE GetCodes(int *pnManCode, int *pnDevCode);
