@@ -46,6 +46,10 @@ inline float ABS(float v) { *((u32*)&v) &= 0x7FFFFFFF; return v; }
 inline bool fIsValid(float v) { return (((u16*)&v)[2] & 0x7F80) != 0x7F80; }
 inline bool dIsValid(float v) { return (((u32*)&v)[2] & 0x7FF0) != 0x7FF0; }
 
+inline u32 LIM(u32 v, u32 min, u32 max) { return (v < min) ? min : ((v > max) ? max : v); }
+inline u32 MIN(u32 a, u32 b) { return (a < b) ? a : b; }
+inline u32 MAX(u32 a, u32 b) { return (a >= b) ? a : b; }
+
 #define GD(adr, t, i) (*(((t*)adr)+i))
 #define GB(adr,i) (*(((byte*)adr)+i))
 
