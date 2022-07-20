@@ -151,7 +151,15 @@ __packed struct NandParamPage
 	byte	guaranteedValidBlocks;
 	u16		blockEnduranceForGuaranteedValidBlocks;
 	byte	numberProgramsPerPage;
-	byte	_rezerved4[143];
+	byte	_rezerved4;
+	byte	number_Bits_ECC_correctability;
+	byte	number_of_interleaved_address_bits;
+	byte	interleaved_operation_attributes;
+	byte	_rezerved5[13];
+	byte	pin_capacitance_per_chip_enable;
+	u16		timing_mode_support;
+
+	byte	_rezerved6[123];
 	u16		integrityCRC;
 };
 
@@ -493,6 +501,7 @@ static void NAND_Set_Features(byte adr, byte p1, byte p2, byte p3, byte p4)
 	NAND_DIR_OUT();
 	NAND_CMD_LATCH(NAND_CMD_SET_FEATURES);
 	NAND_ADR_LATCH(adr);
+	NAND_DELAY_ADL();
 	NAND_WRITE(p1); 
 	NAND_WRITE(p2); 
 	NAND_WRITE(p3); 
@@ -516,6 +525,8 @@ static void NAND_Get_Features(byte adr, byte* p)
 	NAND_DIR_IN();
 
 	while(NAND_BUSY());
+
+	NAND_DELAY_PR();
 
 	p[0] = NAND_READ(); 
 	p[1] = NAND_READ(); 
@@ -1012,7 +1023,7 @@ void NAND_Init()
 
 	using namespace HW;
 
-	byte p[4];
+	U32u p1, p2;
 
 #ifdef CPU_SAME53
 
@@ -1153,21 +1164,27 @@ void NAND_Init()
 		{
 			SEGGER_RTT_WriteString(0, "Micron - ");
 
-			NAND_Set_Features(1, 5, 0, 0, 0);
-			
 			NAND_Reset();
 
-			NAND_Get_Features(1, p);
+			NAND_Set_Features(0x01, 0, 0, 0, 0);
+			NAND_Set_Features(0x10, 0, 0, 0, 0);
+
+			NAND_Get_Features(0x01, p1.b);
+			NAND_Get_Features(0x10, p2.b);
+
+			SEGGER_RTT_printf(0, "FE1:0x%02X FE2:0x%02X - ", p1.d, p2.d);
 
 			NandParamPage &np = nandParamPage[chip];
 
 			NAND_Read_PARAM(&np);
 
+			SEGGER_RTT_printf(0, "mode:0x%02X - ", np.timing_mode_support);
+
 			u16 crc = GetCRC16_8005_refl(&np, sizeof(np)-2, 0x4F4E, true);
 
 			nandSize.integrityCRC[chip] = crc;
 
-			SEGGER_RTT_printf(0, "CRC:%04X - ", crc);
+			SEGGER_RTT_printf(0, "CRC:0x%04X - ", crc);
 
 			if (np.integrityCRC == crc/* || np.integrityCRC == 0xA61F*/)
 			{
