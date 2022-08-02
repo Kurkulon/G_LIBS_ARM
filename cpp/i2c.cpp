@@ -6,6 +6,8 @@
 
 void S_I2C::InitHW()
 {
+#ifdef CPU_SAME53	
+
 	HW::GCLK->PCHCTRL[_ugclk] = GCLK_GEN(_GEN_SRC)|GCLK_CHEN;	// 25 MHz
 
 	HW::MCLK->ClockEnable(_upid);
@@ -34,6 +36,10 @@ void S_I2C::InitHW()
 
 	i2c->STATUS = 0;
 	i2c->STATUS.BUSSTATE = BUSSTATE_IDLE;
+	
+#elif defined(CPU_XMC48)
+
+#endif
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
