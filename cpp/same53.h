@@ -333,7 +333,7 @@ namespace T_HW
 	#define GCLK_EVSYS0					11
 	#define GCLK_EVSYS1					12
 	#define GCLK_EVSYS2					13
-	#define GCLK_EVSYS3					13
+	#define GCLK_EVSYS3					14
 	#define GCLK_EVSYS4					15
 	#define GCLK_EVSYS5					16
 	#define GCLK_EVSYS6					17
