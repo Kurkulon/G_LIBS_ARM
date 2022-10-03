@@ -84,8 +84,9 @@ class ComPort : public USIC
 		u32 _status;
 
 		bool IsTransmited() { return (_uhw.usart->INTFLAG & (USART_TXC|USART_DRE)) && _DMA->CheckComplete(); }
+		bool IsRecieved()	{ u32 s = _uhw.usart->INTFLAG & (USART_ERROR|USART_RXS); if (s) { _status |= s; _uhw.usart->INTFLAG = s; return true; } else return false; }
 		u32	GetDmaCounter() { return _DMA->GetBytesLeft(); }
-		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _prevDmaCounter; }
+		u16	GetRecievedLen() { return _pReadBuffer->maxLen - GetDmaCounter(); }
 
 	#elif defined(CPU_XMC48)
 
@@ -150,6 +151,7 @@ class ComPort : public USIC
 //	dword			_preReadTimeout;
 	dword			_postReadTimeout;
 	dword			_readTimeout;
+	dword			_writeTimeout;
 
 	CTM32			_rtm;
 

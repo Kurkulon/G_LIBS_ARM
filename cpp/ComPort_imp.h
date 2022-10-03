@@ -169,7 +169,9 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 				break;
 		};
 
-		//_CTRLB |= USART_RXEN;
+		_CTRLB |= USART_SFDE;
+
+		_writeTimeout = US2COM((24000000/speed));
 
 		InitHW();
 
@@ -431,6 +433,8 @@ void ComPort::EnableTransmit(void* src, word count)
 
 	_status485 = WRITEING;
 
+	_rtm.Reset();
+
 #endif
 }
 
@@ -444,7 +448,7 @@ void ComPort::DisableTransmit()
 
 		//while (_uhw.usart->SYNCBUSY & USART_CTRLB);
 
-		if (_status != 0)
+		if (_status & USART_ERROR)
 		{
 			_uhw.usart->CTRLA = USART_SWRST;
 		}
@@ -595,7 +599,7 @@ void ComPort::DisableReceive()
 
 		//while (_uhw.usart->SYNCBUSY & USART_CTRLB);
 
-		if (_status != 0)
+		if (_status & USART_ERROR)
 		{
 			_uhw.usart->CTRLA = USART_SWRST;
 		}
@@ -641,29 +645,27 @@ bool ComPort::Update()
 			
 			if (IsTransmited())
 			{
-				_pWriteBuffer->transmited = true;
-				_status485 = READ_END;
+				if (_rtm.Timeout(_writeTimeout))
+				{
+					_pWriteBuffer->transmited = true;
+					_status485 = READ_END;
 
-				DisableTransmit();
+					DisableTransmit();
 
-				r = false;
+					r = false;
+				};
+			}
+			else
+			{
+				_rtm.Reset();
 			};
 
 			break;
 
 		case WAIT_READ: //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		{
-			u32 t = GetDmaCounter();
-			u32 s = _uhw.usart->INTFLAG & USART_ERROR;
-
-			if (_prevDmaCounter != t || s)
+			if (IsRecieved())
 			{
-				//if(s) __breakpoint(0);
-
-				_status |= s;
-				_uhw.usart->INTFLAG = s;
-
-				_prevDmaCounter = t;
 				_rtm.Reset();
 				_readTimeout = _postReadTimeout;
 			}
