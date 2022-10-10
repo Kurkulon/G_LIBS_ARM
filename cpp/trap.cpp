@@ -798,7 +798,7 @@ static bool UpdateSendVector()
 	static byte i = 0;
 	static FLRB flrb;
 
-	static HugeTx *t = 0;
+	static EthBuf *t = 0;
 //	static VecData::Hdr h;
 
 	static u64 vecCount = 0;
@@ -928,8 +928,8 @@ static bool UpdateSendVector()
 
 					ipID = GetIpID(); 
 
-					t->iph.id = ipID;
-					t->iph.off = 0;
+					et.eu.iph.id = ipID;
+					et.eu.iph.off = 0;
 
 					t->len = sizeof(et.eu) + sizeof(et.tv) + flrb.len;
 
@@ -940,9 +940,9 @@ static bool UpdateSendVector()
 						fragOff = t->len - sizeof(EthIp); //flrb.maxLen;
 						fragLen = flrb.hdr.dataLen - flrb.maxLen;
 
-						t->iph.off |= 0x2000;
+						et.eu.iph.off |= 0x2000;
 
-						t->udp.len = sizeof(UdpHdr) + sizeof(trap) + flrb.hdr.dataLen - 2;
+						et.eu.udp.len = sizeof(UdpHdr) + sizeof(trap) + flrb.hdr.dataLen - 2;
 
 						i = 3;
 					}
@@ -987,8 +987,8 @@ static bool UpdateSendVector()
 			{
 				FR  &ef = *((FR*)&t->eth);
 
-				t->iph.id = ipID;
-				t->iph.off = (fragOff/8)&0x1FFF;
+				ef.ei.iph.id = ipID;
+				ef.ei.iph.off = (fragOff/8)&0x1FFF;
 
 				fragLen -= flrb.len;
 				fragOff += flrb.len;
@@ -999,11 +999,11 @@ static bool UpdateSendVector()
 
 				if (fragLen > 0)
 				{ 
-					t->iph.off |= 0x2000; 
+					ef.ei.iph.off |= 0x2000; 
 				}
 				else if (flrb.crc != 0)
 				{
-					t->iph.off = 0;
+					ef.ei.iph.off = 0;
 				}
 				else
 				{
@@ -1035,7 +1035,7 @@ static bool UpdateSendVector_Dlya_Vova()
 	static byte i = 0;
 //	static FLRB flrb;
 
-	static SysEthBuf *t = 0;
+	static EthBuf *t = 0;
 //	static VecData::Hdr h;
 
 	static u32 vecCount = 0;
@@ -1224,4 +1224,3 @@ void TRAP_Idle()
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-

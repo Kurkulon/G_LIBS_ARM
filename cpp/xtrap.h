@@ -22,7 +22,7 @@ extern bool RequestTrap(EthBuf *mb);
 extern void UpdateTraps();
 
 //extern SmallTx*	GetSmallTxBuffer();
-extern HugeTx*	GetHugeTxBuffer();
+//extern EthBuf*	GetHugeTxBuffer();
 extern void SendTrap(EthBuf *p);
 extern void SendFragTrap(EthBuf *p);
 inline bool IsComputerFind() {	extern bool ComputerFind; return ComputerFind; }

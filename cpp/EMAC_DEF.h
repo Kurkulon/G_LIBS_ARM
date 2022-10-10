@@ -3,10 +3,10 @@
 
 #include "core.h"
 
-#define NUM_RX_BUF          8          
-#define ETH_RX_DRBS			8
-#define ETH_RX_BUF_SIZE     (ETH_RX_DRBS * 64)       
-#define NUM_TX_DSC          16        
+//#define NUM_RX_BUF          8          
+//#define ETH_RX_DRBS			8
+//#define ETH_RX_BUF_SIZE     (ETH_RX_DRBS * 64)       
+//#define NUM_TX_DSC          16        
 
 #ifndef WIN32
 #define IP_MTU				1480

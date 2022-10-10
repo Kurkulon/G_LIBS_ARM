@@ -30,6 +30,22 @@ inline bool EmacIsConnected()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+inline bool EmacIsEnergyDetected()
+{
+	extern bool emacEnergyDetected;
+	return emacEnergyDetected;
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+inline bool EmacIsCableNormal()
+{
+	extern bool emacCableNormal;
+	return emacCableNormal;
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 __packed struct MAC
 {
 	u32 B;
@@ -350,46 +366,13 @@ __packed struct EthUdpBuf : public EthIpBuf
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-__packed struct SysEthBuf : public EthBuf
-{
-	byte data[((ETH_RX_BUF_SIZE+3) & ~3) - sizeof(EthBuf::eth)];
-
-	static List<SysEthBuf> freeList;
-
-	static	SysEthBuf*	Alloc()	{ return freeList.Get(); }
-	virtual	u32			MaxLen() { return sizeof(eth) + sizeof(data); }
-	virtual void		Free()	{ freeList.Add(this); }
-
-						SysEthBuf() { freeList.Init(); freeList.Add(this); }
-};
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-__packed struct HugeTx : public EthBuf
-{
-	IPheader	iph; // 20
-	UdpHdr		udp; // 8
-	byte		data[IP_MTU - sizeof(UdpHdr) + (sizeof(EthBuf::eth) & 3)];
-
-	static List<HugeTx> freeList;
-
-	static	HugeTx*		Alloc()		{ return freeList.Get(); }
-	virtual	u32			MaxLen()	{ return sizeof(eth) + sizeof(data); }
-	virtual void		Free()		{ freeList.Add(this); }
-
-						HugeTx()	{ freeList.Init(); freeList.Add(this); }
-
-};
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 extern bool TransmitEth(EthBuf *b);
 extern bool TransmitIp(EthBuf *b);
 extern bool TransmitFragIp(EthBuf *b);
 //extern bool TransmitUdp(EthBuf *b);
 extern bool TransmitFragUdp(EthBuf *b, u16 src, u16 dst);
-extern SysEthBuf* GetSysEthBuffer();
-extern HugeTx* GetHugeTxBuffer();
+extern EthBuf* GetSysEthBuffer();
+extern EthBuf* GetHugeTxBuffer();
 //extern const MAC& HW_EMAC_GetHwAdr();
 //extern byte HW_EMAC_GetAdrPHY();
 //extern u32  HW_EMAC_GetIpAdr();

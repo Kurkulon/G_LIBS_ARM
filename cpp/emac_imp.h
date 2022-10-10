@@ -31,6 +31,47 @@ DWORD txThreadCount = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+__packed struct SysEthBuf : public EthBuf
+{
+	byte data[((ETH_RX_BUF_SIZE+3) & ~3) - sizeof(EthBuf::eth)];
+
+	static List<SysEthBuf> freeList;
+
+	static	SysEthBuf*	Alloc()	{ return freeList.Get(); }
+	virtual	u32			MaxLen() { return sizeof(eth) + sizeof(data); }
+	virtual void		Free()	{ freeList.Add(this); }
+
+						SysEthBuf() { freeList.Init(); freeList.Add(this); }
+};
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+__packed struct HugeTx : public EthBuf
+{
+	IPheader	iph; // 20
+	UdpHdr		udp; // 8
+	byte		data[IP_MTU - sizeof(UdpHdr) + (sizeof(EthBuf::eth) & 3)];
+
+	static List<HugeTx> freeList;
+
+	static	HugeTx*		Alloc()		{ return freeList.Get(); }
+	virtual	u32			MaxLen()	{ return sizeof(eth) + sizeof(data); }
+	virtual void		Free()		{ freeList.Add(this); }
+
+						HugeTx()	{ freeList.Init(); freeList.Add(this); }
+
+};
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+List<SysEthBuf> SysEthBuf::freeList;
+List<HugeTx>	HugeTx::freeList;
+
+static SysEthBuf	sysTxBuf[NUM_SYS_TXBUF];
+static HugeTx		hugeTxBuf[NUM_HUGE_TXBUF];
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 /* Net_Config.c */
 
 //#define OUR_IP_ADDR   	IP32(192, 168, 3, 234)
@@ -45,6 +86,8 @@ static const u32 ipMask = OUR_IP_MASK;
 //static const u16 udpOutPort = ReverseWord(HW_EMAC_GetUdpOutPort());
 
 bool emacConnected = false;
+bool emacEnergyDetected = false;
+bool emacCableNormal = false;
 
 /* Local variables */
 //static const byte PHYA = HW_EMAC_GetAdrPHY();
@@ -140,14 +183,14 @@ static void tx_descr_init (void);
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-SysEthBuf* GetSysEthBuffer()
+EthBuf* GetSysEthBuffer()
 {
 	return SysEthBuf::Alloc();
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-HugeTx* GetHugeTxBuffer()
+EthBuf* GetHugeTxBuffer()
 {
 	return HugeTx::Alloc();
 }
@@ -670,11 +713,11 @@ static void RecieveFrame()
 
 		if (buf.GetAdr() == 0)
 		{
-			SysEthBuf* nmb = GetSysEthBuffer();
+			EthBuf* nmb = GetSysEthBuffer();
 
 			if (nmb != 0)
 			{
-				buf.SetAdr(&nmb->eth, sizeof(nmb->eth) + sizeof(nmb->data));
+				buf.SetAdr(&nmb->eth, nmb->MaxLen());
 			};
 		}
 		else
@@ -1115,7 +1158,7 @@ static void rx_descr_init (void)
 
 	for (u32 i = 0; i < NUM_RX_BUF; i++)
 	{
-		SysEthBuf *b = GetSysEthBuffer();
+		EthBuf *b = GetSysEthBuffer();
 
 		if (b != 0)
 		{
