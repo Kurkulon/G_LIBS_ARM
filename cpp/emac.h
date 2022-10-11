@@ -7,9 +7,8 @@
 
 extern bool	InitEMAC();
 extern void	UpdateEMAC();
-//extern bool	HW_EMAC_Init();
-//extern void HW_EMAC_StartLink();
-//extern bool	HW_EMAC_UpdateLink();
+extern void ResetPHY();	
+extern void EnablePHY();
 
 inline u16 GetIpID() {extern u16 txIpID; return ReverseWord(txIpID++); }
 

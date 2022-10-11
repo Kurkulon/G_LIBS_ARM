@@ -155,6 +155,22 @@ public:
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+template <class T> struct PtrObj
+{
+	friend class Ptr<T>;
+	friend class List<T>;
+	friend class ListPtr<T>;
+
+	PtrObj*	next;
+	u32	count;
+
+public:
+
+	PtrObj() : next(0), count(0) { }
+};
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 template <class T> struct ListPtr
 {
 
@@ -310,14 +326,11 @@ template <class T> bool ListRef<T>::Add(const Ptr<T>& r)
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 template <class T> struct PtrItem;
 
-template <class T> struct PtrItem
+template <class T> struct PtrItem : public PtrObj<T>
 {
 	friend class Ptr<T>;
 	friend class List<T>;
 	friend class ListPtr<T>;
-
-	PtrItem*	next;
-	u32	count;
 
 protected:
 
@@ -330,7 +343,7 @@ protected:
 
 public:
 
-	PtrItem() : next(0), count(0) { _freeList.Init(); _freeList.Add(this); }
+	PtrItem() { _freeList.Init(); _freeList.Add(this); }
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
