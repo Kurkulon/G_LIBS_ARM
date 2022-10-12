@@ -302,6 +302,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\mem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\mem_imp.h"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\PointerCRC.h"
 				>
 			</File>

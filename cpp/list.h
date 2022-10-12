@@ -143,12 +143,11 @@ public:
 	Ptr(T* p) : ptr(p)				{ if (ptr != 0) ptr->count++; }
 	Ptr(const Ptr& p) : ptr(p.ptr)	{ if (ptr != 0) ptr->count++; }
 
-	Ptr& operator=(const Ptr& p)	{ if (ptr != p.ptr) { if (ptr != 0) ptr->Free(); ptr = p.ptr; if (ptr != 0) ptr->count++; }; return *this; }
-	~Ptr()							{ if (ptr != 0) ptr->Free(); }
+	Ptr& operator=(const Ptr& p)	{ if (ptr != p.ptr) { Free(); ptr = p.ptr; if (ptr != 0) ptr->count++; }; return *this; }
+	~Ptr()							{ Free(); }
 	bool Valid() const				{ return ptr != 0; }
-	void Alloc()					{ if (ptr != 0) ptr->Free(); ptr = T::Alloc(); }
-	void Free()						{ if (ptr != 0) ptr->Free(), ptr = 0; }
-
+	void Alloc()					{ Free(); ptr = T::Alloc(); if (ptr != 0) ptr->count = 1; }
+	void Free()						{ if (ptr != 0) { if (ptr->count != 0) { ptr->count--; if (ptr->count == 0) ptr->Free(); };	ptr = 0; }; }
 	T* operator->()					{ return ptr; }
 	T& operator*()					{ return *ptr; }
 };
@@ -161,10 +160,17 @@ template <class T> struct PtrObj
 	friend class List<T>;
 	friend class ListPtr<T>;
 
+protected:
+
 	PtrObj*	next;
-	u32	count;
+	u32		count;
+
+	static	T*		Alloc();
 
 public:
+
+	virtual	void	Free() = 0;
+
 
 	PtrObj() : next(0), count(0) { }
 };
@@ -324,22 +330,23 @@ template <class T> bool ListRef<T>::Add(const Ptr<T>& r)
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#define PTR_LIST_FRIENDS(v) friend class Ptr<v>;friend class List<v>;friend class ListPtr<v>;friend class ListRef<v>
+
 template <class T> struct PtrItem;
 
 template <class T> struct PtrItem : public PtrObj<T>
 {
-	friend class Ptr<T>;
-	friend class List<T>;
-	friend class ListPtr<T>;
+	PTR_LIST_FRIENDS(PtrItem);
 
 protected:
 
 	static List<PtrItem> _freeList;
 
-	static	T*		Alloc()	{ T* p = (T*)_freeList.Get(); if (p != 0) p->count = 1; return p; };
+	static	T*		Alloc()	{ return (T*)_freeList.Get(); };
 
 	virtual	void	_FreeCallBack() {}
-			void	Free()	{ if (count != 0) { count--; if (count == 0) _FreeCallBack(), _freeList.Add(this); }; }
+	virtual	void	Free() { _FreeCallBack(); _freeList.Add(this); }
 
 public:
 
