@@ -13,46 +13,56 @@ template <int L> List< MEMB<L> > MEMB<L>::_freeList;
 #define MEMBM MEMB<MEDIUM_BUF_LEN>
 #define MEMBH MEMB<HUGE_BUF_LEN>
 
-static MEMBS	small_buffer[NUM_SMALL_BUF];
-static MEMBM	medium_buffer[NUM_MEDIUM_BUF];
-static MEMBH	huge_buffer[NUM_HUGE_BUF];
+MEMBS	small_buffer[NUM_SMALL_BUF];
+MEMBM	medium_buffer[NUM_MEDIUM_BUF];
+MEMBH	huge_buffer[NUM_HUGE_BUF];
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Ptr<MB> GetSmallBuffer()
+MB* AllocSmallBuffer()
 {
 	return MEMBS::Alloc();
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Ptr<MB> GetMediumBuffer()
+MB* AllocMediumBuffer()
 {
 	return MEMBM::Alloc();
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Ptr<MB> GetHugeBuffer()
+MB* AllocHugeBuffer()
 {
 	return MEMBH::Alloc();
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Ptr<MB> GetMemBuffer(u32 minLen)
+MB* AllocMemBuffer(u32 minLen)
 {
 	if (minLen > MEDIUM_BUF_LEN)
 	{
-		return GetHugeBuffer();
+		return (minLen <= HUGE_BUF_LEN) ? AllocHugeBuffer() : 0;
 	}
 	else if (minLen > SMALL_BUF_LEN)
 	{
-		return GetMediumBuffer();
+		MB *p = AllocMediumBuffer();
+
+		if (p == 0) p = AllocHugeBuffer();
+
+		return p;
 	}
 	else
 	{
-		return GetSmallBuffer();
+		MB *p = AllocSmallBuffer();
+
+		if (p == 0) p = AllocMediumBuffer();
+
+		if (p == 0) p = AllocHugeBuffer();
+
+		return p;
 	};
 }
 

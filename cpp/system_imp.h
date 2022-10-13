@@ -20,15 +20,13 @@ extern "C" void SystemInit()
 
 //	__breakpoint(0);
 
-	SEGGER_RTT_Init();
 
-	#ifdef BOOTLOADER
+	#ifndef BOOTLOADER
 
-		SEGGER_RTT_WriteString(0, RTT_CTRL_CLEAR);
+		SEGGER_RTT_Init();
+		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_YELLOW "SystemInit ... ");
 
 	#endif
-
-	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_YELLOW "SystemInit ... ");
 
 	#ifdef CPU_SAME53	
 
@@ -363,7 +361,9 @@ extern "C" void SystemInit()
   /* Enable unaligned memory access - SCB_CCR.UNALIGN_TRP = 0 */
 	CM4::SCB->CCR &= ~(SCB_CCR_UNALIGN_TRP_Msk);
 
-	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_GREEN "OK\n");
+	#ifndef BOOTLOADER
+		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_GREEN "OK\n");
+	#endif
 }
 
 #endif

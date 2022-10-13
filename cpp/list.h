@@ -144,6 +144,7 @@ public:
 	Ptr(const Ptr& p) : ptr(p.ptr)	{ if (ptr != 0) ptr->count++; }
 
 	Ptr& operator=(const Ptr& p)	{ if (ptr != p.ptr) { Free(); ptr = p.ptr; if (ptr != 0) ptr->count++; }; return *this; }
+	Ptr& operator=(T* p)			{ if (ptr != p) { Free(); ptr = p; if (ptr != 0) ptr->count++; }; return *this; }
 	~Ptr()							{ Free(); }
 	bool Valid() const				{ return ptr != 0; }
 	void Alloc()					{ Free(); ptr = T::Alloc(); if (ptr != 0) ptr->count = 1; }

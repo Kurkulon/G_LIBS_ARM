@@ -42,9 +42,9 @@ public:
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-extern Ptr<MB> GetSmallBuffer();
-extern Ptr<MB> GetMediumBuffer();
-extern Ptr<MB> GetHugeBuffer();
-extern Ptr<MB> GetMemBuffer(u32 minLen);
+extern MB* AllocSmallBuffer();
+extern MB* AllocMediumBuffer();
+extern MB* AllocHugeBuffer();
+extern MB* AllocMemBuffer(u32 minLen);
 
 #endif // MEM_H__12_10_2022__16_54
