@@ -5,7 +5,7 @@
 //#include "main.h"
 
 extern bool TFTP_Idle();
-extern bool RequestTFTP(EthBuf* mb);
+extern bool RequestTFTP(Ptr<MB> &mb);
 inline bool TFTP_Connected() { extern u16 tftp_processed; return tftp_processed != 0; }  
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

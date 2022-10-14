@@ -10,7 +10,7 @@ extern u16 CRC_CCITT_PIO(const void *data, u32 len, u16 init);
 //extern u16 CRC_CCITT_DMA(const void *data, u32 len, u16 init);
 extern bool CRC_CCITT_DMA_Async(const void* data, u32 len, u16 init);
 extern bool CRC_CCITT_DMA_CheckComplete(u16* crc);
-extern bool TransmitEth(EthBuf *b);
+extern bool TransmitEth(Ptr<MB> &mb);
 extern bool CheckStatusUDP(u32 stat);
 extern bool EmacIsConnected();
 

@@ -77,10 +77,10 @@ public:
 		u32 muxspck, u32 muxmosi, u32 muxmiso,
 		u32* mcs, u32 mcslen, u32 dipo, u32 dopo,
 		u32 gen_src, u32 gen_clk, DMA_CH *dmatx, DMA_CH *dmarx)
-		: USIC(num), _dsc(0), _state(WAIT), _PIO_SPCK(pspck), _PIO_MOSI(pmosi), _PIO_MISO(pmiso), _PIO_CS(pcs), 
+		: USIC(num), _PIO_SPCK(pspck), _PIO_MOSI(pmosi), _PIO_MISO(pmiso), _PIO_CS(pcs), 
 		_MASK_SPCK(mspck), _MASK_MOSI(mmosi), _MASK_MISO(mmiso),
-		_PMUX_SPCK(muxspck), _PMUX_MOSI(muxmosi), _PMUX_MISO(muxmiso), _MASK_CS(mcs), _MASK_CS_LEN(mcslen), _DIPO(dipo), _DOPO(dopo), 
-		_GEN_SRC(gen_src), _GEN_CLK(gen_clk), _DMATX(dmatx), _DMARX(dmarx) {}
+		_PMUX_SPCK(muxspck), _PMUX_MOSI(muxmosi), _PMUX_MISO(muxmiso), _GEN_SRC(gen_src), _GEN_CLK(gen_clk), _MASK_CS(mcs), _MASK_CS_LEN(mcslen), _DIPO(dipo), _DOPO(dopo), 
+		 _DMATX(dmatx), _DMARX(dmarx), _dsc(0), _state(WAIT) {}
 
 			bool Connect(u32 baudrate);
 			void Disconnect();

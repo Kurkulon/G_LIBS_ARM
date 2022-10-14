@@ -68,7 +68,7 @@ public:
 
 #ifdef CPU_SAME53
 
-	DMA_CH(byte chnum) : _dmach(&HW::DMAC->CH[chnum]), _dmadsc(&DmaTable[chnum]), _dmawrb(&DmaWRB[chnum]), _chnum(chnum), _act_mask(0x8000|(chnum<<8)) { _dmach->PRILVL = DMCH_PRILVL_LVL0; }
+	DMA_CH(byte chnum) : _dmach(&HW::DMAC->CH[chnum]), _dmadsc(&DmaTable[chnum]), _dmawrb(&DmaWRB[chnum]), _act_mask(0x8000|(chnum<<8)), _chnum(chnum) { _dmach->PRILVL = DMCH_PRILVL_LVL0; }
 
 	//void Enable() {  }
 	

@@ -17,14 +17,14 @@
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-extern bool RequestTrap(EthBuf *mb);
+extern bool RequestTrap(Ptr<MB> &mb);
 //extern void InitTraps();
 extern void UpdateTraps();
 
 //extern SmallTx*	GetSmallTxBuffer();
 //extern EthBuf*	GetHugeTxBuffer();
-extern void SendTrap(EthBuf *p);
-extern void SendFragTrap(EthBuf *p);
+extern void SendTrap(Ptr<MB> &mb);
+extern void SendFragTrap(Ptr<MB> &mb);
 inline bool IsComputerFind() {	extern bool ComputerFind; return ComputerFind; }
 
 

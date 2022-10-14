@@ -58,11 +58,11 @@ static void StartSendVector(u16 session, u64 adr);
 
 bool TRAP_INFO_SendError(u32 error)
 {
-	EthBuf* buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTrap)));
 
-	if (buf == 0) return false;
+	if (!mb.Valid()) return false;
 
-	EthTrap &et = (EthTrap&)buf->eth;
+	EthTrap &et = *((EthTrap*)mb->GetDataPtr());
 
 	TrapError &trap = (TrapError&)et.trap;
 
@@ -71,9 +71,9 @@ bool TRAP_INFO_SendError(u32 error)
 	trap.hdr.cmd = TRAP_INFO_COMMAND_ERROR;
 	trap.error = error;
 
-	buf->len = sizeof(EthUdp) + sizeof(trap);
+	mb->len = sizeof(EthUdp) + sizeof(trap);
 	
-	SendTrap(buf);
+	SendTrap(mb);
 
 	if (__trace) { TRAP_TRACE_PrintString(__func__); };
 
@@ -84,11 +84,11 @@ bool TRAP_INFO_SendError(u32 error)
 
 bool TRAP_INFO_SendCaptureIP(u32 old_ip, u16 old_port)
 {
-	EthBuf* buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTrap)));
 
-	if (buf == 0) return false;
+	if (!mb.Valid()) return false;
 
-	EthTrap &et = (EthTrap&)buf->eth;
+	EthTrap &et = *((EthTrap*)mb->GetDataPtr());
 
 	TrapIP &trap = (TrapIP&)et.trap;
 
@@ -97,9 +97,9 @@ bool TRAP_INFO_SendCaptureIP(u32 old_ip, u16 old_port)
 	trap.ip = old_ip;
 	trap.port = old_port;
 
-	buf->len = sizeof(EthUdp) + sizeof(trap);
+	mb->len = sizeof(EthUdp) + sizeof(trap);
 
-	SendTrap(buf);
+	SendTrap(mb);
 
 	if (__trace) { TRAP_TRACE_PrintString(__func__); };
 
@@ -110,11 +110,11 @@ bool TRAP_INFO_SendCaptureIP(u32 old_ip, u16 old_port)
 
 bool TRAP_INFO_SendLostIP(u32 new_ip, u16 new_port)
 {
-	EthBuf* buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTrap)));
 
-	if (buf == 0) return false;
+	if (!mb.Valid()) return false;
 
-	EthTrap &et = (EthTrap&)buf->eth;
+	EthTrap &et = *((EthTrap*)mb->GetDataPtr());
 
 	TrapIP &trap = (TrapIP&)et.trap;
 
@@ -123,9 +123,9 @@ bool TRAP_INFO_SendLostIP(u32 new_ip, u16 new_port)
 	trap.ip = new_ip;
 	trap.port = new_port;
 
-	buf->len = sizeof(EthUdp) + sizeof(trap);
+	mb->len = sizeof(EthUdp) + sizeof(trap);
 
-	SendTrap(buf);
+	SendTrap(mb);
 
 	if (__trace) { TRAP_TRACE_PrintString(__func__); };
 
@@ -136,11 +136,11 @@ bool TRAP_INFO_SendLostIP(u32 new_ip, u16 new_port)
 
 bool TRAP_INFO_SendInfo()
 {
-	EthBuf* buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTrap)));
 
-	if (buf == 0) return false;
+	if (!mb.Valid()) return false;
 
-	EthTrap &et = (EthTrap&)buf->eth;
+	EthTrap &et = *((EthTrap*)mb->GetDataPtr());
 
 	TrapInfo &trap = (TrapInfo&)et.trap;
 
@@ -156,9 +156,9 @@ bool TRAP_INFO_SendInfo()
 	trap.device_type = 1;// память 
 	trap.device_telemetry = 2; // USART
 	
-	buf->len = sizeof(EthUdp) + sizeof(trap);
+	mb->len = sizeof(EthUdp) + sizeof(trap);
 
-	SendTrap(buf);
+	SendTrap(mb);
 
 	if (__trace) { TRAP_TRACE_PrintString(__func__); };
 
@@ -171,11 +171,11 @@ bool TRAP_INFO_SendInfo()
 
 bool TRAP_CLOCK_SendMain(/*const RTC_type &rtc*/)
 {
-	EthBuf* buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTrap)));
 
-	if (buf == 0) return false;
+	if (!mb.Valid()) return false;
 
-	EthTrap &et = (EthTrap&)buf->eth;
+	EthTrap &et = *((EthTrap*)mb->GetDataPtr());
 
 	TrapClock &trap = (TrapClock&)et.trap;
 
@@ -185,9 +185,9 @@ bool TRAP_CLOCK_SendMain(/*const RTC_type &rtc*/)
 	
 	GetTime(&trap.rtc);	
 
-	buf->len = sizeof(EthUdp) + sizeof(trap);
+	mb->len = sizeof(EthUdp) + sizeof(trap);
 
-	SendTrap(buf);
+	SendTrap(mb);
 
 //	if (__trace) { TRAP_TRACE_PrintString(__func__); };
 
@@ -200,11 +200,11 @@ bool TRAP_CLOCK_SendMain(/*const RTC_type &rtc*/)
 
 bool TRAP_TRACE_SendData(const char *pData, u32 size)
 {
-	EthBuf* buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTrpHdr)+size));
 
-	if (buf == 0) return false;
+	if (!mb.Valid()) return false;
 
-	EthTrap &et = (EthTrap&)buf->eth;
+	EthTrap &et = *((EthTrap*)mb->GetDataPtr());
 
 	Trap &trap = (Trap&)et.trap;
 
@@ -212,7 +212,7 @@ bool TRAP_TRACE_SendData(const char *pData, u32 size)
 
 	trap.hdr.cmd = TRAP_TRACE_COMMAND_MAIN;
 
-	u32 maxlen = buf->MaxLen() - sizeof(EthTrpHdr);
+	u32 maxlen = mb->MaxLen() - sizeof(EthTrpHdr);
 
 	if (size > maxlen)
 	{
@@ -221,9 +221,9 @@ bool TRAP_TRACE_SendData(const char *pData, u32 size)
 
 	COPY(pData, trap.data, size);
 
-	buf->len = sizeof(EthUdp) + sizeof(TrapHdr) + size;
+	mb->len = sizeof(EthUdp) + sizeof(TrapHdr) + size;
 
-	SendTrap(buf);
+	SendTrap(mb);
 
 	return true;
 }
@@ -232,11 +232,11 @@ bool TRAP_TRACE_SendData(const char *pData, u32 size)
 
 bool TRAP_TRACE_PrintString(const char *data, ...)
 {
-	EthBuf* buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(IP_MTU));
 
-	if (buf == 0) return false;
+	if (!mb.Valid()) return false;
 
-	EthTrap &et = (EthTrap&)buf->eth;
+	EthTrap &et = *((EthTrap*)mb->GetDataPtr());
 
 	Trap &trap = (Trap&)et.trap;
 
@@ -248,7 +248,7 @@ bool TRAP_TRACE_PrintString(const char *data, ...)
 
     va_start(arglist, data);
     
-	int i = vsnprintf((char*)trap.data, buf->MaxLen() - sizeof(EthTrpHdr) - 2, data, arglist);
+	int i = vsnprintf((char*)trap.data, mb->MaxLen() - sizeof(EthTrpHdr) - 2, data, arglist);
 
 	if (i < 0) i = 0;
 	
@@ -259,9 +259,11 @@ bool TRAP_TRACE_PrintString(const char *data, ...)
 
 	i += 2;
 
-	buf->len = sizeof(EthUdp) + sizeof(TrapHdr) + i;
+	mb->len = sizeof(EthUdp) + sizeof(TrapHdr) + i;
 
-	SendTrap(buf);
+	SendTrap(mb);
+
+	va_end(arglist);
 
 	return true;
 }
@@ -316,11 +318,11 @@ void TRAP_TRACE_PrintHex(u32 number)
 
 bool TRAP_MEMORY_SendInfo()
 {
-	EthBuf* buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTrap)));
 
-	if (buf == 0) return false;
+	if (!mb.Valid()) return false;
 
-	EthTrap &et = (EthTrap&)buf->eth;
+	EthTrap &et = *((EthTrap*)mb->GetDataPtr());
 
 	TrapMemInfo &trap = (TrapMemInfo&)et.trap;
 
@@ -332,9 +334,9 @@ bool TRAP_MEMORY_SendInfo()
 	trap.size = FLASH_Full_Size_Get();
 	trap.size_used = FLASH_Used_Size_Get();
 
-	buf->len = sizeof(EthUdp) + sizeof(trap);
+	mb->len = sizeof(EthUdp) + sizeof(trap);
 
-	SendTrap(buf);
+	SendTrap(mb);
 
 	if (__trace) { TRAP_TRACE_PrintString(__func__); };
 
@@ -345,11 +347,11 @@ bool TRAP_MEMORY_SendInfo()
 
 bool TRAP_MEMORY_SendStatus(u32 progress, byte status)
 {
-	EthBuf* buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTrap)));
 
-	if (buf == 0) return false;
+	if (!mb.Valid()) return false;
 
-	EthTrap &et = (EthTrap&)buf->eth;
+	EthTrap &et = *((EthTrap*)mb->GetDataPtr());
 
 	TrapMemStatus &trap = (TrapMemStatus&)et.trap;
 
@@ -360,9 +362,9 @@ bool TRAP_MEMORY_SendStatus(u32 progress, byte status)
 	trap.progress = progress;
 	trap.status = status;
 
-	buf->len = sizeof(EthUdp) + sizeof(trap);
+	mb->len = sizeof(EthUdp) + sizeof(trap);
 
-	SendTrap(buf);
+	SendTrap(mb);
 
 	//if (__trace) { TRAP_TRACE_PrintString(__func__); };
 
@@ -374,11 +376,11 @@ bool TRAP_MEMORY_SendStatus(u32 progress, byte status)
 
 bool TRAP_MEMORY_SendSession(u16 session, i64 size, i64 last_adress, RTC_type start_rtc, RTC_type stop_rtc, byte flags)
 {
-	EthBuf* buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTrap)));
 
-	if (buf == 0) return false;
+	if (!mb.Valid()) return false;
 
-	EthTrap &et = (EthTrap&)buf->eth;
+	EthTrap &et = *((EthTrap*)mb->GetDataPtr());
 
 	TrapSession &trap = (TrapSession&)et.trap;
 
@@ -393,9 +395,9 @@ bool TRAP_MEMORY_SendSession(u16 session, i64 size, i64 last_adress, RTC_type st
 	trap.si.stop_rtc = stop_rtc;
 	trap.si.flags = flags;
 
-	buf->len = sizeof(EthUdp) + sizeof(trap);
+	mb->len = sizeof(EthUdp) + sizeof(trap);
 
-	SendTrap(buf);
+	SendTrap(mb);
 
 	if (__trace) { TRAP_TRACE_PrintString("TRAP_MEMORY_SendSession ses=%5hu, size=%08X %08X, adr=%08X %08X", session, (u32)(size>>32), (u32)size, (u32)(last_adress>>32), (u32)(last_adress)); };
 
@@ -416,8 +418,8 @@ static bool TRAP_MEMORY_SendNullSession()
 	SessionInfo si;
 
 	si.size = 0;
-	si.last_adress = -1;
-	si.session = -1;
+	si.last_adress = ~0;
+	si.session = ~0;
 
 	return TRAP_MEMORY_SendSession(si.session, si.size, si.last_adress, si.start_rtc, si.stop_rtc, si.flags);
 }
@@ -479,11 +481,11 @@ void TRAP_BATTERY_SendStatusMessage(u16 cmd)
 
 static bool TRAP_SendAsknowlege(byte device, u32 on_packet)
 {
-	EthBuf* buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTrap)));
 
-	if (buf == 0) return false;
+	if (!mb.Valid()) return false;
 
-	EthTrap &et = (EthTrap&)buf->eth;
+	EthTrap &et = *((EthTrap*)mb->GetDataPtr());
 
 	TrapAsk &trap = (TrapAsk&)et.trap;
 
@@ -492,9 +494,9 @@ static bool TRAP_SendAsknowlege(byte device, u32 on_packet)
 	trap.hdr.cmd = TRAP_COMMAND_ASKNOWLEGE;
 	trap.on_packet = on_packet;
 
-	buf->len = sizeof(EthUdp) + sizeof(TrapAsk);
+	mb->len = sizeof(EthUdp) + sizeof(TrapAsk);
 	
-	SendTrap(buf);
+	SendTrap(mb);
 
 	if (__trace) { TRAP_TRACE_PrintString("%s('%c', 0x%08X)", __func__, device, on_packet); };
 
@@ -503,7 +505,7 @@ static bool TRAP_SendAsknowlege(byte device, u32 on_packet)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void TRAP_HandleRxData(EthBuf *b)
+void TRAP_HandleRxData(Ptr<MB> &mb)
 {
 	EthTrap *et = (EthTrap*)&b->eth;
 
@@ -664,7 +666,7 @@ void TRAP_HandleRxData(EthBuf *b)
 
 						stop = true;
 
-						FLASH_SendStatus(-1, FLASH_STATUS_STOP);
+						FLASH_SendStatus(~0, FLASH_STATUS_STOP);
 
 //						Mode_Ethernet_Flash_Stop();
 						break;
@@ -675,7 +677,7 @@ void TRAP_HandleRxData(EthBuf *b)
 
 						pause = true;
 
-						FLASH_SendStatus(-1, FLASH_STATUS_PAUSE);
+						FLASH_SendStatus(~0, FLASH_STATUS_PAUSE);
 
 						break;
 
@@ -685,7 +687,7 @@ void TRAP_HandleRxData(EthBuf *b)
 
 						pause = false;
 
-						FLASH_SendStatus(-1, FLASH_STATUS_RESUME);
+						FLASH_SendStatus(~0, FLASH_STATUS_RESUME);
 
 						break;
 
@@ -903,7 +905,7 @@ static bool UpdateSendVector()
 				{
 					t->len = 0;
 
-					FLASH_SendStatus(-1, FLASH_STATUS_READ_VECTOR_READY);
+					FLASH_SendStatus(~0, FLASH_STATUS_READ_VECTOR_READY);
 
 					stop = false;
 					pause = false;
@@ -1096,7 +1098,7 @@ static bool UpdateSendVector_Dlya_Vova()
 
 			if (vecCount >= size)
 			{
-				FLASH_SendStatus(-1, FLASH_STATUS_READ_VECTOR_READY);
+				FLASH_SendStatus(~0, FLASH_STATUS_READ_VECTOR_READY);
 
 				stop = false;
 				pause = false;

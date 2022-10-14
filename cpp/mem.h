@@ -33,8 +33,8 @@ protected:
 
 public:
 
-	static	MEMB*	Alloc()	{ return _freeList.Get(); }
-	virtual void	Free()	{ _freeList.Add(this); }
+	static	MEMB*	Alloc()	{ MEMB *p = _freeList.Get(); if (p != 0) {p->dataOffset = 0; p->len = 0; }; return p; }
+	virtual void	Free()	{ if (this != 0) _freeList.Add(this); }
 	virtual	u32		MaxLen() { return sizeof(data)+sizeof(exData); }
 
 					MEMB() { _freeList.Init(); _freeList.Add(this); }

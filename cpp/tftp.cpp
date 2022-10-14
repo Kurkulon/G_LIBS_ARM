@@ -43,7 +43,7 @@ static u16 srcUDPPort	= 0;
 //static TrapReq  traps[10];
 
 //static List<Receive_Desc> freeTrapList;
-static List<EthBuf> reqTrapList;
+static ListPtr<MB> reqTrapList;
 
 static TM32 tm;
 static TM32 reboot;
@@ -98,14 +98,14 @@ __packed struct	EthTftp
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static void SendFragTFTP(EthBuf *p)
+static void SendFragTFTP(Ptr<MB> &mb)
 {
 	if (!EmacIsConnected())
 	{
 		return;
 	};
 
-	EthUdp &et = (EthUdp&)p->eth;
+	EthUdp &et = *((EthUdp*)mb->GetDataPtr());
 
 	et.eth.dest = ComputerEmacAddr;
 
@@ -113,27 +113,27 @@ static void SendFragTFTP(EthBuf *p)
 
 	if (et.iph.off == 0) { et.iph.id = GetIpID(); };
 
-	TransmitFragUdp(p, srcUDPPort, ComputerUDPPort);
+	TransmitFragUdp(mb, srcUDPPort, ComputerUDPPort);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static void SendTFTP(EthBuf *p)
+static void SendTFTP(Ptr<MB> &mb)
 {
-	EthUdp &et = (EthUdp&)p->eth;
+	EthUdp &et = *((EthUdp*)mb->GetDataPtr());
 
 	et.iph.off = 0;
 
-	SendFragTFTP(p);
+	SendFragTFTP(mb);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool RequestTFTP(EthBuf* mb)
+bool RequestTFTP(Ptr<MB> &mb)
 {
-	EthUdp *h = (EthUdp*)&mb->eth;
+	EthUdp &h = *((EthUdp*)mb->GetDataPtr());
 
-	h->udp.len = ReverseWord(h->udp.len);
+	h.udp.len = ReverseWord(h.udp.len);
 
 	reqTrapList.Add(mb);
 
@@ -196,15 +196,15 @@ bool RequestTFTP(EthBuf* mb)
 
 
 /*********************TX****************************************************/
-static void TFTP_SendData(EthBuf *mb, u16 block, u16 size)
+static void TFTP_SendData(Ptr<MB> &mb, u16 block, u16 size)
 {
-	if (mb == 0) return;
+	if (!mb.Valid()) return;
 
-	EthTftp *h = (EthTftp*)&mb->eth;
+	EthTftp &h = *((EthTftp*)mb->GetDataPtr());
 
-	h->tftp.th.opcode = SWAP16(TFTP_OPCODE_DATA);
-	h->tftp.th.DATA.block = SWAP16(block);
-	mb->len = sizeof(EthUdp) + sizeof(h->tftp.th)+size;
+	h.tftp.th.opcode = SWAP16(TFTP_OPCODE_DATA);
+	h.tftp.th.DATA.block = SWAP16(block);
+	mb->len = sizeof(EthUdp) + sizeof(h.tftp.th)+size;
 
 	SendTFTP(mb);	
 }
@@ -213,90 +213,90 @@ static void TFTP_SendData(EthBuf *mb, u16 block, u16 size)
 
 static void TFTP_SendAck(u16 block)
 {
-	EthBuf *buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTftp)));
 
-	if (buf == 0) return;
+	if (!mb.Valid()) return;
 
-	EthTftp *h = (EthTftp*)&buf->eth;
+	EthTftp &h = *((EthTftp*)mb->GetDataPtr());
 
-	h->tftp.th.opcode = SWAP16(TFTP_OPCODE_ACK);
-	h->tftp.th.ACK.block = SWAP16(block);
-	buf->len = sizeof(EthUdp) + sizeof(h->tftp.th);
+	h.tftp.th.opcode = SWAP16(TFTP_OPCODE_ACK);
+	h.tftp.th.ACK.block = SWAP16(block);
+	mb->len = sizeof(EthUdp) + sizeof(h.tftp.th);
 
-	SendTFTP(buf);	
+	SendTFTP(mb);	
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 static void TFTP_SendError(u16 error, char *message)
 {
-	EthBuf *buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTftp)));
 
-	if (buf == 0) return;
+	if (!mb.Valid()) return;
 
-	EthTftp *h = (EthTftp*)&buf->eth;
+	EthTftp &h = *((EthTftp*)mb->GetDataPtr());
 
-	h->tftp.th.opcode = SWAP16(TFTP_OPCODE_ERROR);
-	h->tftp.th.ERROR.error = SWAP16(error);
+	h.tftp.th.opcode = SWAP16(TFTP_OPCODE_ERROR);
+	h.tftp.th.ERROR.error = SWAP16(error);
 
-	u32 l = strlcpy(h->tftp.th.ERROR.data, message, sizeof(h->tftp.data));
+	u32 l = strlcpy(h.tftp.th.ERROR.data, message, sizeof(h.tftp.data));
 
-	buf->len = sizeof(EthUdp) + sizeof(h->tftp.th) + l;
+	mb->len = sizeof(EthUdp) + sizeof(h.tftp.th) + l;
 
-	SendTFTP(buf);	
+	SendTFTP(mb);	
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 static void TFTP_SendVersion(u16 version)
 {
-	EthBuf *buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTftp)));
 
-	if (buf == 0) return;
+	if (!mb.Valid()) return;
 
-	EthTftp *h = (EthTftp*)&buf->eth;
+	EthTftp &h = *((EthTftp*)mb->GetDataPtr());
 
-	h->tftp.th.opcode = SWAP16(TFTP_OPCODE_DATA);
-	h->tftp.th.DATA.block = SWAP16(1);
+	h.tftp.th.opcode = SWAP16(TFTP_OPCODE_DATA);
+	h.tftp.th.DATA.block = SWAP16(1);
 	
-	DataPointer p(h->tftp.th.DATA.data);
+	DataPointer p(h.tftp.th.DATA.data);
 
 	p.w[0] = version;
 
-	buf->len = sizeof(EthUdp) + sizeof(h->tftp.th) + 2;
+	mb->len = sizeof(EthUdp) + sizeof(h.tftp.th) + 2;
 
-	SendTFTP(buf);	
+	SendTFTP(mb);	
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 static void TFTP_SendMode(byte mode)
 {
-	EthBuf *buf = GetSysEthBuffer();
+	Ptr<MB> mb(AllocMemBuffer(sizeof(EthTftp)));
 
-	if (buf == 0) return;
+	if (!mb.Valid()) return;
 
-	EthTftp *h = (EthTftp*)&buf->eth;
+	EthTftp &h = *((EthTftp*)mb->GetDataPtr());
 
-	h->tftp.th.opcode = SWAP16(TFTP_OPCODE_DATA);
-	h->tftp.th.DATA.block = SWAP16(1);
+	h.tftp.th.opcode = SWAP16(TFTP_OPCODE_DATA);
+	h.tftp.th.DATA.block = SWAP16(1);
 	
-	h->tftp.th.DATA.data[0] = mode;
+	h.tftp.th.DATA.data[0] = mode;
 
-	buf->len = sizeof(EthUdp) + sizeof(h->tftp.th) - sizeof(h->tftp.th.DATA.data) + 1;
+	mb->len = sizeof(EthUdp) + sizeof(h.tftp.th) - sizeof(h.tftp.th.DATA.data) + 1;
 
-	SendTFTP(buf);	
+	SendTFTP(mb);	
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool TFTP_HandleRxData(EthBuf *mb)
+static bool TFTP_HandleRxData(Ptr<MB> &mb)
 {
-	if (mb == 0) return false;
+	if (!mb.Valid()) return false;
 
 	tftp_processed++;
 
-	EthTftp *h = (EthTftp*)&mb->eth;
+	EthTftp *h = ((EthTftp*)mb->GetDataPtr());
 	
 	u16 len = h->eudp.udp.len;
 
@@ -388,7 +388,7 @@ static bool TFTP_HandleRxData(EthBuf *mb)
 					tftp_write_block_req++;
 					tftp_write_block_size = h->eudp.udp.len - sizeof(h->eudp.udp) - sizeof(tftp) + sizeof(tftp.DATA.data);
 
-					FLWB& flwb = *((FLWB*)&mb->eth);
+					FLWB& flwb = *((FLWB*)mb->GetDataPtr());
 
 					flwb.adr = (tftp_write_block - 1) * TFTP_DATA_CHUNK_SIZE;
 					flwb.dataLen = tftp_write_block_size; //TFTP_DATA_CHUNK_SIZE;
@@ -436,9 +436,7 @@ static bool TFTP_HandleRxData(EthBuf *mb)
 static void UpdateRequestTFTP()
 {
 	static byte i = 0;
-	static EthBuf *mb = 0;
-
-	EthUdp* h = (EthUdp*)&mb->eth;
+	static Ptr<MB> mb;
 
 	switch(i)
 	{
@@ -446,7 +444,7 @@ static void UpdateRequestTFTP()
 
 			mb = reqTrapList.Get();
 
-			if (mb != 0)
+			if (mb.Valid())
 			{
 				i++;
 			};
@@ -454,6 +452,8 @@ static void UpdateRequestTFTP()
 			break;
 
 		case 1:
+		{
+			EthUdp* h = (EthUdp*)mb->GetDataPtr();
 
 			ComputerEmacAddr	= h->eth.src;
 			ComputerIpAddr		= h->iph.src;
@@ -468,6 +468,7 @@ static void UpdateRequestTFTP()
 			i = 0;
 
 			break;
+		};
 	};
 } 
 
@@ -477,7 +478,7 @@ bool TFTP_Idle()
 {
 	UpdateRequestTFTP();
 
-	EthBuf* buf = 0;
+	Ptr<MB> mb;
 
 	bool c = true;
 
@@ -487,13 +488,13 @@ bool TFTP_Idle()
 		{
 			case TFTP_COMMAND_PROGRAMM:
 
-				buf = GetHugeTxBuffer();
+				mb = AllocMemBuffer(sizeof(EthTftp) + TFTP_DATA_CHUNK_SIZE);
 
-				if (buf != 0)
+				if (mb.Valid())
 				{
-					tftp_read_block_size = ISP_Flash_Read((tftp_read_block - 1) * TFTP_DATA_CHUNK_SIZE, ((EthTftp*)&buf->eth)->tftp.th.DATA.data, TFTP_DATA_CHUNK_SIZE);
+					tftp_read_block_size = ISP_Flash_Read((tftp_read_block - 1) * TFTP_DATA_CHUNK_SIZE, ((EthTftp*)mb->GetDataPtr())->tftp.th.DATA.data, TFTP_DATA_CHUNK_SIZE);
 
-					TFTP_SendData(buf, tftp_read_block, tftp_read_block_size);
+					TFTP_SendData(mb, tftp_read_block, tftp_read_block_size);
 					tftp_read_block_ready = tftp_read_block;
 
 					if (tftp_read_block_size < TFTP_DATA_CHUNK_SIZE) tftp_read_block = 0;

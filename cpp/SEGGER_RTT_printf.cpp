@@ -297,7 +297,7 @@ int SEGGER_RTT_vprintf(unsigned BufferIndex, const char * sFormat, va_list * pPa
         case '0': FormatFlags |= FORMAT_FLAG_PAD_ZERO;     sFormat++; break;
         case '+': FormatFlags |= FORMAT_FLAG_PRINT_SIGN;   sFormat++; break;
         case '#': FormatFlags |= FORMAT_FLAG_ALTERNATE;    sFormat++; break;
-        default:  goto FilterFieldWidth;                   break;
+        default:  goto FilterFieldWidth;                  // break;
         }
       } while (1);
       //
@@ -438,6 +438,11 @@ int SEGGER_RTT_printf(unsigned BufferIndex, const char * sFormat, ...) {
   va_list ParamList;
 
   va_start(ParamList, sFormat);
-  return SEGGER_RTT_vprintf(BufferIndex, sFormat, &ParamList);
+
+  int res = SEGGER_RTT_vprintf(BufferIndex, sFormat, &ParamList);
+
+  va_end(ParamList);
+
+  return res;
 }
 /*************************** End of file ****************************/

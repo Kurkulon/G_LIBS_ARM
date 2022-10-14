@@ -174,8 +174,8 @@ class ComPort : public USIC
 	  
 	//ComPort() : _connected(false), _status485(READ_END) {}
 	ComPort(byte num, T_HW::S_PORT* ptx, T_HW::S_PORT* prx, T_HW::S_PORT* prts, u32 mtx, u32 mrx, u32 mrts, u32 muxtx, u32 muxrx, u32 txpo, u32 rxpo, u32 gen_src, u32 gen_clk, DMA_CH *dma)
-		: USIC(num), _status485(READ_END), _PIO_TX(ptx), _PIO_RX(prx), _PIO_RTS(prts), _MASK_TX(mtx), _MASK_RX(mrx), _MASK_RTS(mrts),
-		_PMUX_TX(muxtx), _PMUX_RX(muxrx), _TXPO(txpo), _RXPO(rxpo), _GEN_SRC(gen_src), _GEN_CLK(gen_clk), _DMA(dma) {}
+		: USIC(num), _PIO_TX(ptx), _PIO_RX(prx), _PIO_RTS(prts), _MASK_TX(mtx), _MASK_RX(mrx), _MASK_RTS(mrts),
+		_PMUX_TX(muxtx), _PMUX_RX(muxrx), _GEN_SRC(gen_src), _GEN_CLK(gen_clk), _TXPO(txpo), _RXPO(rxpo), _DMA(dma), _status485(READ_END) {}
 
 
 				bool	Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits);

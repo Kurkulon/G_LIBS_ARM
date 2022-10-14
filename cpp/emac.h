@@ -4,6 +4,7 @@
 #include "types.h"
 #include "list.h"
 #include "EMAC_DEF.h"
+#include "mem.h"
 
 extern bool	InitEMAC();
 extern void	UpdateEMAC();
@@ -320,58 +321,58 @@ union EthPtr
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-__packed struct EthBuf
-{
-	EthBuf*		next;
-
-	u32			len;
-	//u16			z_align;
-
-	EthHdr		eth;
-
-	virtual	u32	MaxLen() { return sizeof(eth); }
-	virtual	void Free() {}
-
-	EthBuf() : next(0), len(0) {}
-};
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-__packed struct EthArpBuf : public EthBuf
-{
-	ArpHdr	arp;
-};
+//__packed struct EthBuf
+//{
+//	EthBuf*		next;
+//
+//	u32			len;
+//	//u16			z_align;
+//
+//	EthHdr		eth;
+//
+//	virtual	u32	MaxLen() { return sizeof(eth); }
+//	virtual	void Free() {}
+//
+//	EthBuf() : next(0), len(0) {}
+//};
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-__packed struct EthIpBuf : public EthBuf
-{
-	IPheader	iph;
-};
+//__packed struct EthArpBuf : public EthBuf
+//{
+//	ArpHdr	arp;
+//};
+//
+////+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//
+//__packed struct EthIpBuf : public EthBuf
+//{
+//	IPheader	iph;
+//};
+//
+////+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//
+//__packed struct EthIcmpBuf : public EthIpBuf
+//{
+//	IcmpEchoHdr	icmp;
+//};
+//
+////+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//
+//__packed struct EthUdpBuf : public EthIpBuf
+//{
+//	UdpHdr	udp;
+//};
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-__packed struct EthIcmpBuf : public EthIpBuf
-{
-	IcmpEchoHdr	icmp;
-};
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-__packed struct EthUdpBuf : public EthIpBuf
-{
-	UdpHdr	udp;
-};
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-extern bool TransmitEth(EthBuf *b);
-extern bool TransmitIp(EthBuf *b);
-extern bool TransmitFragIp(EthBuf *b);
+extern bool TransmitEth(Ptr<MB> &mb);
+extern bool TransmitIp(Ptr<MB> &mb);
+extern bool TransmitFragIp(Ptr<MB> &mb);
 //extern bool TransmitUdp(EthBuf *b);
-extern bool TransmitFragUdp(EthBuf *b, u16 src, u16 dst);
-extern EthBuf* GetSysEthBuffer();
-extern EthBuf* GetHugeTxBuffer();
+extern bool TransmitFragUdp(Ptr<MB> &mb, u16 src, u16 dst);
+//extern EthBuf* GetSysEthBuffer();
+//extern EthBuf* GetHugeTxBuffer();
 //extern const MAC& HW_EMAC_GetHwAdr();
 //extern byte HW_EMAC_GetAdrPHY();
 //extern u32  HW_EMAC_GetIpAdr();
@@ -379,7 +380,7 @@ extern EthBuf* GetHugeTxBuffer();
 //extern u32  HW_EMAC_GetDhcpIpAdr();
 //extern u16  HW_EMAC_GetUdpInPort();
 //extern u16  HW_EMAC_GetUdpOutPort();
-extern bool HW_EMAC_RequestUDP(EthBuf* mb);
+extern bool HW_EMAC_RequestUDP(Ptr<MB> &mb);
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

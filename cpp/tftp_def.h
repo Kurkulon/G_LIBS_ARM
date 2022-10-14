@@ -83,7 +83,7 @@ typedef struct	__attribute__ ((packed))
 
 extern u16	TFTP_GetBootloaderVersion();
 extern void	ISP_InitFlashWrite();
-extern bool ISP_RequestFlashWrite(EthBuf *mb);
+extern bool ISP_RequestFlashWrite(Ptr<MB> &mb);
 extern u32	ISP_Flash_Read(u32 addr, byte *data, u32 size);
 extern u32	ISP_GetFlashWriteError();
 extern u32	ISP_GetFlashWriteOK();

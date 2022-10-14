@@ -4,10 +4,11 @@
 //#include "rtc.h"
 //#include "power.h"
 #include "trap_def.h"
+#include "mem.h"
 
 
 /************ Common ******************************************/
-extern void TRAP_HandleRxData(EthBuf *b);
+extern void TRAP_HandleRxData(Ptr<MB> &mb);
 extern void TRAP_HandleRxError();
 extern void TRAP_Init();
 extern void TRAP_Idle();
