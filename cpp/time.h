@@ -52,7 +52,26 @@ extern void GetTime(RTC *t);
 
 extern RTC timeBDC;
 
+#ifdef WIN32	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+extern LARGE_INTEGER queryPerformanceFrequency;
+
+//#define US2RT(x) (((u32)(x) * queryPerformanceFrequency.LowPart + 500000UL) / 1000000UL)
+//#define MS2RT(x) (((u32)(x) * queryPerformanceFrequency.LowPart + 500UL) / 1000UL)
+
+inline u32 GetCYCCNT() 
+{ 
+	LARGE_INTEGER t;
+
+	QueryPerformanceCounter(&t);
+
+	return t.LowPart; 
+}
+#else
+
 inline u32 GetCYCCNT() { return CM4::DWT->CYCCNT; }
+
+#endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

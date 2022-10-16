@@ -111,19 +111,19 @@ bool S_I2C::Connect(u32 baudrate)
 
 #else
 
-	HANDLE h;
+	//HANDLE h;
 
-	h = CreateFile("FRAM_I2C_STORE.BIN", GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
+	//h = CreateFile("FRAM_I2C_STORE.BIN", GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
 
-	if (h == INVALID_HANDLE_VALUE)
-	{
-		return;
-	};
+	//if (h == INVALID_HANDLE_VALUE)
+	//{
+	//	return false;
+	//};
 
-	dword bytes;
+	//dword bytes;
 
-	ReadFile(h, fram_I2c_Mem, sizeof(fram_I2c_Mem), &bytes, 0);
-	CloseHandle(h);
+	//ReadFile(h, fram_I2c_Mem, sizeof(fram_I2c_Mem), &bytes, 0);
+	//CloseHandle(h);
 
 #endif
 

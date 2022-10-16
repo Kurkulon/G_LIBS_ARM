@@ -507,7 +507,7 @@ static bool TRAP_SendAsknowlege(byte device, u32 on_packet)
 
 void TRAP_HandleRxData(Ptr<MB> &mb)
 {
-	EthTrap *et = (EthTrap*)&b->eth;
+	EthTrap *et = ((EthTrap*)mb->GetDataPtr());
 
 	Trap *t = &et->trap;
 
@@ -800,7 +800,7 @@ static bool UpdateSendVector()
 	static byte i = 0;
 	static FLRB flrb;
 
-	static EthBuf *t = 0;
+	static Ptr<MB> mb;
 //	static VecData::Hdr h;
 
 	static u64 vecCount = 0;
@@ -875,11 +875,11 @@ static bool UpdateSendVector()
 			}
 			else if (!pause)
 			{
-				t = GetHugeTxBuffer();
+				mb = AllocMemBuffer(sizeof(TRP));
 
-				if (t != 0)
+				if (mb.Valid())
 				{
-					TRP &et = *((TRP*)&t->eth);
+					TRP &et = *((TRP*)mb->GetDataPtr());
 
 					flrb.data = et.data;
 					flrb.maxLen = sizeof(et.data);
@@ -903,7 +903,7 @@ static bool UpdateSendVector()
 			{
 				if (flrb.len == 0 || flrb.hdr.session != ses || vecCount > flashFullSize)
 				{
-					t->len = 0;
+					mb->len = 0;
 
 					FLASH_SendStatus(~0, FLASH_STATUS_READ_VECTOR_READY);
 
@@ -914,7 +914,7 @@ static bool UpdateSendVector()
 				}
 				else // if (flrb.hdr.crc == 0)
 				{
-					TRP &et = *((TRP*)&t->eth);
+					TRP &et = *((TRP*)mb->GetDataPtr());
 
 					TrapVector &trap = et.tv;
 
@@ -933,13 +933,13 @@ static bool UpdateSendVector()
 					et.eu.iph.id = ipID;
 					et.eu.iph.off = 0;
 
-					t->len = sizeof(et.eu) + sizeof(et.tv) + flrb.len;
+					mb->len = sizeof(et.eu) + sizeof(et.tv) + flrb.len;
 
 					//crc = CRC_CCITT_DMA(flrb.data, flrb.len, 0xFFFF);	// GetCRC16(flrb.data, flrb.len, 0xFFFF, 0);
 
 					if (flrb.hdr.dataLen > flrb.maxLen)
 					{
-						fragOff = t->len - sizeof(EthIp); //flrb.maxLen;
+						fragOff = mb->len - sizeof(EthIp); //flrb.maxLen;
 						fragLen = flrb.hdr.dataLen - flrb.maxLen;
 
 						et.eu.iph.off |= 0x2000;
@@ -950,12 +950,12 @@ static bool UpdateSendVector()
 					}
 					else
 					{
-						t->len -=  (flrb.crc != 0) ? flrb.len : 2;
+						mb->len -=  (flrb.crc != 0) ? flrb.len : 2;
 
 						i = 1;
 					};
 
-					SendFragTrap(t);
+					SendFragTrap(mb);
 				};
 			};
 
@@ -963,11 +963,11 @@ static bool UpdateSendVector()
 
 		case 3:
 
-			t = GetHugeTxBuffer();
+			mb = AllocMemBuffer(sizeof(FR));
 
-			if (t != 0)
+			if (mb.Valid())
 			{
-				FR  &ef = *((FR*)&t->eth);
+				FR  &ef = *((FR*)mb->GetDataPtr());
 
 				flrb.data = ef.data;
 				flrb.maxLen = sizeof(ef.data);
@@ -987,7 +987,7 @@ static bool UpdateSendVector()
 
 			if (flrb.ready)
 			{
-				FR  &ef = *((FR*)&t->eth);
+				FR  &ef = *((FR*)mb->GetDataPtr());
 
 				ef.ei.iph.id = ipID;
 				ef.ei.iph.off = (fragOff/8)&0x1FFF;
@@ -995,7 +995,7 @@ static bool UpdateSendVector()
 				fragLen -= flrb.len;
 				fragOff += flrb.len;
 
-				t->len = sizeof(ef.ei) + flrb.len;
+				mb->len = sizeof(ef.ei) + flrb.len;
 
 				//crc = CRC_CCITT_DMA(flrb.data, flrb.len, crc); //GetCRC16(flrb.data, flrb.len, crc, 0);
 
@@ -1009,10 +1009,10 @@ static bool UpdateSendVector()
 				}
 				else
 				{
-					t->len -= 2;
+					mb->len -= 2;
 				};
 
-				SendFragTrap(t);
+				SendFragTrap(mb);
 
 				if (fragLen > 0)
 				{
@@ -1037,7 +1037,7 @@ static bool UpdateSendVector_Dlya_Vova()
 	static byte i = 0;
 //	static FLRB flrb;
 
-	static EthBuf *t = 0;
+	static Ptr<MB> mb;
 //	static VecData::Hdr h;
 
 	static u32 vecCount = 0;
@@ -1113,11 +1113,11 @@ static bool UpdateSendVector_Dlya_Vova()
 			}
 			else if (!pause)
 			{
-				t = GetSysEthBuffer();
+				mb = AllocMemBuffer(sizeof(TRP));
 
-				if (t != 0)
+				if (mb.Valid())
 				{
-					TRP &et = *((TRP*)&t->eth);
+					TRP &et = *((TRP*)mb->GetDataPtr());
 
 					TrapVector &trap = et.tv;
 
@@ -1194,9 +1194,9 @@ static bool UpdateSendVector_Dlya_Vova()
 					et.data[0] = 0x40;
 					et.data[1] = 0xAD;
 
-					t->len = sizeof(et.eu) + sizeof(et.tv) + 0x1000;
+					mb->len = sizeof(et.eu) + sizeof(et.tv) + 0x1000;
 
-					SendTrap(t);
+					SendTrap(mb);
 
 					//i++;
 				};

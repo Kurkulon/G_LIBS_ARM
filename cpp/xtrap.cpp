@@ -31,9 +31,9 @@ struct TrapReq
 static TrapReq  traps[10];
 
 //static List<TrapReq> freeTrapList;
-static List<EthBuf> reqTrapList;
+static ListPtr<MB> reqTrapList;
 
-static List<EthBuf> txList;
+static ListPtr<MB> txList;
 //static List<SmallTx> txFree;
 
 static MAC ComputerEmacAddr = {0,0};	// Our Ethernet MAC address and IP address
@@ -92,9 +92,9 @@ bool ComputerFind = false;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool RequestTrap(EthBuf *mb)
+bool RequestTrap(Ptr<MB> &mb)
 {
-	EthUdp *h = (EthUdp*)&mb->eth;
+	EthUdp *h = ((EthUdp*)mb->GetDataPtr());
 
 	if ((h->udp.len = ReverseWord(h->udp.len)) < 19) return false;
 
@@ -109,32 +109,32 @@ bool RequestTrap(EthBuf *mb)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void FreeSmallTxBuffer(EthBuf* b)
-{
+//void FreeSmallTxBuffer(EthBuf* b)
+//{
 //	txFree.Add(b);
-}
+//}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void FreeHugeTxBuffer(EthBuf* b)
-{
+//void FreeHugeTxBuffer(EthBuf* b)
+//{
 //	txFree.Add(b);
+//}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void SendTrap(Ptr<MB> &mb)
+{
+	((EthIp*)mb->GetDataPtr())->iph.off = 0;
+
+	txList.Add(mb);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void SendTrap(EthBuf *p)
+void SendFragTrap(Ptr<MB> &mb)
 {
-	((EthIp*)&p->eth)->iph.off = 0;
-
-	txList.Add(p);
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-void SendFragTrap(EthBuf *p)
-{
-	txList.Add(p);
+	txList.Add(mb);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -142,18 +142,18 @@ void SendFragTrap(EthBuf *p)
 static void UpdateRequestTraps()
 {
 	static byte i = 0;
-	static EthBuf *req = 0;
+	static Ptr<MB> mb;
 	static EthPtr et = {0};
 
 	switch(i)
 	{
 		case 0:
 
-			req = reqTrapList.Get();
+			mb = reqTrapList.Get();
 
-			if (req != 0)
+			if (mb.Valid())
 			{
-				et.eth = &req->eth;
+				et.eth = (EthHdr*)mb->GetDataPtr();
 				i++;
 			};
 
@@ -207,9 +207,9 @@ static void UpdateRequestTraps()
 
 		case 5:
 
-			TRAP_HandleRxData(req);
+			TRAP_HandleRxData(mb);
 
-			req->Free(); req = 0;
+			mb.Free();
 
 			i = 0;
 
@@ -228,11 +228,11 @@ static void UpdateSendTraps()
 		return;
 	};
 
-	EthBuf *t = txList.Get();
+	Ptr<MB> mb = txList.Get();
 
-	if (t != 0)
+	if (mb.Valid())
 	{
-		EthUdp &et = (EthUdp&)t->eth;
+		EthUdp &et = *((EthUdp*)mb->GetDataPtr());
 
 		et.eth.dest = ComputerEmacAddr;
 
@@ -240,7 +240,7 @@ static void UpdateSendTraps()
 
 		if (et.iph.off == 0) { et.iph.id = GetIpID(); };
 
-		TransmitFragUdp(t, srcUDPPort, ComputerUDPPort);
+		TransmitFragUdp(mb, srcUDPPort, ComputerUDPPort);
 	};
 	
 	if (ComputerFind && tm.Check(500))

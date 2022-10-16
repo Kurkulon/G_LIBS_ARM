@@ -45,7 +45,7 @@ static byte nandReadStatus = 0x41;
 static u32 lastError = 0;
 
 
-static byte fram_I2c_Mem[0x10000];
+//static byte fram_I2c_Mem[0x10000];
 static byte fram_SPI_Mem[0x40000];
 
 static bool fram_spi_WREN = false;
@@ -498,6 +498,7 @@ static bool NAND_CheckDataComplete()
 
 static void NAND_Set_Features(byte adr, byte p1, byte p2, byte p3, byte p4)
 {
+#ifndef WIN32
 	NAND_DIR_OUT();
 	NAND_CMD_LATCH(NAND_CMD_SET_FEATURES);
 	NAND_ADR_LATCH(adr);
@@ -510,12 +511,14 @@ static void NAND_Set_Features(byte adr, byte p1, byte p2, byte p3, byte p4)
 	while(NAND_BUSY());
 
 	NAND_DIR_IN();
+#endif
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 static void NAND_Get_Features(byte adr, byte* p)
 {
+#ifndef WIN32
 	NAND_DIR_OUT();
 	NAND_CMD_LATCH(NAND_CMD_GET_FEATURES);
 	NAND_ADR_LATCH(adr);
@@ -532,12 +535,14 @@ static void NAND_Get_Features(byte adr, byte* p)
 	p[1] = NAND_READ(); 
 	p[2] = NAND_READ(); 
 	p[3] = NAND_READ(); 
+#endif
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 bool NAND_Read_ID(NandID *id)
 {
+#ifndef WIN32
 	__disable_irq();
 
 	NAND_DIR_OUT();
@@ -559,6 +564,8 @@ bool NAND_Read_ID(NandID *id)
 	//NAND_ReadDataDMA(id, sizeof(NandID));
 
 	//while (!NAND_CheckDataComplete());
+
+#endif
 
 	return true;
 }

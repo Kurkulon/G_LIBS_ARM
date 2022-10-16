@@ -9,6 +9,8 @@
 
 #ifndef __CC_ARM //WIN32
 
+#include <intrin.h>
+
 #define __packed /*__declspec(align(1))*/
 #define __softfp /**/
 #define __irq __declspec(naked)
@@ -18,7 +20,7 @@
 
 inline void __disable_irq() {}
 inline void __enable_irq() {}
-inline void __nop() {}
+//inline void __nop() {}
 
 #define __CC_ARM
 #define __TARGET_FPU_VFP

@@ -462,7 +462,7 @@ static void UpdateRequestTFTP()
 
 			if (!TFTP_HandleRxData(mb))
 			{
-				mb->Free();
+				mb.Free();
 			};
 
 			i = 0;

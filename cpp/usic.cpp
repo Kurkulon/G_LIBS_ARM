@@ -19,9 +19,9 @@ USICHWT*	const USIC::_usic_hw[USIC_NUM]	= {	HW::USIC0_CH0,	HW::USIC0_CH1,	HW::US
 
 #elif defined(WIN32)
 
-const u32	USIC::_usic_pid[USIC_NUM] = {PID_USIC0, PID_USIC0, PID_USIC1, PID_USIC1, PID_USIC2, PID_USIC2 };
+const byte	USIC::_usic_pid[USIC_NUM] = {0};
 
-USICHWT*	const USIC::_uhw[USIC_NUM] = { HW_USIC0, HW_USIC1, HW_USIC2, HW_USIC3, HW_USIC4, HW_USIC5 };
+USICHWT	const USIC::_usic_hw[USIC_NUM] = { 0 };
 
 #endif 
 

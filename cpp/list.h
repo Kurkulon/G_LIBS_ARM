@@ -11,6 +11,10 @@
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+#define PTR_LIST_FRIENDS(v) friend class Ptr<v>;friend class List<v>;friend class ListPtr<v>;friend class ListRef<v>
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 template <class T> struct List
 {
 
@@ -147,8 +151,8 @@ public:
 	Ptr& operator=(T* p)			{ if (ptr != p) { Free(); ptr = p; if (ptr != 0) ptr->count++; }; return *this; }
 	~Ptr()							{ Free(); }
 	bool Valid() const				{ return ptr != 0; }
-	void Alloc()					{ Free(); ptr = T::Alloc(); if (ptr != 0) ptr->count = 1; }
-	void Free()						{ if (ptr != 0) { if (ptr->count != 0) { ptr->count--; if (ptr->count == 0) ptr->Free(); };	ptr = 0; }; }
+	void Alloc()					{ Free(); ptr = T::Create(); if (ptr != 0) ptr->count = 1; }
+	void Free()						{ if (ptr != 0) { if (ptr->count != 0) { ptr->count--; if (ptr->count == 0) ptr->Destroy(); };	ptr = 0; }; }
 	T* operator->()					{ return ptr; }
 	T& operator*()					{ return *ptr; }
 };
@@ -157,20 +161,18 @@ public:
 
 template <class T> struct PtrObj
 {
-	friend class Ptr<T>;
-	friend class List<T>;
-	friend class ListPtr<T>;
+	PTR_LIST_FRIENDS(T);
 
 protected:
 
 	PtrObj*	next;
 	u32		count;
 
-	static	T*		Alloc();
+	//static	T*		Create();
 
 public:
 
-	virtual	void	Free() = 0;
+	virtual	void	Destroy() = 0;
 
 
 	PtrObj() : next(0), count(0) { }
@@ -332,8 +334,6 @@ template <class T> bool ListRef<T>::Add(const Ptr<T>& r)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#define PTR_LIST_FRIENDS(v) friend class Ptr<v>;friend class List<v>;friend class ListPtr<v>;friend class ListRef<v>
-
 template <class T> struct PtrItem;
 
 template <class T> struct PtrItem : public PtrObj<T>
@@ -344,10 +344,10 @@ protected:
 
 	static List<PtrItem> _freeList;
 
-	static	T*		Alloc()	{ return (T*)_freeList.Get(); };
+	static	T*		Create()	{ return (T*)_freeList.Get(); };
 
 	virtual	void	_FreeCallBack() {}
-	virtual	void	Free() { _FreeCallBack(); _freeList.Add(this); }
+	virtual	void	Destroy() { _FreeCallBack(); _freeList.Add(this); }
 
 public:
 

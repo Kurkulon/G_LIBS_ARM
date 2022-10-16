@@ -380,7 +380,7 @@ extern bool TransmitFragUdp(Ptr<MB> &mb, u16 src, u16 dst);
 //extern u32  HW_EMAC_GetDhcpIpAdr();
 //extern u16  HW_EMAC_GetUdpInPort();
 //extern u16  HW_EMAC_GetUdpOutPort();
-extern bool HW_EMAC_RequestUDP(Ptr<MB> &mb);
+//extern bool HW_EMAC_RequestUDP(Ptr<MB> &mb);
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

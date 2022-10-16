@@ -123,8 +123,10 @@ u16  txIpID = 0;
 
 /* GMAC local IO buffers descriptors. */
 #ifdef CPU_SAME53	
-	Receive_Desc	Rx_Desc[NUM_RX_BUF];
+	Receive_Desc	Rx_Desc[NUM_RX_DSC];
 	Transmit_Desc	Tx_Desc[NUM_TX_DSC];
+	Ptr<MB>			Rx_MB[NUM_RX_DSC];
+	Ptr<MB>			Tx_MB[NUM_TX_DSC];
 #elif defined(CPU_XMC48)
 	Receive_Desc	Rx_Desc[NUM_RX_BUF];
 	Transmit_Desc	Tx_Desc[NUM_TX_DSC];
@@ -143,7 +145,7 @@ u16  txIpID = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static List<EthBuf> txList;
+static ListPtr<MB> txList;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -186,17 +188,17 @@ static void tx_descr_init (void);
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-EthBuf* GetSysEthBuffer()
-{
-	return SysEthBuf::Alloc();
-}
+//EthBuf* GetSysEthBuffer()
+//{
+//	return SysEthBuf::Alloc();
+//}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-EthBuf* GetHugeTxBuffer()
-{
-	return HugeTx::Alloc();
-}
+//EthBuf* GetHugeTxBuffer()
+//{
+//	return HugeTx::Alloc();
+//}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -228,9 +230,7 @@ static void FreeTxDesc()
 
 		if (__debug && !HW::RamCheck(td.GetAdr())) __breakpoint(0); 
 
-		EthBuf* b; b = (EthBuf*)(td.GetAdr() - ((byte*)&b->eth - (byte*)b));
-
-		b->Free();
+		Tx_MB[TxFreeIndex].Free(); // EthBuf* b; b = (EthBuf*)(td.GetAdr() - ((byte*)&b->eth - (byte*)b));
 
 		TxFreeIndex = (td.ChkWrap()) ? 0 : TxFreeIndex + 1;
 
@@ -301,22 +301,22 @@ loop:
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool TransmitEth(EthBuf *b)
+bool TransmitEth(Ptr<MB> &mb)
 {
-	if (b == 0 || b->len < sizeof(EthHdr))
+	if (!mb.Valid() || mb->len < sizeof(EthHdr))
 	{
 		return false;
 	};
 
 #ifndef WIN32
 
-	b->eth.src = hwAdr;
+	((EthHdr*)mb->GetDataPtr())->src = hwAdr;
 
-	txList.Add(b);
+	txList.Add(mb);
 
 #else
 
-	txList.Add(b);
+	txList.Add(mb);
 
 	ResumeThread(handleTxThread);
 
@@ -348,11 +348,11 @@ bool TransmitEth(EthBuf *b)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool TransmitIp(EthBuf *mb)
+bool TransmitIp(Ptr<MB> &mb)
 {
-	if (mb == 0 || mb->len < sizeof(EthIp)) return false;
+	if (!mb.Valid() || mb->len < sizeof(EthIp)) return false;
 
-	EthIp &b = (EthIp&)mb->eth;
+	EthIp &b = *((EthIp*)mb->GetDataPtr());
 
 	b.iph.off = 0;		
 
@@ -372,11 +372,11 @@ bool TransmitIp(EthBuf *mb)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool TransmitFragIp(EthBuf *mb)
+bool TransmitFragIp(Ptr<MB> &mb)
 {
-	if (mb == 0 || mb->len < sizeof(EthIp))	return false;
+	if (!mb.Valid() || mb->len < sizeof(EthIp))	return false;
 
-	EthIp &b = (EthIp&)mb->eth;
+	EthIp &b = *((EthIp*)mb->GetDataPtr());
 
 	b.eth.protlen = SWAP16(PROT_IP);
 
@@ -395,11 +395,11 @@ bool TransmitFragIp(EthBuf *mb)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool TransmitUdp(EthBuf *mb)
+bool TransmitUdp(Ptr<MB> &mb)
 {
-	if (mb == 0 || mb->len < sizeof(EthUdp)) return false;
+	if (!mb.Valid() || mb->len < sizeof(EthUdp)) return false;
 
-	EthUdp &b = (EthUdp&)mb->eth;
+	EthUdp &b = *((EthUdp*)mb->GetDataPtr());
 
 	b.iph.p = PROT_UDP;
 	//b.udp.src = udpOutPort;
@@ -411,11 +411,11 @@ bool TransmitUdp(EthBuf *mb)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool TransmitFragUdp(EthBuf *mb, u16 src, u16 dst)
+bool TransmitFragUdp(Ptr<MB> &mb, u16 src, u16 dst)
 {
-	if (mb == 0 || mb->len < sizeof(EthUdp)) return false;
+	if (!mb.Valid() || mb->len < sizeof(EthUdp)) return false;
 
-	EthUdp &b = (EthUdp&)mb->eth;
+	EthUdp &b = *((EthUdp*)mb->GetDataPtr());
 
 	b.iph.p = PROT_UDP;
 
@@ -432,9 +432,9 @@ bool TransmitFragUdp(EthBuf *mb, u16 src, u16 dst)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool RequestARP(EthBuf *mb)
+static bool RequestARP(Ptr<MB> &mb)
 {
-	EthArp *h = (EthArp*)&mb->eth;
+	EthArp *h = (EthArp*)mb->GetDataPtr();
 
 	if (ReverseWord(h->arp.op) == ARP_REQUEST) // ARP REPLY operation
 	{     
@@ -442,11 +442,11 @@ static bool RequestARP(EthBuf *mb)
 		{
 			reqArpCount++;
 
-			EthBuf *buf = GetSysEthBuffer();
+			Ptr<MB> buf = AllocMemBuffer(sizeof(EthArp));
 
-			if (buf == 0) return false;
+			if (!buf.Valid()) return false;
 
-			EthArp *t = (EthArp*)&buf->eth;
+			EthArp *t = (EthArp*)buf->GetDataPtr();
 
 			t->eth.dest = h->eth.src;
 
@@ -475,19 +475,19 @@ static bool RequestARP(EthBuf *mb)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool RequestICMP(EthBuf* mb)
+static bool RequestICMP(Ptr<MB> &mb)
 {
-	EthIcmp *h = (EthIcmp*)&mb->eth;
+	EthIcmp *h = (EthIcmp*)mb->GetDataPtr();
 
 	if(h->icmp.type == ICMP_ECHO_REQUEST)
 	{
 		reqIcmpCount++;
 
-		EthIpBuf *buf = (EthIpBuf*)GetSysEthBuffer();
+		Ptr<MB> buf = AllocMemBuffer(ReverseWord(h->iph.len)+sizeof(EthHdr));
 
-		if (buf == 0) return false;
+		if (!buf.Valid()) return false;
 
-		EthIcmp *t = (EthIcmp*)&buf->eth;
+		EthIcmp *t = (EthIcmp*)buf->GetDataPtr();
 
 		t->eth.dest = h->eth.src;
 		t->iph.len = h->iph.len;		
@@ -530,9 +530,9 @@ static bool RequestICMP(EthBuf* mb)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool RequestDHCP(EthBuf *mb)
+static bool RequestDHCP(Ptr<MB> &mb)
 {
-	EthDhcp *h = (EthDhcp*)&mb->eth;
+	EthDhcp *h = (EthDhcp*)mb->GetDataPtr();
 
 	if (h->dhcp.op != 1) return false;
 
@@ -561,13 +561,11 @@ static bool RequestDHCP(EthBuf *mb)
 
 	if (op != DHCPDISCOVER && op != DHCPREQUEST) return false;
 
-	EthIpBuf *buf = (EthIpBuf*)GetSysEthBuffer();
+	Ptr<MB> buf = AllocMemBuffer(sizeof(EthDhcp));
 
-	if (buf == 0) return false;
+	if (!buf.Valid()) return false;
 
-	EthDhcp *t = (EthDhcp*)&buf->eth;
-
-
+	EthDhcp *t = (EthDhcp*)buf->GetDataPtr();
 
 	t->dhcp.op = 2;
 	t->dhcp.htype = 1;
@@ -629,9 +627,9 @@ static bool RequestDHCP(EthBuf *mb)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool RequestUDP(EthBuf* mb)
+static bool RequestUDP(Ptr<MB> &mb)
 {
-	EthUdp *h = (EthUdp*)&mb->eth;
+	EthUdp *h = (EthUdp*)mb->GetDataPtr();
 
 	bool c = false;
 
@@ -648,9 +646,9 @@ static bool RequestUDP(EthBuf* mb)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool RequestIP(EthBuf* mb, u32 stat)
+static bool RequestIP(Ptr<MB> &mb, u32 stat)
 {
-	EthIp *h = (EthIp*)&mb->eth;
+	EthIp *h = (EthIp*)mb->GetDataPtr();
 
 	if (h->iph.hl_v != 0x45) return false;
 
@@ -682,45 +680,44 @@ static void RecieveFrame()
 	}
 	else
 	{
-		bool c = false;
+		//bool c = false;
 
-		SysEthBuf *mb = 0;
+		Ptr<MB> &mb = Rx_MB[RxBufIndex];
 
 		if (buf.CheckRcvFrame()) // buffer contains a whole frame
 		{
-			if (__debug && !HW::RamCheck(buf.GetAdr())) __breakpoint(0); 
+			if (__debug && (!mb.Valid() || !HW::RamCheck(buf.GetAdr()))) __breakpoint(0); 
 
-			mb = (SysEthBuf*)(buf.GetAdr() - ((byte*)&mb->eth - (byte*)mb));
+			//mb = (SysEthBuf*)(buf.GetAdr() - ((byte*)&mb->eth - (byte*)mb));
 
-			switch (ReverseWord(mb->eth.protlen))
+			EthHdr &eth = *((EthHdr*)mb->GetDataPtr());
+
+			switch (ReverseWord(eth.protlen))
 			{
 				case PROT_ARP: // ARP Packet format
 
-					c = RequestARP(mb); break; 
+					RequestARP(mb); break; 
 
 				case PROT_IP:	// IP protocol frame
 
 					if (CheckStatusIP(buf.GetStatus()))
 					{
-						c = RequestIP(mb, buf.GetStatus());
+						RequestIP(mb, buf.GetStatus());
 					};
 
 					break;
 			};
 
-			if (c)
-			{
-				buf.ClrAdr();
-			};
+			mb.Free(); // if (c) buf.ClrAdr();
 		};
 
-		if (buf.GetAdr() == 0)
+		if (!mb.Valid())
 		{
-			EthBuf* nmb = GetSysEthBuffer();
+			mb = AllocMemBuffer(ETH_RX_BUF_SIZE);
 
-			if (nmb != 0)
+			if (mb.Valid())
 			{
-				buf.SetAdr(&nmb->eth, nmb->MaxLen());
+				buf.SetAdr(mb->GetDataPtr(), mb->MaxLen());
 			};
 		}
 		else
@@ -794,7 +791,7 @@ static void UpdateTransmit()
 
 	static byte i = 0;
 
-	static EthBuf *buf = 0;
+	static Ptr<MB> buf;
 
 	static Transmit_Desc *dsc = 0;
 
@@ -802,7 +799,9 @@ static void UpdateTransmit()
 	{
 		case 0:
 
-			if ((buf = txList.Get()) != 0)
+			buf = txList.Get();
+
+			if (buf.Valid())
 			{
 				i += 1;
 			}
@@ -817,7 +816,7 @@ static void UpdateTransmit()
 
 			if ((dsc = GetTxDesc()) != 0)
 			{
-				dsc->SetAdr(&buf->eth, buf->len);
+				dsc->SetAdr(buf->GetDataPtr(), buf->len);
 
 				#ifdef CPU_SAME53	
 
@@ -875,19 +874,19 @@ static void UpdateTransmit()
 
 DWORD WINAPI TxThreadFunction(LPVOID lpParam) 
 {
-	EthBuf *b = 0;
+	Ptr<MB> mb;
 
 	u32 count = 0;
 
 	while(1)
 	{
-		b = txList.Get();
+		mb = txList.Get();
 
-		if (b != 0)
+		if (mb.Valid())
 		{
 			EthPtr ep;
 
-			ep.eth = &b->eth;
+			ep.eth = (EthHdr*)mb->GetDataPtr();
 
 			sockaddr_in srvc;
 
@@ -901,11 +900,11 @@ DWORD WINAPI TxThreadFunction(LPVOID lpParam)
 			srcip.S_un.S_addr = ep.eip->iph.src;
 			dstip.S_un.S_addr = ep.eip->iph.dst;
 
-			int len = sendto(lstnSocket, (char*)&ep.eip->iph, b->len - sizeof(b->eth), 0, (SOCKADDR*)&srvc, sizeof(srvc)); 
+			int len = sendto(lstnSocket, (char*)&ep.eip->iph, mb->len - sizeof(ep.eip->eth), 0, (SOCKADDR*)&srvc, sizeof(srvc)); 
 
-			b->len = 0;
+			mb->len = 0;
 
-			b->Free();
+			mb.Free();
 
 			count = 100;
 		}
@@ -927,27 +926,27 @@ DWORD WINAPI TxThreadFunction(LPVOID lpParam)
 
 DWORD WINAPI RxThreadFunction(LPVOID lpParam) 
 {
-	EthBuf *buf = 0;
+	Ptr<MB> mb;
 
 	u32 count = 0;
 
 	while(1)
 	{
-		if (buf == 0) buf = GetSysEthBuffer();
+		if (!mb.Valid()) mb = AllocMemBuffer(ETH_RX_BUF_SIZE);
 
-		if (buf != 0)
+		if (mb.Valid())
 		{
 			EthPtr ep;
 
-			ep.eth = &buf->eth;
+			ep.eth = (EthHdr*)mb->GetDataPtr();
 
-			int len = recv(lstnSocket, (char*)&ep.eip->iph, buf->MaxLen()-sizeof(buf->eth), 0); 
+			int len = recv(lstnSocket, (char*)&ep.eip->iph, mb->MaxLen()-sizeof(ep.eip->eth), 0); 
 
 			if (len > 0) //(len != SOCKET_ERROR/* && len >= sizeof(ep.eip->iph)*/)
 			{
-				if (RequestIP(buf, 0))
+				if (RequestIP(mb, 0))
 				{
-					buf = 0;
+					mb.Free();
 				};
 			};
 		};
@@ -972,8 +971,8 @@ bool InitEMAC()
 	
 	//PHYA = GetAdrPHY();
 
-	if (sizeof(SysEthBuf) & 3) __breakpoint(0);
-	if (sizeof(HugeTx) & 3) __breakpoint(0);
+//	if (sizeof(SysEthBuf) & 3) __breakpoint(0);
+//	if (sizeof(HugeTx) & 3) __breakpoint(0);
 
 	HW_EMAC_Init();
 
@@ -1159,21 +1158,24 @@ static void rx_descr_init (void)
 {
 	RxBufIndex = 0;
 
-	for (u32 i = 0; i < NUM_RX_BUF; i++)
+	for (u32 i = 0; i < NUM_RX_DSC; i++)
 	{
-		EthBuf *b = GetSysEthBuffer();
+		Receive_Desc &dsc	= Rx_Desc[i];
+		Ptr<MB> &mb			= Rx_MB[i];
 
-		if (b != 0)
+		mb = AllocMemBuffer(ETH_RX_BUF_SIZE);
+
+		if (mb.Valid())
 		{
-			Rx_Desc[i].SetAdr(&b->eth, b->MaxLen());
+			dsc.SetAdr(mb->GetDataPtr(), mb->MaxLen());
 		}
 		else
 		{
-			Rx_Desc[i].ClrAdr();
+			dsc.ClrAdr();
 		};
 	};
 
-	Rx_Desc[NUM_RX_BUF-1].SetWrap();
+	Rx_Desc[NUM_RX_DSC-1].SetWrap();
 
 	#ifdef CPU_SAME53	
 

@@ -14,7 +14,7 @@
 #include "i2c.h"
 #include "spi.h"
 
-#pragma diag_suppress 550,177
+//#pragma diag_suppress 550,177
 
 //#pragma O3
 //#pragma Otime
@@ -73,13 +73,13 @@ static ListItem listItems[LIST_ITEMS_NUM];
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 //List<UNIBUF> UNIBUF::freeBufList;
-static UNIBUF flashWriteBuffer[FLASH_WRITE_BUFFER_NUM];
+//static UNIBUF flashWriteBuffer[FLASH_WRITE_BUFFER_NUM];
 static FLRB flashReadBuffer[FLASH_READ_BUFFER_NUM];
 
 //List<PtrFLWB> PtrFLWB::freePtrList;
 
 //static List<FLWB> freeFlWrBuf;
-static ListRef<UNIBUF> writeFlBuf;
+static ListRef<MB> writeFlBuf;
 
 static List<FLRB> freeFlRdBuf;
 static List<FLRB> readFlBuf;
@@ -350,10 +350,17 @@ static void InitFlashBuffer()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-//FLWB* AllocFlashWriteBuffer()
-//{
-//	return FLWB::freeBufList.Get();
-//}
+MB* AllocFlashWriteBuffer(u32 minLen)
+{
+	MB* mb = AllocMemBuffer(minLen+sizeof(VecData::Hdr)+2);
+
+	if (mb != 0)
+	{
+		mb->dataOffset = sizeof(VecData::Hdr);
+	};
+
+	return mb;
+}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -609,7 +616,7 @@ struct Write
 	u32		rejVec ;
 	u32		errVec ;
 
-	Ptr<UNIBUF> curWrBuf;
+	Ptr<MB> curWrBuf;
 
 	SpareArea spare;
 
@@ -773,7 +780,7 @@ bool Write::Start()
 		};
 
 		vector = (VecData*)(curWrBuf->data + curWrBuf->dataOffset - sizeof(VecData::Hdr));
-		vector->h.dataLen = curWrBuf->dataLen;
+		vector->h.dataLen = curWrBuf->len;
 
 		state = (vector->h.flags) ? CRC_START : VECTOR_UPDATE;
 
@@ -2260,9 +2267,9 @@ static bool UpdateBlackBoxSendSessions()
 //	static u32	curFileLastBlock = ~0;
 	static u16	curFileNum = ~0;
 	static u64	curFileStartAdr = ~0;
-	static u64	curFileEndAdr = ~0;
+//	static u64	curFileEndAdr = ~0;
 	//static u32	curFileFPN = ~0;
-	static bool	sendedFileRes = false;
+//	static bool	sendedFileRes = false;
 	static u16	sendedFileNum = 0;
 
 	static u32	lastSessionBlock = ~0;
@@ -2330,9 +2337,9 @@ static bool UpdateBlackBoxSendSessions()
 //			curFileLastBlock = ~0;
 			curFileNum = ~0;
 			curFileStartAdr = ~0;
-			curFileEndAdr = ~0;
+//			curFileEndAdr = ~0;
 //			curFileFPN = ~0;
-			sendedFileRes = false;
+//			sendedFileRes = false;
 			sendedFileNum = 0;
 
 			lastSessionBlock = ~0;
@@ -2386,7 +2393,7 @@ static bool UpdateBlackBoxSendSessions()
 
 					lastSessionBlock	= rd.GetRawBlock();
 					curFileNum			= spare.v1.file;
-					curFileEndAdr		= rd.GetRawAdr();
+//					curFileEndAdr		= rd.GetRawAdr();
 
 					rd.NextBlock();
 				}
@@ -2618,8 +2625,8 @@ static bool UpdateSendSession()
 	static u16 ind = 0;
 	static u32 prgrss = 0;
 	static u16 count = 0;
-	static u32 lp = 0;
-	static u32 sum = 0;
+//	static u32 lp = 0;
+//	static u32 sum = 0;
 	static FLADR a(0);
 	static TM32 tm;
 
@@ -3015,7 +3022,7 @@ bool FLASH_UnErase_Full()
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool RequestFlashWrite(Ptr<UNIBUF> &fwb, u16 devID, bool updateCRC)
+bool RequestFlashWrite(Ptr<MB> &fwb, u16 devID, bool updateCRC)
 {
 	bool result = false;
 
@@ -3025,7 +3032,7 @@ bool RequestFlashWrite(Ptr<UNIBUF> &fwb, u16 devID, bool updateCRC)
 	}
 	else
 	{
-		if (fwb->dataLen > 0 && fwb->dataOffset >= sizeof(VecData::Hdr))
+		if (fwb->len > 0 && fwb->dataOffset >= sizeof(VecData::Hdr))
 		{
 			VecData* vd = (VecData*)(fwb->data + fwb->dataOffset - sizeof(VecData::Hdr));
 

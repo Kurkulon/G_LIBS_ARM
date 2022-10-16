@@ -27,6 +27,20 @@ typedef T_HW::USIC_CH_Type USICHWT;
 
 #define USIC_NUM 8
 
+struct SERCOM
+{
+	u32			*usart;
+	//S_SPI		*spi;
+	//S_I2C		*i2c;
+
+	//SERCOM()			: usart(0)	{}
+	//SERCOM(S_USART *p)	: usart(p)	{}
+	//SERCOM(S_SPI *p)	: spi(p)	{}
+	//SERCOM(S_I2C *p)	: i2c(p)	{}
+};
+
+typedef SERCOM* USICHWT;
+
 #endif 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

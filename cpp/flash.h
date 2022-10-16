@@ -101,12 +101,12 @@ __packed struct FileDsc
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-//extern FLWB*	AllocFlashWriteBuffer();
+extern MB*		AllocFlashWriteBuffer(u32 minLen);
 extern FLRB*	AllocFlashReadBuffer();
 //extern void		FreeFlashWriteBuffer(FLWB* b);
 extern void		FreeFlashReadBuffer(FLRB* b);
 extern bool		RequestFlashRead(FLRB* b);
-extern bool		RequestFlashWrite(Ptr<UNIBUF> &b, u16 devID, bool updateCRC);
+extern bool		RequestFlashWrite(Ptr<MB> &mb, u16 devID, bool updateCRC);
 
 extern void NAND_Idle();
 extern void NAND_FullErase();

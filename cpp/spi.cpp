@@ -219,11 +219,15 @@ void S_SPIM::WriteAsyncDMA(void *data, u16 count)
 
 void S_SPIM::WriteSyncDMA(void *data, u16 count)
 {
+#ifndef WIN32
+
 	WriteAsyncDMA(data, count);
 
 	while (!CheckWriteComplete());
 
 	_DMATX->Disable();
+
+#endif
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -279,6 +283,8 @@ void S_SPIM::ReadAsyncDMA(void *data, u16 count)
 
 void S_SPIM::ReadSyncDMA(void *data, u16 count)
 {
+#ifndef WIN32
+
 	ReadAsyncDMA(data, count);
 
 	while (!CheckReadComplete());
@@ -287,6 +293,8 @@ void S_SPIM::ReadSyncDMA(void *data, u16 count)
 
 	_DMATX->Disable();
 	_DMARX->Disable();
+
+#endif
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -308,6 +316,10 @@ byte S_SPIM::WriteReadByte(byte v)
 		return _uhw.spi->DATA; 
 
 	#elif defined(CPU_XMC48)
+
+	#elif defined(WIN32)
+
+	return 0;
 		
 	#endif
 }
@@ -337,7 +349,9 @@ bool S_SPIM::Update()
 {
 	bool result = false;
 
+#ifndef WIN32
 	T_HW::S_SPI* spi = _uhw.spi;
+#endif
 
 #ifdef CPU_SAME53
 
