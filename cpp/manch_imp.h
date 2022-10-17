@@ -88,16 +88,60 @@
 
 #elif defined(CPU_XMC48) //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-		#define ManResetTransmit()		
-		#define ManEndIRQ()				
-		inline void ManDisableTransmit()
-		{ 
-			HW::SCU_GENERAL->CCUCON &= ~ManT_CCUCON; 
-			ManT1->INTE = 0; 
-			ManT1->TCCLR = ManT2->TCCLR = ManT3->TCCLR = CC8_TRBC; 
-			ManT_CCU8->GCSS = ManT_OUT_GCSS;	
-			ManT_CCU8->GCSC = ManT_OUT_GCSC; 
-		}
+	#if (SYSCLK_MHz > 100)
+			#define MANRT_PSC		5
+	#elif (SYSCLK_MHz > 50)
+			#define MANRT_PSC		4
+	#elif (SYSCLK_MHz > 20)
+			#define MANRT_PSC		3
+	#elif (SYSCLK_MHz > 10)
+			#define MANRT_PSC		2
+	#elif (SYSCLK_MHz > 5)
+			#define MANRT_PSC		1
+	#else
+			#define MANRT_PSC		0
+	#endif
+
+	#define US2MR(v)			(((v)*(SYSCLK/(1UL<<MANRT_PSC))+500000)/1000000)
+	#define US2MI(v)			(((v)*(SYSCLK/(1UL<<MANRT_PSC))+500000)/1000000)
+	#define BAUD2CLK(x)			((u32)((SYSCLK*1.0/(1UL<<MANRT_PSC))/x+0.5))
+
+	#define MANCCU_PID			CONCAT2(PID_,MAN_CCU)
+
+	//#define MANIT_EVSYS_USER	CONCAT3(EVSYS_USER_, MANI_TC, _EVU)
+	//#define MANRT_EVENT_GEN		CONCAT3(EVGEN_, MANI_TC, _OVF)
+	//#define MANRT_EVSYS_USER	CONCAT3(EVSYS_USER_,MANR_TCC,_MC_0)
+
+	#define MANCCU				HW::MAN_CCU
+	#define __MANTCC			CONCAT3(MAN_CCU,_CC4,MANT_CC)
+	#define __MANICC			CONCAT3(MAN_CCU,_CC4,MANI_CC)
+	#define __MANRCC			CONCAT3(MAN_CCU,_CC4,MANR_CC)
+
+	#define MANTCC				HW::__MANTCC			
+	#define MANICC				HW::__MANICC			
+	#define MANRCC				HW::__MANRCC			
+	
+	#define MANT_GCSS			CONCAT3(CCU4_S,MANT_CC,SE)
+	#define MANT_GIDLC			CONCAT3(CCU4_S,MANT_CC,I)
+	#define MANR_GCSS			CONCAT3(CCU4_S,MANR_CC,SE)
+	#define MANR_GIDLC			CONCAT3(CCU4_S,MANR_CC,I)
+	#define MANI_GCSS			CONCAT3(CCU4_S,MANI_CC,SE)
+	#define MANI_GIDLC			CONCAT3(CCU4_S,MANI_CC,I)
+	
+	#define MANT_IRQ			CONCAT4(MAN_CCU,_,MANT_CC,_IRQn)
+	#define MANR_IRQ			CONCAT4(MAN_CCU,_,MANR_CC,_IRQn)
+
+
+	#define ManResetTransmit()		
+	#define ManEndIRQ()				
+	inline void ManDisableTransmit()
+	{ 
+		HW::SCU_GENERAL->CCUCON &= ~ManT_CCUCON; 
+		ManT1->INTE = 0; 
+		ManT1->TCCLR = ManT2->TCCLR = ManT3->TCCLR = CC8_TRBC; 
+		ManT_CCU8->GCSS = ManT_OUT_GCSS;	
+		ManT_CCU8->GCSC = ManT_OUT_GCSC; 
+	}
 
 #endif	// #elif defined(CPU_XMC48)
 
@@ -322,7 +366,7 @@ static __irq void ManTrmIRQ()
 			#ifdef CPU_SAME53	
 				ManDisableTransmit();
 			#elif defined(CPU_XMC48)
-				ManTT->TCCLR = CC4_TRBC;
+				MANTCC->TCCLR = CC4_TRBC;
 			#endif
 
 			manTB->ready = true;
@@ -392,15 +436,15 @@ bool SendManData(MTB *mtb)
 
 	#elif defined(CPU_XMC48)
 
-		ManTT->PRS = GetTrmBaudRate(mtb->baud)-1; //trmHalfPeriod - 1;
-		ManTT->PSC = 3; //0.08us
+		MANTCC->PRS = GetTrmBaudRate(mtb->baud)-1; //trmHalfPeriod - 1;
+		MANTCC->PSC = MANRT_PSC; //0.08us
 
-		ManCCU->GCSS = CCU4_S0SE;  
+		MANCCU->GCSS = MANT_GCSS;  
 
-		ManTT->SWR = ~0;
-		ManTT->INTE = CC4_PME;
+		MANTCC->SWR = ~0;
+		MANTCC->INTE = CC4_PME;
 
-		ManTT->TCSET = CC4_TRBS;
+		MANTCC->TCSET = CC4_TRBS;
 
 	#endif
 
@@ -437,21 +481,21 @@ void InitManTransmit()
 
 #elif defined(CPU_XMC48)
 
-	HW::CCU_Enable(ManCCU_PID);
+	HW::CCU_Enable(MANCCU_PID);
 
-	ManCCU->GCTRL = 0;
+	MANCCU->GCTRL = 0;
 
-	ManCCU->GIDLC = CCU4_S0I|CCU4_PRB;
+	MANCCU->GIDLC = MANT_GIDLC|CCU4_PRB;
 
-	ManTT->PRS = GetTrmBaudRate(0)-1;
-	ManTT->PSC = 3; //0.08us
+	MANTCC->PRS = GetTrmBaudRate(0)-1;
+	MANTCC->PSC = MANRT_PSC; //0.08us
 
-	ManCCU->GCSS = CCU4_S0SE;  
+	MANCCU->GCSS = MANT_GCSS;  
 
-	ManTT->SRS = 0;
+	MANTCC->SRS = 0;
 
-	ManTT->SWR = ~0;
-	ManTT->INTE = CC4_PME;
+	MANTCC->SWR = ~0;
+	MANTCC->INTE = CC4_PME;
 
 #endif
 
@@ -915,34 +959,11 @@ void InitManTransmit()
 
 #elif defined(CPU_XMC48)	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	#if (SYSCLK_MHz > 100)
-			#define MANRT_PSC		5
-	#elif (SYSCLK_MHz > 50)
-			#define MANRT_PSC		4
-	#elif (SYSCLK_MHz > 20)
-			#define MANRT_PSC		3
-	#elif (SYSCLK_MHz > 10)
-			#define MANRT_PSC		2
-	#elif (SYSCLK_MHz > 5)
-			#define MANRT_PSC		1
-	#else
-			#define MANRT_PSC		0
-	#endif
 
-	#define US2MR(v)			(((v)*(SYSCLK/(1UL<<MANRT_PSC))+500000)/1000000)
-	#define US2MI(v)			(((v)*(SYSCLK/(1UL<<MANRT_PSC))+500000)/1000000)
+	//#define MANR_EXTINT			(PIN_RXD&15)
 
-	#define MANIT_EVSYS_USER	CONCAT3(EVSYS_USER_, MANI_TC, _EVU)
-	#define MANRT_EVENT_GEN		CONCAT3(EVGEN_, MANI_TC, _OVF)
-	#define MANRT_EVSYS_USER	CONCAT3(EVSYS_USER_,MANR_TCC,_MC_0)
-
-	#define MNITC				HW::MANI_TC
-	#define MNRTCC				HW::MANR_TCC
-
-	#define MANR_EXTINT			(PIN_RXD&15)
-
-	inline void MANRT_ClockEnable()  { HW::GCLK->PCHCTRL[CONCAT2(GCLK_,MANR_TCC)]	= MANR_GEN|GCLK_CHEN; HW::MCLK->ClockEnable(CONCAT2(PID_,MANR_TCC)); }
-	inline void MANIT_ClockEnable()  { HW::GCLK->PCHCTRL[CONCAT2(GCLK_,MANI_TC)]	= MANI_GEN|GCLK_CHEN; HW::MCLK->ClockEnable(CONCAT2(PID_,MANI_TC)); }
+//	inline void MANRT_ClockEnable()  { HW::GCLK->PCHCTRL[CONCAT2(GCLK_,MANR_TCC)]	= MANR_GEN|GCLK_CHEN; HW::MCLK->ClockEnable(CONCAT2(PID_,MANR_TCC)); }
+//	inline void MANIT_ClockEnable()  { HW::GCLK->PCHCTRL[CONCAT2(GCLK_,MANI_TC)]	= MANI_GEN|GCLK_CHEN; HW::MCLK->ClockEnable(CONCAT2(PID_,MANI_TC)); }
 
 #elif defined(WIN32)	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -978,7 +999,7 @@ static void ManRcvEnd(bool ok)
 #ifdef CPU_SAME53	
 	MNRTCC->INTENCLR = ~0;
 #elif defined(CPU_XMC48)
-	ManTmr->INTE = 0;
+	MANRCC->INTE = 0;
 #endif
 
 	manRB->OK = ok;
@@ -1023,7 +1044,7 @@ static __irq void ManRcvIRQ2()
 
 	#elif defined(CPU_XMC48)
 
-		u16 len = ManTmr->CV[1];
+		u16 len = MANRCC->CV[1];
 
 		//ManTmr->TCCLR = CC4_TCC;
 		//ManTmr->TCSET = CC4_TRB;
@@ -1244,38 +1265,38 @@ void InitManRecieve()
 
 #elif defined(CPU_XMC48)
 
-	HW::CCU_Enable(ManCCU_PID);
+	HW::CCU_Enable(MANCCU_PID);
 
 	P1->ModePin10(I2DPU);
 	P1->ModePin11(I2DPU);
 
-	ManCCU->GCTRL = 0;
+	MANCCU->GCTRL = 0;
 
-	ManCCU->GIDLC = ManCCU_GIDLC;//CCU4_CS1I|CCU4_CS2I|CCU4_SPRB;
+	MANCCU->GIDLC = MANR_GIDLC|MANI_GIDLC|CCU4_SPRB; //ManCCU_GIDLC;//CCU4_CS1I|CCU4_CS2I|CCU4_SPRB;
 
-	ManRT->PRS = US2MT(12) - 1;
-	ManRT->CRS = US2MT(12) - 1;
-	ManRT->PSC = MANRT_PSC; //1.28us
+	MANICC->PRS = US2MR(12) - 1;
+	MANICC->CRS = US2MR(12) - 1;
+	MANICC->PSC = MANRT_PSC; //1.28us
 
-	ManTmr->PRS = US2MT(250);
-	ManTmr->PSC = ManRT_PSC; //1.28us
+	MANRCC->PRS = US2MR(250);
+	MANRCC->PSC = MANRT_PSC; //1.28us
 
-	ManCCU->GCSS = ManCCU_GCSS;//CCU4_S1SE|CCU4_S2SE;  
+	MANCCU->GCSS = MANR_GCSS|MANI_GCSS; //ManCCU_GCSS;//CCU4_S1SE|CCU4_S2SE;  
 
-	ManRT->INS = ManRT_INS;//CC4_EV0IS(2)|CC4_EV0EM_BOTH_EDGES|CC4_LPF0M_7CLK;
-	ManRT->CMC = CC4_STRTS_EVENT0;
-	ManRT->TC = CC4_STRM|CC4_TSSM;
+	MANICC->INS = ManRT_INS;//CC4_EV0IS(2)|CC4_EV0EM_BOTH_EDGES|CC4_LPF0M_7CLK;
+	MANICC->CMC = CC4_STRTS_EVENT0;
+	MANICC->TC = CC4_STRM|CC4_TSSM;
 
-	ManRT->INTE = 0;//CC4_PME;
-	ManRT->SRS = 0;//ManRT_SRS;//CC4_POSR(2);
+	MANICC->INTE = 0;//CC4_PME;
+	MANICC->SRS = 0;//ManRT_SRS;//CC4_POSR(2);
 
-	ManTmr->INS = ManTmr_INS; //CC4_EV0IS(15) | CC4_EV0EM_RISING_EDGE;
-	ManTmr->CMC = CC4_CAP0S_EVENT0|CC4_STRTS_EVENT0;
-	ManTmr->SRS = CC4_E0SR(2);
-	ManTmr->TC = CC4_TSSM|CC4_CAPC_ALWAYS;
-	ManTmr->TCSET = CC4_TRB;
+	MANRCC->INS = ManTmr_INS; //CC4_EV0IS(15) | CC4_EV0EM_RISING_EDGE;
+	MANRCC->CMC = CC4_CAP0S_EVENT0|CC4_STRTS_EVENT0;
+	MANRCC->SRS = CC4_E0SR(2);
+	MANRCC->TC = CC4_TSSM|CC4_CAPC_ALWAYS;
+	MANRCC->TCSET = CC4_TRB;
 
-	ManTmr->INTE = 0;//CC4_PME;
+	MANRCC->INTE = 0;//CC4_PME;
 
 #endif
 
@@ -1316,8 +1337,8 @@ bool RcvManData(MRB *mrb)
 
 	#elif defined(CPU_XMC48)
 
-		ManTmr->SWR = CC4_RE0A;
-		ManTmr->INTE = CC4_E0AE;
+		MANRCC->SWR = CC4_RE0A;
+		MANRCC->INTE = CC4_E0AE;
 
 	#endif
 
