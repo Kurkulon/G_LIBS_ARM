@@ -2276,6 +2276,186 @@ namespace T_HW
 	  __O  u32  IN[32];                            /*!< (@ 0x40030180) Transmit FIFO Buffer                                   */
 	} USIC_CH_Type;
 
+#define USIC_SDIR(v)         (v<<0)                     /*!< USIC_CH SCTR: SDIR (Bit 0)                                  */
+#define USIC_PDL(v)          (v<<1)                     /*!< USIC_CH SCTR: PDL (Bit 1)                                   */
+#define USIC_DSM(v)          (v<<2)                     /*!< USIC_CH SCTR: DSM (Bit 2)                                   */
+#define USIC_HPCDIR(v)       (v<<4)                     /*!< USIC_CH SCTR: HPCDIR (Bit 4)                                */
+#define USIC_DOCFG(v)        (v<<6)                     /*!< USIC_CH SCTR: DOCFG (Bit 6)                                 */
+#define USIC_TRM(v)          (v<<8)                     /*!< USIC_CH SCTR: TRM (Bit 8)                                   */
+#define USIC_FLE(v)          (v<<16)                    /*!< USIC_CH SCTR: FLE (Bit 16)                                  */
+#define USIC_WLE(v)          (v<<24)                    /*!< USIC_CH SCTR: WLE (Bit 24)                                  */
+
+#define USIC_CLKSEL(v)  		(v<<0)                     /*!< USIC_CH BRG: CLKSEL (Bit 0)                                 */
+#define USIC_TMEN(v)    		(v<<3)                     /*!< USIC_CH BRG: TMEN (Bit 3)                                   */
+#define USIC_PPPEN(v)   		(v<<4)                     /*!< USIC_CH BRG: PPPEN (Bit 4)                                  */
+#define USIC_CTQSEL(v)  		(v<<6)                     /*!< USIC_CH BRG: CTQSEL (Bit 6)                                 */
+#define USIC_PCTQ(v)    		(v<<8)                     /*!< USIC_CH BRG: PCTQ (Bit 8)                                   */
+#define USIC_DCTQ(v)    		(v<<10)                    /*!< USIC_CH BRG: DCTQ (Bit 10)                                  */
+#define USIC_PDIV(v)    		(v<<16)                    /*!< USIC_CH BRG: PDIV (Bit 16)                                  */
+#define USIC_SCLKOSEL(v)		(v<<28)                    /*!< USIC_CH BRG: SCLKOSEL (Bit 28)                              */
+#define USIC_MCLKCFG(v) 		(v<<29)                    /*!< USIC_CH BRG: MCLKCFG (Bit 29)                               */
+#define USIC_SCLKCFG(v) 		(v<<30)                    /*!< USIC_CH BRG: SCLKCFG (Bit 30)                               */
+
+/* ---------------------------------  USIC_CH_CCR  -------------------------------- */
+#define USIC_MODE(v)      	(v<<0UL)                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
+#define USIC_HPCEN(v)     	(v<<6UL)                     /*!< USIC_CH CCR: HPCEN (Bit 6)                                  */
+#define USIC_PM(v)        	(v<<8UL)                     /*!< USIC_CH CCR: PM (Bit 8)                                     */
+#define USIC_RSIEN     		(1<<10UL)                    /*!< USIC_CH CCR: RSIEN (Bit 10)                                 */
+#define USIC_DLIEN     		(1<<11UL)                    /*!< USIC_CH CCR: DLIEN (Bit 11)                                 */
+#define USIC_TSIEN     		(1<<12UL)                    /*!< USIC_CH CCR: TSIEN (Bit 12)                                 */
+#define USIC_TBIEN     		(1<<13UL)                    /*!< USIC_CH CCR: TBIEN (Bit 13)                                 */
+#define USIC_RIEN      		(1<<14UL)                    /*!< USIC_CH CCR: RIEN (Bit 14)                                  */
+#define USIC_AIEN      		(1<<15UL)                    /*!< USIC_CH CCR: AIEN (Bit 15)                                  */
+#define USIC_BRGIEN    		(1<<16UL)                    /*!< USIC_CH CCR: BRGIEN (Bit 16)                                */
+
+/* -----------------------------  USIC_CH_PCR_ASCMode  ---------------------------- */
+
+#define USIC_SMD(v)       	(v<<0UL)                     /*!< USIC_CH PCR_ASCMode: SMD (Bit 0)                            */
+#define USIC_STPB(v)      	(v<<1UL)                     /*!< USIC_CH PCR_ASCMode: STPB (Bit 1)                           */
+#define USIC_IDM(v)       	(v<<2UL)                     /*!< USIC_CH PCR_ASCMode: IDM (Bit 2)                            */
+#define USIC_SBIEN(v)     	(v<<3UL)                     /*!< USIC_CH PCR_ASCMode: SBIEN (Bit 3)                          */
+#define USIC_CDEN(v)      	(v<<4UL)                     /*!< USIC_CH PCR_ASCMode: CDEN (Bit 4)                           */
+#define USIC_RNIEN(v)     	(v<<5UL)                     /*!< USIC_CH PCR_ASCMode: RNIEN (Bit 5)                          */
+#define USIC_FEIEN(v)     	(v<<6UL)                     /*!< USIC_CH PCR_ASCMode: FEIEN (Bit 6)                          */
+#define USIC_FFIEN(v)     	(v<<7UL)                     /*!< USIC_CH PCR_ASCMode: FFIEN (Bit 7)                          */
+#define USIC_SP(v)        	(v<<8UL)                     /*!< USIC_CH PCR_ASCMode: SP (Bit 8)                             */
+#define USIC_PL(v)        	(v<<13UL)                    /*!< USIC_CH PCR_ASCMode: PL (Bit 13)                            */
+#define USIC_RSTEN(v)     	(v<<16UL)                    /*!< USIC_CH PCR_ASCMode: RSTEN (Bit 16)                         */
+#define USIC_TSTEN(v)     	(v<<17UL)                    /*!< USIC_CH PCR_ASCMode: TSTEN (Bit 17)                         */
+#define USIC_MCLK      		(0x80000000UL)                    /*!< USIC_CH PCR_ASCMode: MCLK (Bit 31)                          */
+
+/* --------------------------------  USIC_CH_DX0CR  ------------------------------- */
+
+#define USIC_DSEL(v)        	(v<<0UL)                     /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC_INSW(v)        	(v<<4UL)                     /*!< USIC_CH DX0CR: INSW (Bit 4)                                 */
+#define USIC_DFEN(v)        	(v<<5UL)                     /*!< USIC_CH DX0CR: DFEN (Bit 5)                                 */
+#define USIC_DSEN(v)        	(v<<6UL)                     /*!< USIC_CH DX0CR: DSEN (Bit 6)                                 */
+#define USIC_DPOL(v)        	(v<<8UL)                     /*!< USIC_CH DX0CR: DPOL (Bit 8)                                 */
+#define USIC_SFSEL(v)       	(v<<9UL)                     /*!< USIC_CH DX0CR: SFSEL (Bit 9)                                */
+#define USIC_CM(v)          	(v<<10UL)                    /*!< USIC_CH DX0CR: CM (Bit 10)                                  */
+#define USIC_DXS(v)         	(v<<15UL)                    /*!< USIC_CH DX0CR: DXS (Bit 15)                                 */
+
+/* ---------------------------------  USIC_CH_FDR  -------------------------------- */
+
+#define USIC_STEP(v)      	(v<<0UL)                     /*!< USIC_CH FDR: STEP (Bit 0)                                   */
+#define USIC_DM(v)        	(v<<14UL)                    /*!< USIC_CH FDR: DM (Bit 14)                                    */
+#define USIC_RESULT(v)    	(v<<16UL)                    /*!< USIC_CH FDR: RESULT (Bit 16)                                */
+
+/* --------------------------------  USIC_CH_TCSR  -------------------------------- */
+
+#define USIC_WLEMD(v)    	(v<<0UL)                     /*!< USIC_CH TCSR: WLEMD (Bit 0)                                 */
+#define USIC_SELMD(v)    	(v<<1UL)                     /*!< USIC_CH TCSR: SELMD (Bit 1)                                 */
+#define USIC_FLEMD(v)    	(v<<2UL)                     /*!< USIC_CH TCSR: FLEMD (Bit 2)                                 */
+#define USIC_WAMD(v)     	(v<<3UL)                     /*!< USIC_CH TCSR: WAMD (Bit 3)                                  */
+#define USIC_HPCMD(v)    	(v<<4UL)                     /*!< USIC_CH TCSR: HPCMD (Bit 4)                                 */
+#define USIC_SOF(v)      	(v<<5UL)                     /*!< USIC_CH TCSR: SOF (Bit 5)                                   */
+#define USIC_EOF(v)      	(v<<6UL)                     /*!< USIC_CH TCSR: EOF (Bit 6)                                   */
+#define USIC_TDV      		(1<<7UL)                     /*!< USIC_CH TCSR: TDV (Bit 7)                                   */
+#define USIC_TDSSM(v)    	(v<<8UL)                     /*!< USIC_CH TCSR: TDSSM (Bit 8)                                 */
+#define USIC_TDEN(v)     	(v<<10UL)                    /*!< USIC_CH TCSR: TDEN (Bit 10)                                 */
+#define USIC_TDVTR(v)    	(v<<12UL)                    /*!< USIC_CH TCSR: TDVTR (Bit 12)                                */
+#define USIC_WA(v)       	(v<<13UL)                    /*!< USIC_CH TCSR: WA (Bit 13)                                   */
+
+/* --------------------------------  USIC_CH_PSCR  -------------------------------- */
+
+#define USIC_TXIDLE         (0x1UL)                   /*!< USIC_CH PSCR: CST0 (Bitfield-Mask: 0x01)                    */
+#define USIC_RXIDLE         (0x2UL)                   /*!< USIC_CH PSCR: CST1 (Bitfield-Mask: 0x01)                    */
+#define USIC_SBD         	(0x4UL)                   /*!< USIC_CH PSCR: CST2 (Bitfield-Mask: 0x01)                    */
+#define USIC_COL         	(0x8UL)                   /*!< USIC_CH PSCR: CST3 (Bitfield-Mask: 0x01)                    */
+#define USIC_RNS         	(0x10UL)                  /*!< USIC_CH PSCR: CST4 (Bitfield-Mask: 0x01)                    */
+#define USIC_FER0         	(0x20UL)                  /*!< USIC_CH PSCR: CST5 (Bitfield-Mask: 0x01)                    */
+#define USIC_FER1         	(0x40UL)                  /*!< USIC_CH PSCR: CST6 (Bitfield-Mask: 0x01)                    */
+#define USIC_RFF         	(0x80UL)                  /*!< USIC_CH PSCR: CST7 (Bitfield-Mask: 0x01)                    */
+#define USIC_TFF         	(0x100UL)                 /*!< USIC_CH PSCR: CST8 (Bitfield-Mask: 0x01)                    */
+#define USIC_BUSY         	(0x200UL)                 /*!< USIC_CH PSCR: CST9 (Bitfield-Mask: 0x01)                    */
+#define USIC_RSIF        	(0x400UL)                 /*!< USIC_CH PSCR: CRSIF (Bitfield-Mask: 0x01)                   */
+#define USIC_DLIF        	(0x800UL)                 /*!< USIC_CH PSCR: CDLIF (Bitfield-Mask: 0x01)                   */
+#define USIC_TSIF        	(0x1000UL)                /*!< USIC_CH PSCR: CTSIF (Bitfield-Mask: 0x01)                   */
+#define USIC_TBIF        	(0x2000UL)                /*!< USIC_CH PSCR: CTBIF (Bitfield-Mask: 0x01)                   */
+#define USIC_RIF         	(0x4000UL)                /*!< USIC_CH PSCR: CRIF (Bitfield-Mask: 0x01)                    */
+#define USIC_AIF         	(0x8000UL)                /*!< USIC_CH PSCR: CAIF (Bitfield-Mask: 0x01)                    */
+#define USIC_BRGIF       	(0x10000UL)               /*!< USIC_CH PSCR: CBRGIF (Bitfield-Mask: 0x01)                  */
+
+/* --------------------------------  USIC_CH_KSCFG  ------------------------------- */
+#define USIC_MODEN           (0x1UL)                 	/*!< USIC_CH KSCFG: MODEN (Bitfield-Mask: 0x01)                  */
+#define USIC_BPMODEN         (0x2UL)                 	/*!< USIC_CH KSCFG: BPMODEN (Bitfield-Mask: 0x01)                */
+#define USIC_NOMCFG(v)		(((v)&3)<<4)				/*!< USIC_CH KSCFG: NOMCFG (Bitfield-Mask: 0x03)                 */
+#define USIC_BPNOM           (0x80UL)                	/*!< USIC_CH KSCFG: BPNOM (Bitfield-Mask: 0x01)                  */
+#define USIC_SUMCFG(v)		(((v)&3)<<8)            	/*!< USIC_CH KSCFG: SUMCFG (Bitfield-Mask: 0x03)                 */
+#define USIC_BPSUM           (0x800UL)               	/*!< USIC_CH KSCFG: BPSUM (Bitfield-Mask: 0x01)                  */
+
+/* --------------------------------  USIC_CH_TBCTR  ------------------------------- */
+#define TBCTR_DPTR(v)		(((v)&0x3F)<<0)         /*!< USIC_CH TBCTR: DPTR (Bit 0)                                 */
+#define TBCTR_LIMIT(v)		(((v)&0x3F)<<8)         /*!< USIC_CH TBCTR: LIMIT (Bit 8)                                */
+#define TBCTR_STBTM			(0x4000UL)            	/*!< USIC_CH TBCTR: STBTM (Bitfield-Mask: 0x01)                  */
+#define TBCTR_STBTEN        (0x8000UL)            	/*!< USIC_CH TBCTR: STBTEN (Bitfield-Mask: 0x01)                 */
+#define TBCTR_STBINP(v)		(((v)&7)<<16)			/*!< USIC_CH TBCTR: STBINP (Bit 16)                              */
+#define TBCTR_ATBINP(v)		(((v)&7)<<19)           /*!< USIC_CH TBCTR: ATBINP (Bit 19)                              */
+#define TBCTR_SIZE(v)		(((v)&7)<<24)           /*!< USIC_CH TBCTR: SIZE (Bit 24)                                */
+#define TBCTR_SIZE0			(0<<24)           		/*!< USIC_CH TBCTR: SIZE (Bit 24)                                */
+#define TBCTR_SIZE2			(1<<24)           		/*!< USIC_CH TBCTR: SIZE (Bit 24)                                */
+#define TBCTR_SIZE4			(2<<24)           		/*!< USIC_CH TBCTR: SIZE (Bit 24)                                */
+#define TBCTR_SIZE8			(3<<24)           		/*!< USIC_CH TBCTR: SIZE (Bit 24)                                */
+#define TBCTR_SIZE16		(4<<24)           		/*!< USIC_CH TBCTR: SIZE (Bit 24)                                */
+#define TBCTR_SIZE32		(5<<24)           		/*!< USIC_CH TBCTR: SIZE (Bit 24)                                */
+#define TBCTR_SIZE64		(6<<24)           		/*!< USIC_CH TBCTR: SIZE (Bit 24)                                */
+#define TBCTR_LOF		    (0x10000000UL)        	/*!< USIC_CH TBCTR: LOF (Bitfield-Mask: 0x01)                    */
+#define TBCTR_STBIEN        (0x40000000UL)        	/*!< USIC_CH TBCTR: STBIEN (Bitfield-Mask: 0x01)                 */
+#define TBCTR_TBERIEN       (0x80000000UL)        	/*!< USIC_CH TBCTR: TBERIEN (Bitfield-Mask: 0x01)                */
+
+/* --------------------------------  USIC_CH_RBCTR  ------------------------------- */
+#define RBCTR_DPTR(v)		(((v)&0x3F)<<0) 		/*!< USIC_CH RBCTR: DPTR (Bit 0)                                 */
+#define RBCTR_LIMIT(v)		(((v)&0x3F)<<8) 		/*!< USIC_CH RBCTR: LIMIT (Bit 8)                                */
+#define RBCTR_SRBTM		    (0x4000UL)				/*!< USIC_CH RBCTR: SRBTM (Bitfield-Mask: 0x01)                  */
+#define RBCTR_SRBTEN		(0x8000UL)				/*!< USIC_CH RBCTR: SRBTEN (Bitfield-Mask: 0x01)                 */
+#define RBCTR_SRBINP(v)		(((v)&7)<<16)   		/*!< USIC_CH RBCTR: SRBINP (Bit 16)                              */
+#define RBCTR_ARBINP(v)		(((v)&7)<<19)   		/*!< USIC_CH RBCTR: ARBINP (Bit 19)                              */
+#define RBCTR_RCIM(v)		(((v)&3)<<22)   		/*!< USIC_CH RBCTR: RCIM (Bit 22)                                */
+#define RBCTR_SIZE(v)		(((v)&7)<<24)   		/*!< USIC_CH RBCTR: SIZE (Bit 24)                                */
+#define RBCTR_SIZE0			(0<<24)         		/*!< USIC_CH RBCTR: SIZE (Bit 24)                                */
+#define RBCTR_SIZE2			(1<<24)         		/*!< USIC_CH RBCTR: SIZE (Bit 24)                                */
+#define RBCTR_SIZE4			(2<<24)         		/*!< USIC_CH RBCTR: SIZE (Bit 24)                                */
+#define RBCTR_SIZE8			(3<<24)         		/*!< USIC_CH RBCTR: SIZE (Bit 24)                                */
+#define RBCTR_SIZE16		(4<<24)         		/*!< USIC_CH RBCTR: SIZE (Bit 24)                                */
+#define RBCTR_SIZE32		(5<<24)         		/*!< USIC_CH RBCTR: SIZE (Bit 24)                                */
+#define RBCTR_SIZE64		(6<<24)         		/*!< USIC_CH RBCTR: SIZE (Bit 24)                                */
+#define RBCTR_RNM			(0x8000000UL)   		/*!< USIC_CH RBCTR: RNM (Bitfield-Mask: 0x01)                    */
+#define RBCTR_LOF			(0x10000000UL)  		/*!< USIC_CH RBCTR: LOF (Bitfield-Mask: 0x01)                    */
+#define RBCTR_ARBIEN        (0x20000000UL)  		/*!< USIC_CH RBCTR: ARBIEN (Bitfield-Mask: 0x01)                 */
+#define RBCTR_SRBIEN        (0x40000000UL)  		/*!< USIC_CH RBCTR: SRBIEN (Bitfield-Mask: 0x01)                 */
+#define RBCTR_RBERIEN       (0x80000000UL)  		/*!< USIC_CH RBCTR: RBERIEN (Bitfield-Mask: 0x01)                */
+
+/* --------------------------------  USIC_CH_INPR  -------------------------------- */
+#define USIC_TSINP(v)			(((v)&7)<<0)     		/*!< USIC_CH INPR: TSINP (Bit 0)                                 */
+#define USIC_TBINP(v)			(((v)&7)<<4)     		/*!< USIC_CH INPR: TBINP (Bit 4)                                 */
+#define USIC_RINP(v)			(((v)&7)<<8)     		/*!< USIC_CH INPR: RINP (Bit 8)                                  */
+#define USIC_AINP(v)			(((v)&7)<<12)    		/*!< USIC_CH INPR: AINP (Bit 12)                                 */
+#define USIC_PINP(v)			(((v)&7)<<16)    		/*!< USIC_CH INPR: PINP (Bit 16)                                 */
+
+/* --------------------------------  USIC_CH_TRBSR  ------------------------------- */
+#define TRBSR_SRBI                (0x1UL)                   /*!< USIC_CH TRBSR: SRBI (Bitfield-Mask: 0x01)                   */
+#define TRBSR_RBERI               (0x2UL)                   /*!< USIC_CH TRBSR: RBERI (Bitfield-Mask: 0x01)                  */
+#define TRBSR_ARBI                (0x4UL)                   /*!< USIC_CH TRBSR: ARBI (Bitfield-Mask: 0x01)                   */
+#define TRBSR_REMPTY              (0x8UL)                   /*!< USIC_CH TRBSR: REMPTY (Bitfield-Mask: 0x01)                 */
+#define TRBSR_RFULL               (0x10UL)                  /*!< USIC_CH TRBSR: RFULL (Bitfield-Mask: 0x01)                  */
+#define TRBSR_RBUS                (0x20UL)                  /*!< USIC_CH TRBSR: RBUS (Bitfield-Mask: 0x01)                   */
+#define TRBSR_SRBT                (0x40UL)                  /*!< USIC_CH TRBSR: SRBT (Bitfield-Mask: 0x01)                   */
+#define TRBSR_STBI                (0x100UL)                 /*!< USIC_CH TRBSR: STBI (Bitfield-Mask: 0x01)                   */
+#define TRBSR_TBERI               (0x200UL)                 /*!< USIC_CH TRBSR: TBERI (Bitfield-Mask: 0x01)                  */
+#define TRBSR_TEMPTY              (0x800UL)                 /*!< USIC_CH TRBSR: TEMPTY (Bitfield-Mask: 0x01)                 */
+#define TRBSR_TFULL               (0x1000UL)                /*!< USIC_CH TRBSR: TFULL (Bitfield-Mask: 0x01)                  */
+#define TRBSR_TBUS                (0x2000UL)                /*!< USIC_CH TRBSR: TBUS (Bitfield-Mask: 0x01)                   */
+#define TRBSR_STBT                (0x4000UL)                /*!< USIC_CH TRBSR: STBT (Bitfield-Mask: 0x01)                   */
+
+/* -------------------------------  USIC_CH_TRBSCR  ------------------------------- */
+#define TRBSCR_CSRBI              (0x1UL)                   /*!< USIC_CH TRBSCR: CSRBI (Bitfield-Mask: 0x01)                 */
+#define TRBSCR_CRBERI             (0x2UL)                   /*!< USIC_CH TRBSCR: CRBERI (Bitfield-Mask: 0x01)                */
+#define TRBSCR_CARBI              (0x4UL)                   /*!< USIC_CH TRBSCR: CARBI (Bitfield-Mask: 0x01)                 */
+#define TRBSCR_CSTBI              (0x100UL)                 /*!< USIC_CH TRBSCR: CSTBI (Bitfield-Mask: 0x01)                 */
+#define TRBSCR_CTBERI             (0x200UL)                 /*!< USIC_CH TRBSCR: CTBERI (Bitfield-Mask: 0x01)                */
+#define TRBSCR_CBDV               (0x400UL)                 /*!< USIC_CH TRBSCR: CBDV (Bitfield-Mask: 0x01)                  */
+#define TRBSCR_FLUSHRB            (0x4000UL)                /*!< USIC_CH TRBSCR: FLUSHRB (Bitfield-Mask: 0x01)               */
+#define TRBSCR_FLUSHTB            (0x8000UL)                /*!< USIC_CH TRBSCR: FLUSHTB (Bitfield-Mask: 0x01)               */
 
 	/* ================================================================================ */
 	/* ================                       CAN                      ================ */
@@ -2714,6 +2894,29 @@ namespace T_HW
 	  __I  u32  PDBG;                              /*!< (@ 0x40028100) POSIF Debug register                                   */
 	} POSIF_GLOBAL_Type;
 
+#define I0DNP  0	// Direct Input - No internal pull device active
+#define I1DPD  1	// Direct Input - Internal pull-down device active
+#define I2DPU  2	// Direct Input - Internal pull-up device active
+#define I3DOS  3	// Direct Input - No internal pull device active; Pn_OUTx continuously samples the input value
+#define I4INP  4	// Inverted Input - No internal pull device active
+#define I5IPD  5	// Inverted Input - Internal pull-down device active
+#define I6IPU  6	// Inverted Input - Internal pull-up device active
+#define I7IOS  7	// Inverted Input - No internal pull device active; Pn_OUTx continuously samples the input value
+
+#define G_PP 0x10
+#define A1PP 0x11
+#define A2PP 0x12
+#define A3PP 0x13
+#define A4PP 0x14
+
+#define G_OD 0x18
+#define A1OD 0x19
+#define A2OD 0x1A
+#define A3OD 0x1B
+#define A4OD 0x1C
+
+#define HWIO0 0x30
+#define HWIO1 0x40
 
 	/* ================================================================================ */
 	/* ================                      PORT0                     ================ */
@@ -3060,7 +3263,8 @@ namespace T_HW
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	typedef struct {                                    
+	struct S_PORT
+	{                                    
 		__IO	u32  OUT;                               /*!< (@ 0x00) Port 15 Output Register                                */
 		__IO	u32  OMR;                               /*!< (@ 0x04) Port 15 Output Modification Register                   */
 		__I  	u32  z_RESERVED[2];
@@ -3137,6 +3341,9 @@ namespace T_HW
 		bool TBSET(u16 b) { return IN & (1<<b); }
 		bool TBCLR(u16 b) { return (IN & (1<<b)) == 0; }
 
+		void DIRSET(u16 m) { for (byte i = 0; i < 16; i++) { if (m&1) PC0[i] = G_PP; m >>= 1; }; }
+		void DIRCLR(u16 m) { for (byte i = 0; i < 16; i++) { if (m&1) PC0[i] = I2DPU; m >>= 1; };} 
+
 		//void PIOF0(byte f0=0, byte f1=0, byte f2=0, byte f3=0) { IOCR0 =	((f0 |(f1<<8)|(f2<<16)|(f3<<24)) & 0x1F1F1F1F)<<3; ((byte*)&HWSEL)[0] = ((f0>>5)&3)|(((f1>>5)&3)<<2)|(((f2>>5)&3)<<4)|(((f3>>5)&3)<<6);}
 		//void PIOF4(byte f0=0, byte f1=0, byte f2=0, byte f3=0) { IOCR4 =	((f0 |(f1<<8)|(f2<<16)|(f3<<24)) & 0x1F1F1F1F)<<3; ((byte*)&HWSEL)[1] = ((f0>>5)&3)|(((f1>>5)&3)<<2)|(((f2>>5)&3)<<4)|(((f3>>5)&3)<<6);}
 		//void PIOF8(byte f0=0, byte f1=0, byte f2=0, byte f3=0) { IOCR8 =	((f0 |(f1<<8)|(f2<<16)|(f3<<24)) & 0x1F1F1F1F)<<3; ((byte*)&HWSEL)[2] = ((f0>>5)&3)|(((f1>>5)&3)<<2)|(((f2>>5)&3)<<4)|(((f3>>5)&3)<<6);}
@@ -3176,7 +3383,9 @@ namespace T_HW
 
 
 
-	} PORT_Type;
+	};
+	
+	typedef S_PORT PORT_Type;
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -19863,31 +20072,6 @@ namespace T_HW
 #define PC15(v)    	(v<<27UL)                    /*!< PORT0 IOCR12: PC15 (Bit 27)                                 */
 
 #define PC0123(v0,v1,v2,v3)     ((v0<<3UL)|(v1<<11UL)|(v2<<19UL)|(v3<<27UL))
-
-
-#define I0DNP  0	// Direct Input - No internal pull device active
-#define I1DPD  1	// Direct Input - Internal pull-down device active
-#define I2DPU  2	// Direct Input - Internal pull-up device active
-#define I3DOS  3	// Direct Input - No internal pull device active; Pn_OUTx continuously samples the input value
-#define I4INP  4	// Inverted Input - No internal pull device active
-#define I5IPD  5	// Inverted Input - Internal pull-down device active
-#define I6IPU  6	// Inverted Input - Internal pull-up device active
-#define I7IOS  7	// Inverted Input - No internal pull device active; Pn_OUTx continuously samples the input value
-
-#define G_PP 0x10
-#define A1PP 0x11
-#define A2PP 0x12
-#define A3PP 0x13
-#define A4PP 0x14
-
-#define G_OD 0x18
-#define A1OD 0x19
-#define A2OD 0x1A
-#define A3OD 0x1B
-#define A4OD 0x1C
-
-#define HWIO0 0x30
-#define HWIO1 0x40
 
 #define HW0_0   	(1<<0)        
 #define HW0_1   	(2<<0)        

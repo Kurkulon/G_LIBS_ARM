@@ -76,6 +76,15 @@ protected:
 
 #elif defined(CPU_XMC48)
 
+	const u32 __SCTR;
+	const u32 __FDR;
+	const u32 __BRG;
+	const u32 __TCSR;
+	const u32 __DX0CR;
+	const u32 __DX1CR;
+	const u32 __CCR;
+	const u32 __PCR;
+
 #elif defined(WIN32)
 
 	//byte fram_I2c_Mem[0x10000];
@@ -93,11 +102,14 @@ protected:
 
 public:
 
-#ifndef WIN32
+#ifdef CPU_SAME53
 
 	S_I2C(byte num, T_HW::S_PORT* pio_scl, u32 mask_scl, u32 pmux_scl, T_HW::S_PORT* pio_sda, u32 mask_sda, u32 pmux_sda, u32 gen_src, u32 gen_clk, DMA_CH *dma)
 		: USIC(num), _PIO_SCL(pio_scl), _PIO_SDA(pio_sda), _MASK_SCL(mask_scl), _MASK_SDA(mask_sda), _PMUX_SCL(pmux_scl), _PMUX_SDA(pmux_sda), 
 			_GEN_SRC(gen_src), _GEN_CLK(gen_clk), _DMA(dma), _dsc(0), _state(WAIT) {}
+
+#elif defined(CPU_XMC48)
+
 
 #endif
 

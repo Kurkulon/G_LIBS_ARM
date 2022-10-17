@@ -21,7 +21,7 @@ typedef T_HW::SERCOM USICHWT;
 
 #define USIC_NUM 6
 
-typedef T_HW::USIC_CH_Type USICHWT;
+typedef T_HW::USIC_CH_Type *USICHWT;
 
 #elif defined(WIN32)
 
@@ -85,6 +85,11 @@ class USIC // Universal Serial Interface Channel
 		bool CheckReset()	{ return _req_reset_mask & _usic_mask; }
 
 		virtual void InitHW() {}
+
+#ifdef CPU_SAME53
+#elif defined(CPU_XMC48)
+		byte	Get_INPR_SR() { return _usic_num&1; }
+#endif
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

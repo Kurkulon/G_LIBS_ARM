@@ -128,8 +128,10 @@ u16  txIpID = 0;
 	Ptr<MB>			Rx_MB[NUM_RX_DSC];
 	Ptr<MB>			Tx_MB[NUM_TX_DSC];
 #elif defined(CPU_XMC48)
-	Receive_Desc	Rx_Desc[NUM_RX_BUF];
+	Receive_Desc	Rx_Desc[NUM_RX_DSC];
 	Transmit_Desc	Tx_Desc[NUM_TX_DSC];
+	Ptr<MB>			Rx_MB[NUM_RX_DSC];
+	Ptr<MB>			Tx_MB[NUM_TX_DSC];
 #endif
 
 /* GMAC local buffers must be 8-byte aligned. */

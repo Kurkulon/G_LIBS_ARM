@@ -58,6 +58,31 @@ protected:
 	DMA_CH *	const 	_DMARX;
 
 #elif defined(CPU_XMC48)
+
+	T_HW::S_PORT* const _PIO_SPCK;
+	T_HW::S_PORT* const _PIO_MOSI;
+	T_HW::S_PORT* const _PIO_MISO;
+	T_HW::S_PORT* const _PIO_CS;
+
+	const byte 			_PIN_SPCK;
+	const byte 			_PIN_MOSI;
+	const byte 			_PIN_MISO;
+
+	const byte * const	_PIN_CS;
+	const u32			_PIN_CS_LEN;
+
+	DMA_CH *	const 	_DMATX;
+	DMA_CH *	const 	_DMARX;
+
+	const u32 __SCTR;
+	const u32 __FDR;
+	const u32 __BRG;
+	const u32 __TCSR;
+	const u32 __DX0CR;
+	const u32 __DX1CR;
+	const u32 __CCR;
+	const u32 __PCR;
+
 #endif
 
 	List<DSCSPI>	_reqList;
@@ -72,7 +97,7 @@ protected:
 
 public:
 
-#ifndef WIN32
+#ifdef CPU_SAME53
 
 	S_SPIM(byte num, T_HW::S_PORT* pspck, T_HW::S_PORT* pmosi, T_HW::S_PORT* pmiso, T_HW::S_PORT* pcs, 
 		u32 mspck, u32 mmosi, u32 mmiso, 
@@ -88,7 +113,15 @@ public:
 			bool CheckReadComplete() { return _DMATX->CheckComplete() && _DMARX->CheckComplete(); }
 			void ChipSelect(byte num)	{ _PIO_CS->CLR(_MASK_CS[num]); }
 			void ChipDisable()			{ _PIO_CS->SET(_MASK_CS_ALL); }
-#else
+
+#elif defined(CPU_XMC48)
+
+			void ChipSelect(byte num)	{ _PIO_CS->BCLR(_PIN_CS[num]); }
+			bool CheckWriteComplete() { return _DMATX->CheckComplete() /*&& (_uhw.spi->INTFLAG & SPI_TXC)*/; }
+			bool CheckReadComplete() { return _DMATX->CheckComplete() && _DMARX->CheckComplete(); }
+			void ChipDisable()			{ _PIO_CS->SET(_MASK_CS_ALL); }
+
+#elif defined(WIN32)
 
 	S_SPIM() : USIC(0) {}
 

@@ -112,11 +112,19 @@
 
 #else	// #ifdef MAN_TRANSMIT_V1
 
-	//#define MANT_IRQ_2			TCC2_IRQ
+	#ifdef CPU_SAME53	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	#define ManT_SET_PR(v)			{ MNTTCC->PERBUF = (v); }
-	#define ManT_SET_CR(v)			{ MNTTCC->CCBUF[L1_CC_NUM] = (v); MNTTCC->CCBUF[L2_CC_NUM] = (v); }
-	#define ManT_SHADOW_SYNC()			
+		#define ManT_SET_PR(v)			{ MNTTCC->PERBUF = (v); }
+		#define ManT_SET_CR(v)			{ MNTTCC->CCBUF[L1_CC_NUM] = (v); MNTTCC->CCBUF[L2_CC_NUM] = (v); }
+		#define ManT_SHADOW_SYNC()			
+
+	#elif defined(CPU_XMC48) //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+		#define ManT_SET_PR(v)			{ ManT1->PRS = (v); ManT2->PRS = (v); ManT3->PRS = (v); }
+		#define ManT_SET_CR(v)			{ ManT1->CR2S = (v); ManT2->CR1S = (v); ManT2->CR2S = (v); ManT3->CR1S = (v);}
+		#define ManT_SHADOW_SYNC()		{ ManT_CCU8->GCSS = ManT_CCU8_GCSS; }	
+
+	#endif
 
 	static u16 trmHalfPeriod = (BAUD2CLK(20833)+1)/2;
 	static u16 trmHalfPeriod2 = BAUD2CLK(20833);
@@ -907,6 +915,35 @@ void InitManTransmit()
 
 #elif defined(CPU_XMC48)	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+	#if (SYSCLK_MHz > 100)
+			#define MANRT_PSC		5
+	#elif (SYSCLK_MHz > 50)
+			#define MANRT_PSC		4
+	#elif (SYSCLK_MHz > 20)
+			#define MANRT_PSC		3
+	#elif (SYSCLK_MHz > 10)
+			#define MANRT_PSC		2
+	#elif (SYSCLK_MHz > 5)
+			#define MANRT_PSC		1
+	#else
+			#define MANRT_PSC		0
+	#endif
+
+	#define US2MR(v)			(((v)*(SYSCLK/(1UL<<MANRT_PSC))+500000)/1000000)
+	#define US2MI(v)			(((v)*(SYSCLK/(1UL<<MANRT_PSC))+500000)/1000000)
+
+	#define MANIT_EVSYS_USER	CONCAT3(EVSYS_USER_, MANI_TC, _EVU)
+	#define MANRT_EVENT_GEN		CONCAT3(EVGEN_, MANI_TC, _OVF)
+	#define MANRT_EVSYS_USER	CONCAT3(EVSYS_USER_,MANR_TCC,_MC_0)
+
+	#define MNITC				HW::MANI_TC
+	#define MNRTCC				HW::MANR_TCC
+
+	#define MANR_EXTINT			(PIN_RXD&15)
+
+	inline void MANRT_ClockEnable()  { HW::GCLK->PCHCTRL[CONCAT2(GCLK_,MANR_TCC)]	= MANR_GEN|GCLK_CHEN; HW::MCLK->ClockEnable(CONCAT2(PID_,MANR_TCC)); }
+	inline void MANIT_ClockEnable()  { HW::GCLK->PCHCTRL[CONCAT2(GCLK_,MANI_TC)]	= MANI_GEN|GCLK_CHEN; HW::MCLK->ClockEnable(CONCAT2(PID_,MANI_TC)); }
+
 #elif defined(WIN32)	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	#define US2MR(v)			(v)
@@ -1218,7 +1255,7 @@ void InitManRecieve()
 
 	ManRT->PRS = US2MT(12) - 1;
 	ManRT->CRS = US2MT(12) - 1;
-	ManRT->PSC = ManRT_PSC; //1.28us
+	ManRT->PSC = MANRT_PSC; //1.28us
 
 	ManTmr->PRS = US2MT(250);
 	ManTmr->PSC = ManRT_PSC; //1.28us

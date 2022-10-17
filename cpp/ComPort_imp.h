@@ -25,33 +25,33 @@ extern dword millisecondsCount;
 
 #elif defined(CPU_XMC48)	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	#define __SCTR (PDL(1) | TRM(1) | FLE(7) | WLE(7))
+	#define __SCTR (USIC_PDL(1) | USIC_TRM(1) | USIC_FLE(7) | USIC_WLE(7))
 
-	#define __CCR (MODE(2))
+	//#define __CCR (USIC_MODE(2))
 
-	#define __BRG_ASYN	(DCTQ(15))
-	#define __BRG_SYNC	(DCTQ(0)|CLKSEL(3))
+	#define __BRG_ASYN	(USIC_DCTQ(15))
+	#define __BRG_SYNC	(USIC_DCTQ(0)|USIC_CLKSEL(3))
 
 	//#define __DX0CR (DSEL(0) | INSW(0) | DFEN(0) | DSEN(0) | DPOL(0) | SFSEL(0) | CM(0) | DXS(0))
 	//#define __DX1CR (DSEL(0) | INSW(0) | DFEN(0) | DSEN(0) | DPOL(0) | SFSEL(0) | CM(0) | DXS(0))
 	//#define __DX2CR (DSEL(0) | INSW(0) | DFEN(0) | DSEN(0) | DPOL(0) | SFSEL(0) | CM(0) | DXS(0))
 	//#define __DX3CR (DSEL(0) | INSW(0) | DFEN(0) | DSEN(0) | DPOL(0) | SFSEL(0) | CM(0) | DXS(0))
 
-	#define __PCR_ASYN	(SMD(1) | SP(9) | RSTEN(1) | TSTEN(1))
-	#define __PCR_SYNC	(SMD(0) | SP(0) | RSTEN(1) | TSTEN(1))
+	#define __PCR_ASYN	(USIC_SMD(1) | USIC_SP(9) | USIC_RSTEN(1) | USIC_TSTEN(1))
+	#define __PCR_SYNC	(USIC_SMD(0) | USIC_SP(0) | USIC_RSTEN(1) | USIC_TSTEN(1))
 
-//	#define __FDR (STEP(0x3FF) | DM(1))
+	//#define __FDR (USIC_STEP(0x3FF) | USIC_DM(1))
 
-	#define __TCSR (TDEN(1)|TDSSM(1))
+	#define __TCSR (USIC_TDEN(1)|USIC_TDSSM(1))
 
-	ComPort::ComBase	ComPort::_bases[3] = { 
-	//		used	dsel	USIC_CH			port_RTS	pin_RTS		USIC PID	INPR_SRx	GPDMA		dmaCh	DLR
-		{	false, 	1, 		HW::USIC0_CH0,	HW::P1, 	1<<0,		PID_USIC0,  0,			HW::DMA0, 	0, 		0 	}, 
-		{	false, 	2, 		HW::USIC0_CH1,	HW::P1, 	1<<13,		PID_USIC0, 	1,			HW::DMA0, 	1, 		2 	},
-		{	false, 	4, 		HW::USIC2_CH1,	HW::P1, 	1<<8,		PID_USIC2,	1,			HW::DMA1, 	0, 		9 	}
-	};
+	//ComPort::ComBase	ComPort::_bases[3] = { 
+	////		used	dsel	USIC_CH			port_RTS	pin_RTS		USIC PID	INPR_SRx	GPDMA		dmaCh	DLR
+	//	{	false, 	1, 		HW::USIC0_CH0,	HW::P1, 	1<<0,		PID_USIC0,  0,			HW::DMA0, 	0, 		0 	}, 
+	//	{	false, 	2, 		HW::USIC0_CH1,	HW::P1, 	1<<13,		PID_USIC0, 	1,			HW::DMA0, 	1, 		2 	},
+	//	{	false, 	4, 		HW::USIC2_CH1,	HW::P1, 	1<<8,		PID_USIC2,	1,			HW::DMA1, 	0, 		9 	}
+	//};
 
-	static u32 parityMask[3] = { PM(0), PM(3), PM(2) };
+	static u32 parityMask[3] = { USIC_PM(0), USIC_PM(3), USIC_PM(2) };
 
 	//#define READ_PIN_SET()	HW::P1->BSET(0)
 	//#define READ_PIN_CLR()	HW::P1->BCLR(0)
@@ -93,20 +93,20 @@ void ComPort::InitHW()
 
 	#elif defined(CPU_XMC48)
 
-		HW::Peripheral_Enable(_cb->usic_pid);
+		HW::Peripheral_Enable(_upid);
 
-		_SU->KSCFG = MODEN|BPMODEN|BPNOM|NOMCFG(0);
+		_uhw->KSCFG = USIC_MODEN|USIC_BPMODEN|USIC_BPNOM|USIC_NOMCFG(0);
 
-		_SU->BRG = _brg;		
-		_SU->PCR_ASCMode = _pcr;
+		_uhw->BRG = __BRG;		
+		_uhw->PCR_ASCMode = __PCR;
 
-		_SU->FDR			= _BaudRateRegister;
-		_SU->SCTR			= __SCTR;
-		_SU->DX0CR			= DSEL(_cb->dsel);//__DX0CR;
-		_SU->DX1CR			= DPOL(1);
-		_SU->TCSR			= __TCSR;
-		_SU->PSCR			= ~0;
-		_SU->CCR			= _ModeRegister;
+		_uhw->FDR			= __FDR; //_BaudRateRegister;
+		_uhw->SCTR			= __SCTR;
+		_uhw->DX0CR			= __DX0CR; // DSEL(_cb->dsel);//__DX0CR;
+		_uhw->DX1CR			= __DX1CR; //DPOL(1);
+		_uhw->TCSR			= __TCSR;
+		_uhw->PSCR			= ~0;
+		_uhw->CCR			= __CCR; //_ModeRegister;
 
 	#endif
 }
@@ -177,38 +177,37 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 
 	#elif defined(CPU_XMC48)
 
-		_dma = cb.dma;
-		_dmaChMask = 1<<cb.dmaCh;
-		_chdma = &(_dma->CH[cb.dmaCh]);
-		_dlr = cb.dlr;
-		_inpr_sr = cb.inpr_sr;
+		//_dma = cb.dma;
+		//_dmaChMask = 1<<cb.dmaCh;
+		//_chdma = &(_dma->CH[cb.dmaCh]);
+		//_dlr = cb.dlr;
+		//_inpr_sr = cb.inpr_sr;
 
-		_ModeRegister = __CCR | ((parity < 3) ? parityMask[parity] : parityMask[0]);
-
+		__CCR = USIC_MODE(2) | ((parity < 3) ? parityMask[parity] : parityMask[0]);
 
 		switch (ct)
 		{
 			case ASYNC:
 
-				_brg				= __BRG_ASYN;
-				_pcr				= __PCR_ASYN | ((stopBits == 2) ? STPB(1) : 0);;
-				_BaudRateRegister	= BoudToPresc(speed) | DM(1);
+				__BRG	= __BRG_ASYN;
+				__PCR	= __PCR_ASYN | ((stopBits == 2) ? USIC_STPB(1) : 0);;
+				__FDR	= BoudToPresc(speed) | USIC_DM(1);
 
 				break;
 
 			case SYNC_M:
 
-				_brg				= __BRG_SYNC;
-				_pcr				= __PCR_SYNC | ((stopBits == 2) ? STPB(1) : 0);
-				_BaudRateRegister	= BoudToPresc(speed) | DM(1);
+				__BRG	= __BRG_SYNC;
+				__PCR	= __PCR_SYNC | ((stopBits == 2) ? USIC_STPB(1) : 0);
+				__FDR	= BoudToPresc(speed) | USIC_DM(1);
 
 				break;
 
 			case SYNC_S:
 
-				_brg				= __BRG_SYNC;
-				_pcr				= __PCR_SYNC | ((stopBits == 2) ? STPB(1) : 0);
-				_BaudRateRegister	= 0;
+				__BRG	= __BRG_SYNC;
+				__PCR	= __PCR_SYNC | ((stopBits == 2) ? USIC_STPB(1) : 0);
+				__FDR	= 0;
 
 				break;
 
@@ -304,14 +303,14 @@ void ComPort::TransmitByte(byte v)
 
 	#elif defined(CPU_XMC48)
 
-		_SU->CCR = _ModeRegister|TBIEN;
-		_SU->INPR = _inpr_sr<<4;
+		_uhw->CCR = __CCR|USIC_TBIEN;
+		_uhw->INPR = USIC_TSINP(Get_INPR_SR());
 
-		_SU->TBUF[0] = v;
+		_uhw->TBUF[0] = v;
 
-		while ((_SU->PSR & TSIF) == 0);
+		while ((_uhw->PSR & USIC_TSIF) == 0);
 
-		_SU->CCR = _ModeRegister;	// Disable transmit and receive
+		_uhw->CCR = __CCR;	// Disable transmit and receive
 
 	#endif
 
@@ -355,76 +354,17 @@ void ComPort::EnableTransmit(void* src, word count)
 
 	#elif defined(CPU_XMC48)
 
-		if (_portNum > 1 && count > 0xFFF) { count = 0xFFF; };
-
 		__disable_irq();
 
-		HW::DLR->LNEN |= (1<<_dlr);
+		_DMA->WritePeripheralByte(src, &_uhw->TBUF[0], count);
 
-		_dma->DMACFGREG = 1;
+		_uhw->PSCR = ~0;
+		_uhw->CCR = __CCR|USIC_TBIEN;
+		_uhw->INPR = USIC_TBINP(Get_INPR_SR());
 
-		if (count > 0xFFF)
+		if ((_uhw->PSR & USIC_TBIF) == 0)
 		{
-			byte *p = (byte*)src;
-
-			u32 i = 0;
-
-			LLI *lli = &_lli[0];
-
-			for ( ; i < ArraySize(_lli); i++)
-			{
-				lli = _lli+i;
-
-				lli->SAR = src;
-				lli->CTLL = DINC(2)|SINC(0)|TT_FC(1)|DEST_MSIZE(0)|SRC_MSIZE(0);
-				lli->DAR = &_SU->TBUF[0];
-
-				if (count > 0xFFF)
-				{
-					lli->LLP = _lli+i+1;
-					lli->CTLH = 0xFFF;
-					lli->CTLL |= LLP_DST_EN;
-					count -= 0xFFF;
-					p += 0xFFF;
-				}
-				else
-				{
-					lli->LLP = 0;
-					lli->CTLH = count;
-					count = 0;
-
-					break;
-				};
-			};
-
-			lli->LLP = 0;
-
-			_dma->DMACFGREG = 1;
-
-			_chdma->CTLH = _lli[0].CTLH;
-			_chdma->CTLL = _lli[0].CTLL;
-			_chdma->LLP = (u32)&_lli[0];
-		}
-		else
-		{
-			_chdma->CTLL = DINC(2)|SINC(0)|TT_FC(1)|DEST_MSIZE(0)|SRC_MSIZE(0);
-			_chdma->CTLH = BLOCK_TS(count);
-		};
-
-		_chdma->SAR = (u32)src;
-		_chdma->DAR = (u32)&_SU->TBUF[0];
-		_chdma->CFGL = HS_SEL_SRC;
-		_chdma->CFGH = PROTCTL(1)|DEST_PER(_dlr&7);
-
-		_dma->CHENREG = _dmaChMask|(_dmaChMask<<8);
-
-		_SU->PSCR = ~0;
-		_SU->CCR = _ModeRegister|TBIEN;
-		_SU->INPR = _inpr_sr<<4;
-
-		if ((_SU->PSR & TBIF) == 0)
-		{
-			_SU->FMR = USIC_CH_FMR_SIO0_Msk<<_inpr_sr;
+			_uhw->FMR = USIC_CH_FMR_SIO0_Msk << Get_INPR_SR();
 		};
 
 		__enable_irq();
@@ -461,9 +401,8 @@ void ComPort::DisableTransmit()
 
 	#elif defined(CPU_XMC48)
 
-		_dma->CHENREG = _dmaChMask<<8;
-		_SU->CCR = _ModeRegister;
-		HW::DLR->LNEN &= ~(1<<_dlr);
+		_uhw->CCR = __CCR;
+		_DMA->Disable(); 
 
 	#endif
 
@@ -507,74 +446,16 @@ void ComPort::EnableReceive(void* dst, word count)
 
 		volatile u32 t;
 
-		if (_portNum > 1 && count > 0xFFF) { count = 0xFFF; };
+		/*_startDmaCounter = */_prevDmaCounter = (u32)dst;
 
-		__disable_irq();
+		t = _uhw->RBUF;
+		t = _uhw->RBUF;
+		_uhw->PSCR = ~0;
 
-		_dma->DMACFGREG = 1;
+		_DMA->ReadPeripheralByte(&_uhw->RBUF, dst, count);
 
-		if (count > 0xFFF)
-		{
-			byte *p = (byte*)dst;
-
-			u32 i = 0;
-
-			LLI *lli = &_lli[0];
-
-			for ( ; i < ArraySize(_lli); i++)
-			{
-				lli = _lli+i;
-
-				lli->SAR = &_SU->RBUF;
-				lli->CTLL = DINC(0)|SINC(2)|TT_FC(2)|DEST_MSIZE(0)|SRC_MSIZE(0);
-				lli->DAR = p;
-
-				if (count > 0xFFF)
-				{
-					lli->LLP = _lli+i+1;
-					lli->CTLH = 0xFFF;
-					lli->CTLL |= LLP_SRC_EN;
-					count -= 0xFFF;
-					p += 0xFFF;
-				}
-				else
-				{
-					lli->LLP = 0;
-					lli->CTLH = count;
-					count = 0;
-
-					break;
-				};
-			};
-
-			lli->LLP = 0;
-
-			_dma->DMACFGREG = 1;
-
-			_chdma->CTLH = _lli[0].CTLH;
-			_chdma->CTLL = _lli[0].CTLL;
-			_chdma->LLP = (u32)&_lli[0];
-		}
-		else
-		{
-			_chdma->CTLH = BLOCK_TS(count);
-			_chdma->CTLL = DINC(0)|SINC(2)|TT_FC(2)|DEST_MSIZE(0)|SRC_MSIZE(0);
-		};
-
-		_chdma->SAR = (u32)&_SU->RBUF;
-		_chdma->DAR = _startDmaCounter = _prevDmaCounter = (u32)dst;
-		_chdma->CFGL = HS_SEL_DST;
-		_chdma->CFGH = PROTCTL(1)|SRC_PER(_dlr&7);
-		_dma->CHENREG = _dmaChMask|(_dmaChMask<<8);
-
-		t = _SU->RBUF;
-		t = _SU->RBUF;
-		_SU->PSCR = ~0;
-
-		HW::DLR->LNEN |= (1<<_dlr);
-
-		_SU->CCR = _ModeRegister|RIEN;
-		_SU->INPR = _inpr_sr<<8;
+		_uhw->CCR = __CCR|USIC_RIEN;
+		_uhw->INPR = USIC_RINP(Get_INPR_SR());
 
 		__enable_irq();
 
@@ -612,9 +493,8 @@ void ComPort::DisableReceive()
 
 	#elif defined(CPU_XMC48)
 
-		_dma->CHENREG = _dmaChMask<<8;
-		_SU->CCR = _ModeRegister;
-		HW::DLR->LNEN &= ~(1<<_dlr);
+		_uhw->CCR = __CCR;
+		_DMA->Disable(); 
 
 	#endif
 

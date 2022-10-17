@@ -7,9 +7,9 @@
 #include "usic.h"
 #include "DMA.h"
 
-#ifdef CPU_XMC48
-	#include "COM_DEF.h"
-#endif
+//#ifdef CPU_XMC48
+//	#include "COM_DEF.h"
+//#endif
 
 #define US2COM(v) US2CLK(v)
 #define MS2COM(v) MS2CLK(v)
@@ -80,6 +80,7 @@ class ComPort : public USIC
 		u32 _CTRLA;
 		u32 _CTRLB;
 		u32 _CTRLC;
+		u16	_BaudRateRegister;
 
 		u32 _status;
 
@@ -90,38 +91,33 @@ class ComPort : public USIC
 
 	#elif defined(CPU_XMC48)
 
-		struct ComBase
-		{
-			bool used;
-			const byte dsel;
-			T_HW::USIC_CH_Type* const HU;
-			T_HW::PORT_Type* const pm;
-			const dword pinRTS;
-			const u32 usic_pid;
-			const u32 inpr_sr;
-			T_HW::GPDMA_Type* const dma;
-			const u32 dmaCh;
-			const u32 dlr;
-		};
+		T_HW::S_PORT* const _PIO_TX;
+		T_HW::S_PORT* const _PIO_RX;
+		T_HW::S_PORT* const _PIO_RTS;
 
-		LLI					_lli[4];
+		const u32 _PIN_TX;
+		const u32 _PIN_RX;
+		const u32 _PIN_RTS;
 
-		T_HW::PORT_Type		*_pm;
-		T_HW::USIC_CH_Type 	*_SU;
-		T_HW::GPDMA_Type	*_dma;
-		T_HW::GPDMA_CH_Type	*_chdma;
-		u32					_dmaChMask;
-		u32					_dlr;
-		u32					_inpr_sr;
-		u32					_brg;
-		u32					_pcr;
+		DMA_CH *	const _DMA;
+
+		const u32 __SCTR;
+		u32 __FDR;
+		u32 __BRG;
+		const u32 __TCSR;
+		const u32 __DX0CR;
+		const u32 __DX1CR;
+		u32 __CCR;
+		u32 __PCR;
+		u32 _MASK_RTS;
 
 
-		bool IsTransmited() { return (_SU->PSR & BUSY) == 0 && !(_dma->CHENREG & _dmaChMask); }
+		bool IsTransmited() { return (_uhw->PSR & USIC_BUSY) == 0 && _DMA->CheckComplete(); }
+		bool IsRecieved() { return (_uhw->PSR & USIC_BUSY); }
 //		u16	GetDmaCounter() { return BLOCK_TS(_chdma->CTLH); }
-		u32	GetDmaCounter() { return _chdma->DAR; }
+		u32	GetDmaCounter() { return _DMA->GetDstCounter(); }
 //		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _prevDmaCounter; }
-		u16	GetRecievedLen() { return _chdma->DAR - _startDmaCounter; }
+		u16	GetRecievedLen() { return _pReadBuffer->maxLen - GetDmaCounter(); }
 
 	#elif defined(WIN32)
 
@@ -142,11 +138,10 @@ class ComPort : public USIC
 
 
 
-	word			_BaudRateRegister;
 
-	dword			_ModeRegister;
-	dword			_pinRTS;
-	dword			_startTransmitTime;
+	//dword			_ModeRegister;
+	//dword			_pinRTS;
+	//dword			_startTransmitTime;
 
 //	dword			_startReceiveTime;
 //	dword			_preReadTimeout;
@@ -173,11 +168,14 @@ class ComPort : public USIC
 
   public:
 	  
-#ifndef WIN32
+#ifdef CPU_SAME53
 
 	ComPort(byte num, T_HW::S_PORT* ptx, T_HW::S_PORT* prx, T_HW::S_PORT* prts, u32 mtx, u32 mrx, u32 mrts, u32 muxtx, u32 muxrx, u32 txpo, u32 rxpo, u32 gen_src, u32 gen_clk, DMA_CH *dma)
 		: USIC(num), _PIO_TX(ptx), _PIO_RX(prx), _PIO_RTS(prts), _MASK_TX(mtx), _MASK_RX(mrx), _MASK_RTS(mrts),
 		_PMUX_TX(muxtx), _PMUX_RX(muxrx), _GEN_SRC(gen_src), _GEN_CLK(gen_clk), _TXPO(txpo), _RXPO(rxpo), _DMA(dma), _status485(READ_END) {}
+
+#elif defined(CPU_XMC48)
+
 #else
 
 	ComPort() : USIC(0), _connected(false), _status485(READ_END) {}
