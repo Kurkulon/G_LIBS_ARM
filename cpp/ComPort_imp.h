@@ -37,8 +37,8 @@ extern dword millisecondsCount;
 	//#define __DX2CR (DSEL(0) | INSW(0) | DFEN(0) | DSEN(0) | DPOL(0) | SFSEL(0) | CM(0) | DXS(0))
 	//#define __DX3CR (DSEL(0) | INSW(0) | DFEN(0) | DSEN(0) | DPOL(0) | SFSEL(0) | CM(0) | DXS(0))
 
-	#define __PCR_ASYN	(USIC_SMD(1) | USIC_SP(9) | USIC_RSTEN(1) | USIC_TSTEN(1))
-	#define __PCR_SYNC	(USIC_SMD(0) | USIC_SP(0) | USIC_RSTEN(1) | USIC_TSTEN(1))
+	#define __PCR_ASYN	(UART_SMD(1) | UART_SP(9) | UART_RSTEN(1) | UART_TSTEN(1))
+	#define __PCR_SYNC	(UART_SMD(0) | UART_SP(0) | UART_RSTEN(1) | UART_TSTEN(1))
 
 	//#define __FDR (USIC_STEP(0x3FF) | USIC_DM(1))
 
@@ -102,8 +102,8 @@ void ComPort::InitHW()
 
 		_uhw->FDR			= __FDR; //_BaudRateRegister;
 		_uhw->SCTR			= __SCTR;
-		_uhw->DX0CR			= __DX0CR; // DSEL(_cb->dsel);//__DX0CR;
-		_uhw->DX1CR			= __DX1CR; //DPOL(1);
+		_uhw->DX0CR			= _DX0CR; // DSEL(_cb->dsel);//__DX0CR;
+		_uhw->DX1CR			= USIC_DPOL(1);
 		_uhw->TCSR			= __TCSR;
 		_uhw->PSCR			= ~0;
 		_uhw->CCR			= __CCR; //_ModeRegister;
@@ -190,7 +190,7 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 			case ASYNC:
 
 				__BRG	= __BRG_ASYN;
-				__PCR	= __PCR_ASYN | ((stopBits == 2) ? USIC_STPB(1) : 0);;
+				__PCR	= __PCR_ASYN | ((stopBits == 2) ? UART_STPB(1) : 0);;
 				__FDR	= BoudToPresc(speed) | USIC_DM(1);
 
 				break;
@@ -198,7 +198,7 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 			case SYNC_M:
 
 				__BRG	= __BRG_SYNC;
-				__PCR	= __PCR_SYNC | ((stopBits == 2) ? USIC_STPB(1) : 0);
+				__PCR	= __PCR_SYNC | ((stopBits == 2) ? UART_STPB(1) : 0);
 				__FDR	= BoudToPresc(speed) | USIC_DM(1);
 
 				break;
@@ -206,7 +206,7 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 			case SYNC_S:
 
 				__BRG	= __BRG_SYNC;
-				__PCR	= __PCR_SYNC | ((stopBits == 2) ? USIC_STPB(1) : 0);
+				__PCR	= __PCR_SYNC | ((stopBits == 2) ? UART_STPB(1) : 0);
 				__FDR	= 0;
 
 				break;

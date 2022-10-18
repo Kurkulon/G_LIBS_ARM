@@ -76,14 +76,19 @@ protected:
 
 #elif defined(CPU_XMC48)
 
-	const u32 __SCTR;
-	const u32 __FDR;
-	const u32 __BRG;
-	const u32 __TCSR;
-	const u32 __DX0CR;
-	const u32 __DX1CR;
-	const u32 __CCR;
-	const u32 __PCR;
+	T_HW::S_PORT* const _PIO_SCL;
+	T_HW::S_PORT* const _PIO_SDA;
+
+	const byte _PIN_SCL;
+	const byte _PIN_SDA;
+
+	DMA_CH *	const _DMA;
+
+	const u32 _DX0CR;
+	const u32 _DX1CR;
+	const u32 _GEN_CLK;
+
+	u32 _FDR;
 
 #elif defined(WIN32)
 
@@ -110,6 +115,9 @@ public:
 
 #elif defined(CPU_XMC48)
 
+	S_I2C(byte num, T_HW::S_PORT* pio_scl, byte pin_scl, T_HW::S_PORT* pio_sda, byte pin_sda, DMA_CH *dma, u32 dx0cr, u32 dx1cr, u32 genclk)
+		: USIC(num), _PIO_SCL(pio_scl), _PIO_SDA(pio_sda), _PIN_SCL(pin_scl), _PIN_SDA(pin_sda), _DMA(dma),
+		_DX0CR(dx0cr), _DX1CR(dx1cr), _GEN_CLK(genclk), _dsc(0), _state(WAIT) {}
 
 #endif
 

@@ -116,7 +116,7 @@ u32 rxCount = 0;
 //u32 countRXOVR = 0;
 //u32 countHNO = 0;
 
-u32 trp[4] = {-1};
+u32 trp[4] = {~0};
 
 u16  txIpID = 0;
 
@@ -606,14 +606,14 @@ static bool RequestDHCP(Ptr<MB> &mb)
 	*p.d++ = ipAdr;	// Destination
 	*p.d++ = t->dhcp.yiaddr; // Router
 
-	*p.b++ = -1; // End option
+	*p.b++ = ~0; // End option
 
 	u16 ipLen = sizeof(EthDhcp) - sizeof(t->dhcp.options) + (p.b - (byte*)t->dhcp.options);
 
 	t->eth.dest = hwBroadCast;
 	t->iph.id = GetIpID(); //h->iph.id;		
 	t->iph.p = PROT_UDP;		
-	t->iph.dst = -1; //BroadCast	
+	t->iph.dst = ~0; //BroadCast	
 
 	t->udp.src = BOOTPS;
 	t->udp.dst = BOOTPC;

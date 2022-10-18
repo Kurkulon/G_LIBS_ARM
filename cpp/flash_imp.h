@@ -103,9 +103,9 @@ static u32 pagesRead = 0;
 static u32 pagesReadOK = 0;
 static u32 pagesReadErr = 0;
 
-static u64 adrLastVector = -1;
-static u32 lastSessionBlock = -1;
-static u32 lastSessionPage = -1;
+static u64 adrLastVector = ~0;
+static u32 lastSessionBlock = ~0;
+static u32 lastSessionPage = ~0;
 
 static bool cmdCreateNextFile = false;
 static bool cmdFullErase = false;
@@ -218,7 +218,7 @@ static NandState nandState = NAND_STATE_WAIT;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 static byte lastFlashStatus = FLASH_STATUS_NONE;
-static u32 lastFlashProgress = -1;
+static u32 lastFlashProgress = ~0;
 static u32 lastFlashTime = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -445,7 +445,7 @@ struct EraseBlock
 	bool check;		// Проверить результат стирания
 	u16	errBlocks;
 
-	EraseBlock() : state(WAIT), force(false), check(true), errBlocks(0), er(~0) {}
+	EraseBlock() : er(~0), state(WAIT), force(false), check(true), errBlocks(0) {}
 
 	void Start(const FLADR &rd, bool frc, bool chk);
 	bool Update();
@@ -666,10 +666,10 @@ void Write::Init()
 
 	spare.v1.vectorCount = 0;
 
-	spare.v1.vecFstOff = -1;
+	spare.v1.vecFstOff = ~0;
 	spare.v1.vecFstLen = 0;
 
-	spare.v1.vecLstOff = -1;
+	spare.v1.vecLstOff = ~0;
 	spare.v1.vecLstLen = 0;
 
 	spare.v1.fbb = 0;		
@@ -694,10 +694,10 @@ void Write::Init(u32 bl, u32 file, u32 prfile)
 
 	spare.v1.vectorCount = 0;
 
-	spare.v1.vecFstOff = -1;
+	spare.v1.vecFstOff = ~0;
 	spare.v1.vecFstLen = 0;
 
-	spare.v1.vecLstOff = -1;
+	spare.v1.vecLstOff = ~0;
 	spare.v1.vecLstLen = 0;
 
 	spare.v1.fbb = 0;		
@@ -1122,10 +1122,10 @@ bool Write::Update()
 
 			spare.v1.fpn += 1;
 
-			spare.v1.vecFstOff = -1;
+			spare.v1.vecFstOff = ~0;
 			spare.v1.vecFstLen = 0;
 
-			spare.v1.vecLstOff = -1;
+			spare.v1.vecLstOff = ~0;
 			spare.v1.vecLstLen = 0;
 
 			break;	
@@ -1163,7 +1163,7 @@ bool Write::Update()
 
 				for (u16 i = (sizeof(wrBuf)-wr.GetCol())/4; i > 0; i--)
 				{
-					*(d++) = -1;
+					*(d++) = ~0;
 				};
 
 				createFile = true;
@@ -1406,7 +1406,7 @@ struct Read2
 
 	PageBuffer *pagebuf;
 
-	Read2() : sparePage(~0), prevSparePage(~0), rd_data(0), rd_count(0), vecStart(false), state(WAIT), statePage(0), pagebuf(0) {}
+	Read2() :  rd_data(0), rd_count(0), sparePage(~0), prevSparePage(~0), vecStart(false), state(WAIT), statePage(0), pagebuf(0) {}
 	
 	bool Start();
 //	bool Start(FLRB *flrb, FLADR *adr);
@@ -2068,7 +2068,7 @@ static void InitSessions()
 		while (write.Update()) ;
 	};
 
-	u32 ms = 0, me = 0, ls = -1;
+	u32 ms = 0, me = 0, ls = ~0;
 	u32 sp = 0;
 
 	bool bm = false, bl = false;
@@ -2578,7 +2578,7 @@ static bool UpdateBlackBoxSendSessions()
 
 		case 10: //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-			if (TRAP_MEMORY_SendStatus(-1, FLASH_STATUS_READ_SESSION_READY))
+			if (TRAP_MEMORY_SendStatus(~0, FLASH_STATUS_READ_SESSION_READY))
 			{
 				state++;
 			};

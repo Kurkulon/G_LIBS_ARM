@@ -49,32 +49,32 @@ void S_SPIM::InitHW()
 		_uhw->CCR = 0;
 
 		_uhw->FDR = __FDR;
-		_uhw->BRG = __BRG;
+		_uhw->BRG = USIC_SCLKCFG(2UL)|USIC_CTQSEL(0)|USIC_DCTQ(1)|USIC_PCTQ(3)|USIC_CLKSEL(0);
 	    
-		_uhw->SCTR = __SCTR;
-		_uhw->TCSR = __TCSR;
+		_uhw->SCTR = USIC_SDIR(1) | USIC_TRM(1) | USIC_FLE(0x3F) | USIC_WLE(7);
+		_uhw->TCSR = USIC_TDEN(1)|USIC_HPCMD(0);
 
-		_uhw->PCR_SSCMode = __PCR;
+		_uhw->PCR_SSCMode = (SPI_MSLSEN | SPI_SELINV |  SPI_TIWEN | SPI_MCLK | SPI_CTQSEL1(0) | SPI_PCTQ1(0) | SPI_DCTQ1(0));
 
 		_uhw->PSCR = ~0;
 
 		_uhw->CCR = 0;
 
-		_uhw->DX0CR = __DX0CR;
-		_uhw->DX1CR = __DX1CR;
+		_uhw->DX0CR = _DX0CR;
+		_uhw->DX1CR = _DX1CR;
 
 		_uhw->TBCTR = 0;// TBCTR_SIZE8|TBCTR_LIMIT(0);
 		_uhw->RBCTR = 0;//RBCTR_SIZE8|RBCTR_LIMIT(0);
 
-		_uhw->CCR = __CCR;
+		_uhw->CCR = (USIC_MODE(1));
 
 		_PIO_SPCK->ModePin(_PIN_SPCK, A2PP);
 		_PIO_MOSI->ModePin(_PIN_MOSI, A2PP);
  		_PIO_MISO->ModePin(_PIN_MISO, I0DNP);
 
-		_MASK_CS_ALL = 0;
+		//_MASK_CS_ALL = 0;
 
-		for (u32 i = 0; i < _PIN_CS_LEN; i++) _PIO_CS->ModePin(_PIN_CS[i], G_PP), _MASK_CS_ALL |= 1UL<<_PIN_CS[i];
+		//for (u32 i = 0; i < _PIN_CS_LEN; i++) _PIO_CS->ModePin(_PIN_CS[i], G_PP), _MASK_CS_ALL |= 1UL<<_PIN_CS[i];
 
 		ChipDisable();
 
@@ -136,6 +136,8 @@ bool S_SPIM::Connect(u32 baudrate)
 		return false;
 	};
 
+	if (baudrate == 0) baudrate = 1;
+
 	#ifdef CPU_SAME53	
 
 		_MASK_CS_ALL = 0;
@@ -144,8 +146,6 @@ bool S_SPIM::Connect(u32 baudrate)
 		{
 			_MASK_CS_ALL |= _MASK_CS[i];
 		};
-
-		if (baudrate == 0) baudrate = 1;
 
 		u32 baud = (_GEN_CLK + baudrate/2) / baudrate;
 
@@ -161,7 +161,23 @@ bool S_SPIM::Connect(u32 baudrate)
 
 	#elif defined(CPU_XMC48)
 
+		_MASK_CS_ALL = 0;
 
+		for (u32 i = 0; i < _PIN_CS_LEN; i++)
+		{
+			_MASK_CS_ALL |= 1UL << _PIN_CS[i];
+		};
+
+//		__SCTR = USIC_SDIR(1) | USIC_TRM(1) | USIC_FLE(0x3F) | USIC_WLE(7);
+		__FDR = ((1024 - ((_GEN_CLK + baudrate/2) / baudrate + 1) / 2) | USIC_DM(1));
+//		__BRG = USIC_SCLKCFG(2)|USIC_CTQSEL(0)|USIC_DCTQ(1)|USIC_PCTQ(3)|USIC_CLKSEL(0));
+//		__TCSR = (USIC_TDEN(1)|USIC_HPCMD(0));
+//		__DX0CR;
+//		__DX1CR;
+//		__CCR = (USIC_MODE(1));
+//		__PCR = (USIC_MSLSEN | USIC_SELINV |  USIC_TIWEN | USIC_MCLK | USIC_CTQSEL1(0) | USIC_PCTQ1(0) | USIC_DCTQ1(0));
+
+		InitHW();
 
 		//SPI->PCR_SSCMode = SPI__PCR|SELO(1);
 		
@@ -235,7 +251,11 @@ void S_SPIM::WriteSyncDMA(void *data, u16 count)
 
 	while (!CheckWriteComplete());
 
-	_DMATX->Disable();
+	#ifdef CPU_SAME53
+		_DMATX->Disable();
+	#elif defined(CPU_XMC48)
+		_DMA->Disable();
+	#endif
 
 #endif
 }
@@ -300,13 +320,16 @@ void S_SPIM::ReadSyncDMA(void *data, u16 count)
 	while (!CheckReadComplete());
 
 	#ifdef CPU_SAME53	
-	_uhw.spi->CTRLB &= ~SPI_RXEN;
+
+		_uhw.spi->CTRLB &= ~SPI_RXEN;
+		_DMATX->Disable();
+		_DMARX->Disable();
+
 	#elif defined(CPU_XMC48)
 
-	#endif
+		_DMA->Disable();
 
-	_DMATX->Disable();
-	_DMARX->Disable();
+	#endif
 
 #endif
 }

@@ -95,21 +95,22 @@ class ComPort : public USIC
 		T_HW::S_PORT* const _PIO_RX;
 		T_HW::S_PORT* const _PIO_RTS;
 
-		const u32 _PIN_TX;
-		const u32 _PIN_RX;
-		const u32 _PIN_RTS;
+		const byte	_PIN_TX;
+		const byte	_PIN_RX;
+		const byte	_PIN_RTS;
+		const u32	_MASK_RTS;
 
 		DMA_CH *	const _DMA;
 
-		const u32 __SCTR;
+		const u32	_DX0CR;
+		//const u32 __DX1CR;
+
+		//const u32 __SCTR;
 		u32 __FDR;
 		u32 __BRG;
-		const u32 __TCSR;
-		const u32 __DX0CR;
-		const u32 __DX1CR;
+		//const u32 __TCSR;
 		u32 __CCR;
 		u32 __PCR;
-		u32 _MASK_RTS;
 
 
 		bool IsTransmited() { return (_uhw->PSR & USIC_BUSY) == 0 && _DMA->CheckComplete(); }
@@ -175,6 +176,10 @@ class ComPort : public USIC
 		_PMUX_TX(muxtx), _PMUX_RX(muxrx), _GEN_SRC(gen_src), _GEN_CLK(gen_clk), _TXPO(txpo), _RXPO(rxpo), _DMA(dma), _status485(READ_END) {}
 
 #elif defined(CPU_XMC48)
+
+	ComPort(byte num, T_HW::S_PORT* ptx, T_HW::S_PORT* prx, T_HW::S_PORT* prts, byte pintx, byte pinrx, byte pinrts, byte dsel, DMA_CH *dma)
+		: USIC(num), _PIO_TX(ptx), _PIO_RX(prx), _PIO_RTS(prts), _PIN_TX(pintx), _PIN_RX(pinrx), _PIN_RTS(pinrts), _MASK_RTS(1UL<<pinrts),
+		_DMA(dma), _DX0CR(USIC_DSEL(dsel)), _connected(false), _status485(READ_END) {}
 
 #else
 

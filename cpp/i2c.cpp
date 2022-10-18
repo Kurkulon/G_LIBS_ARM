@@ -46,24 +46,27 @@ void S_I2C::InitHW()
 
 		_uhw->KSCFG = USIC_MODEN|USIC_BPMODEN|USIC_BPNOM|USIC_NOMCFG(0);
 
-		_uhw->SCTR = __SCTR;
+		_uhw->SCTR = USIC_SDIR(1) | USIC_TRM(3) | USIC_FLE(0x3F) | USIC_WLE(7);
 
-		_uhw->FDR = __FDR;
-		_uhw->BRG = __BRG;
+		_uhw->FDR = _FDR;
+		_uhw->BRG = USIC_DCTQ(24)|USIC_SCLKCFG(0);
 	    
-		_uhw->TCSR = __TCSR;
+		_uhw->TCSR = USIC_TDEN(1)|USIC_TDSSM(1);
 
 		_uhw->PSCR = ~0;
 
 		_uhw->CCR = 0;
 
-		_uhw->DX0CR = __DX0CR;
-		_uhw->DX1CR = __DX1CR;
+		_uhw->DX0CR = _DX0CR;
+		_uhw->DX1CR = _DX1CR;
 
-		_uhw->CCR = __CCR;
+		_uhw->CCR = USIC_MODE(4);
 
 
-		_uhw->PCR_IICMode = __PCR;
+		_uhw->PCR_IICMode = I2C_STIM;
+
+		_PIO_SCL->ModePin(_PIN_SCL, A2PP);
+		_PIO_SDA->ModePin(_PIN_SDA, A2PP);
 
 		//VectorTableExt[I2C_IRQ] = I2C_Handler;
 		//CM4::NVIC->CLR_PR(I2C_IRQ);
@@ -89,9 +92,9 @@ bool S_I2C::Connect(u32 baudrate)
 		return false;
 	};
 
-	#ifdef CPU_SAME53	
+	if (baudrate == 0) baudrate = 1;
 
-		if (baudrate == 0) baudrate = 1;
+	#ifdef CPU_SAME53	
 
 		u32 baud = (_GEN_CLK + baudrate/2) / baudrate;
 
@@ -107,6 +110,9 @@ bool S_I2C::Connect(u32 baudrate)
 
 	#elif defined(CPU_XMC48)
 
+		_FDR = (1024 - (((_GEN_CLK + baudrate/2) / baudrate + 8) / 16)) | USIC_DM(1);
+
+		InitHW();
 
 	#endif
 

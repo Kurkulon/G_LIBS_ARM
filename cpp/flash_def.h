@@ -124,7 +124,7 @@ struct FLADR
 {
 	union
 	{
-		struct K9K8
+		struct
 		{
 			u64		col		: K9K8_COL_BITS;
 			u64 	page	: K9K8_PAGE_BITS;
@@ -133,7 +133,7 @@ struct FLADR
 			//u64		overflow : (64-(K9K8_COL_BITS+K9K8_PAGE_BITS+NAND_CHIP_BITS+K9K8_BLOCK_BITS));
 		} K9K8;
 
-		struct MT29
+		struct
 		{
 			u64		col		: MT29_COL_BITS;
 			u64 	page	: MT29_PAGE_BITS;
