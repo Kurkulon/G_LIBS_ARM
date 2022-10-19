@@ -2297,7 +2297,12 @@ namespace T_HW
 #define USIC_SCLKCFG(v) 		(v<<30)                    /*!< USIC_CH BRG: SCLKCFG (Bit 30)                               */
 
 /* ---------------------------------  USIC_CH_CCR  -------------------------------- */
-#define USIC_MODE(v)      	(v<<0UL)                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
+//#define USIC_MODE(v)      	(v<<0UL)                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
+#define USIC_MODE_DISABLE  	(0UL)	                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
+#define USIC_MODE_SPI	  	(1UL)	                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
+#define USIC_MODE_UART  	(2UL)	                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
+#define USIC_MODE_I2S	  	(3UL)	                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
+#define USIC_MODE_I2C		(4UL)	                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
 #define USIC_HPCEN(v)     	(v<<6UL)                     /*!< USIC_CH CCR: HPCEN (Bit 6)                                  */
 #define USIC_PM(v)        	(v<<8UL)                     /*!< USIC_CH CCR: PM (Bit 8)                                     */
 #define USIC_RSIEN     		(1<<10UL)                    /*!< USIC_CH CCR: RSIEN (Bit 10)                                 */
@@ -2385,9 +2390,17 @@ namespace T_HW
 #define I2C_AIF           	(0x8000UL)                /*!< USIC_CH PSR_IICMode: AIF (Bitfield-Mask: 0x01)              */
 #define I2C_BRGIF         	(0x10000UL)               /*!< USIC_CH PSR_IICMode: BRGIF (Bitfield-Mask: 0x01)            */
 
+#define I2C_TDF_MASTER_SEND				(0U << 8U)
+#define I2C_TDF_SLAVE_SEND				(1U << 8U)
+#define I2C_TDF_MASTER_RECEIVE_ACK   	(2U << 8U)
+#define I2C_TDF_MASTER_RECEIVE_NACK  	(3U << 8U)
+#define I2C_TDF_MASTER_START         	(4U << 8U)
+#define I2C_TDF_MASTER_RESTART      	(5U << 8U)
+#define I2C_TDF_MASTER_STOP         	(6U << 8U)
+
 /* --------------------------------  USIC_CH_DX0CR  ------------------------------- */
 
-#define USIC_DSEL(v)        (v<<0UL)                     /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+//#define USIC_DSEL(v)        (v<<0UL)                     /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
 #define USIC_INSW(v)        (v<<4UL)                     /*!< USIC_CH DX0CR: INSW (Bit 4)                                 */
 #define USIC_DFEN(v)        (v<<5UL)                     /*!< USIC_CH DX0CR: DFEN (Bit 5)                                 */
 #define USIC_DSEN(v)        (v<<6UL)                     /*!< USIC_CH DX0CR: DSEN (Bit 6)                                 */
@@ -2395,6 +2408,122 @@ namespace T_HW
 #define USIC_SFSEL(v)       (v<<9UL)                     /*!< USIC_CH DX0CR: SFSEL (Bit 9)                                */
 #define USIC_CM(v)          (v<<10UL)                    /*!< USIC_CH DX0CR: CM (Bit 10)                                  */
 #define USIC_DXS(v)         (v<<15UL)                    /*!< USIC_CH DX0CR: DXS (Bit 15)                                 */
+
+//++++++ USIC0_CH0 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#define USIC0_DX0_P1_5		(0UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC0_DX0_P1_4		(1UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC0_DX0_P4_7		(2UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC0_DX0_P5_0		(3UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC0_DX0E			(4UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC0_DX0_XTAL1		(5UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC0_DX0_DOUT0		(6UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC0_HWIN0_P1_5	(7UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+
+#define USIC0_DX1_P1_1		(0UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC0_DX1_P0_8		(1UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC0_DX1C			(2UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC0_DX1D			(3UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC0_DX1E			(4UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC0_DX1_DX0INS	(5UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC0_DX1_SCLKOUT	(6UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+
+//++++++ USIC0_CH1 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#define USIC1_DX0_P2_2		(0UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC1_DX0_P2_5		(1UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC1_DX0_P6_3		(2UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC1_DX0_P3_13		(3UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC1_DX0_P4_0		(4UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC1_DX0_XTAL1		(5UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC1_DX0_DOUT0		(6UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC1_HWIN0_P3_13	(7UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+
+#define USIC1_DX1_P2_4		(0UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC1_DX1_P3_0		(1UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC1_DX1_P6_2		(2UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC1_DX1D			(3UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC1_DX1E			(4UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC1_DX1_DX0INS	(5UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC1_DX1_SCLKOUT	(6UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+
+//++++++ USIC1_CH0 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#define USIC2_DX0_P0_4		(0UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC2_DX0_P0_5		(1UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC2_DX0_P2_15		(2UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC2_DX0_P2_14		(3UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC2_DX0E			(4UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC2_DX0_XTAL1		(5UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC2_DX0_DOUT0		(6UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC2_HWIN0_P0_5	(7UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+
+#define USIC2_DX1_P0_11		(0UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC2_DX1_P5_8		(1UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC2_DX1C			(2UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC2_DX1D			(3UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC2_DX1E			(4UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC2_DX1_DX0INS	(5UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC2_DX1_SCLKOUT	(6UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+
+//++++++ USIC1_CH1 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#define USIC3_DX0_P3_15		(0UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC3_DX0_P3_14		(1UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC3_DX0_P4_2		(2UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC3_DX0_P0_0		(3UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC3_DX0_CAN1INS	(4UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC3_DX0_XTAL1		(5UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC3_DX0_DOUT0		(6UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC3_HWIN0_P3_15	(7UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+
+#define USIC3_DX1_P0_10		(0UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC3_DX1_P0_13		(1UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC3_DX1_P4_0		(2UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC3_DX1D			(3UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC3_DX1E			(4UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC3_DX1_DX0INS	(5UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC3_DX1_SCLKOUT	(6UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+
+//++++++ USIC2_CH0 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#define USIC4_DX0_P5_1		(0UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC4_DX0_P5_0		(1UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC4_DX0_P3_7		(2UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC4_DX0D			(3UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC4_DX0E			(4UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC4_DX0_XTAL1		(5UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC4_DX0_DOUT0		(6UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC4_HWIN0_P5_0	(7UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+
+#define USIC4_DX1_P5_2		(0UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC4_DX1B			(1UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC4_DX1C			(2UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC4_DX1D			(3UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC4_DX1E			(4UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC4_DX1_DX0INS	(5UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC4_DX1_SCLKOUT	(6UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+
+//++++++ USIC2_CH1 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#define USIC5_DX0_P3_5		(0UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC5_DX0_P3_4		(1UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC5_DX0_P4_0		(2UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC5_DX0_P3_12		(3UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC5_DX0_P4_6		(4UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC5_DX0_XTAL1		(5UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC5_DX0_DOUT0		(6UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC5_HWIN0_P4_7	(7UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+
+#define USIC5_DX1_P4_2		(0UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC5_DX1_P3_6		(1UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC5_DX1C			(2UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC5_DX1D			(3UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC5_DX1E			(4UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC5_DX1_DX0INS	(5UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+#define USIC5_DX1_SCLKOUT	(6UL)		                 /*!< USIC_CH DX0CR: DSEL (Bit 0)                                 */
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 /* ---------------------------------  USIC_CH_FDR  -------------------------------- */
 

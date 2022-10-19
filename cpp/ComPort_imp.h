@@ -97,6 +97,8 @@ void ComPort::InitHW()
 
 		_uhw->KSCFG = USIC_MODEN|USIC_BPMODEN|USIC_BPNOM|USIC_NOMCFG(0);
 
+		__dsb(15);
+
 		_uhw->BRG = __BRG;		
 		_uhw->PCR_ASCMode = __PCR;
 
@@ -183,7 +185,7 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 		//_dlr = cb.dlr;
 		//_inpr_sr = cb.inpr_sr;
 
-		__CCR = USIC_MODE(2) | ((parity < 3) ? parityMask[parity] : parityMask[0]);
+		__CCR = USIC_MODE_UART | ((parity < 3) ? parityMask[parity] : parityMask[0]);
 
 		switch (ct)
 		{

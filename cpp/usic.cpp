@@ -92,8 +92,9 @@ void USIC::Usic_Update()
 
 			if ((_alloc_mask & mask) && _usic[num] != 0)
 			{
-				_usic[num]->InitHW();
+				HW::Peripheral_Disable(_usic[num]->_upid);
 
+				_usic[num]->InitHW();
 			};
 			
 			_req_reset_mask &= ~(mask|_usic_mask);

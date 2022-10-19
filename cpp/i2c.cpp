@@ -46,6 +46,8 @@ void S_I2C::InitHW()
 
 		_uhw->KSCFG = USIC_MODEN|USIC_BPMODEN|USIC_BPNOM|USIC_NOMCFG(0);
 
+		__dsb(15);
+
 		_uhw->SCTR = USIC_SDIR(1) | USIC_TRM(3) | USIC_FLE(0x3F) | USIC_WLE(7);
 
 		_uhw->FDR = _FDR;
@@ -60,13 +62,12 @@ void S_I2C::InitHW()
 		_uhw->DX0CR = _DX0CR;
 		_uhw->DX1CR = _DX1CR;
 
-		_uhw->CCR = USIC_MODE(4);
-
+		_uhw->CCR = USIC_MODE_I2C;
 
 		_uhw->PCR_IICMode = I2C_STIM;
 
-		_PIO_SCL->ModePin(_PIN_SCL, A2PP);
-		_PIO_SDA->ModePin(_PIN_SDA, A2PP);
+		_PIO_SCL->ModePin(_PIN_SCL, _MUX_SCL);
+		_PIO_SDA->ModePin(_PIN_SDA, _MUX_SDA);
 
 		//VectorTableExt[I2C_IRQ] = I2C_Handler;
 		//CM4::NVIC->CLR_PR(I2C_IRQ);
@@ -321,73 +322,153 @@ bool S_I2C::Update()
 
 #elif defined(CPU_XMC48)
 
-	//using namespace HW;
+	USICHWT	&I2C = _uhw;
 
-	//static TM32 tm;
+	u32 psr = I2C->PSR_IICMode;
 
-	//__disable_irq();
+	switch (_state)
+	{
+		case WAIT:
 
-	//if (twi_dsc != 0)
-	//{
-	//	if (i2c->PSR_IICMode & (PCR|NACK|ACK|RIF|AIF))
-	//	{
-	//		tm.Reset();
-	//	}
-	//	else if (tm.Check(10))
-	//	{
-	//		result = true;
+			if (CheckReset())
+			{
+				Usic_Update();
+			}
+			else
+			{
+				_dsc = _reqList.Get();
 
-	//		HW::Peripheral_Disable(I2C_PID);
+				if (_dsc != 0)
+				{
+					Usic_Lock();
 
-	//		I2C_Init();
+					DSCI2C &dsc = *_dsc;
 
-	//		twi_dsc->ready = true;
-	//		twi_dsc->readedLen = twi_dsc->rlen - twi_rdCount;
+					dsc.ready = false;
+					dsc.ack = false;
+					dsc.readedLen = 0;
 
-	//		DSCI2C *ndsc = twi_dsc->next;
+					wrPtr	= (byte*)dsc.wdata;
+					wrPtr2	= (byte*)dsc.wdata2;
+					rdPtr	= (byte*)dsc.rdata;
+					wlen	= dsc.wlen;
+					wlen2	= dsc.wlen2;
+					rlen	= dsc.rlen;
 
-	//		if (ndsc != 0)
-	//		{
-	//			twi_dsc->next = 0;
-	//			twi_dsc = ndsc;
+					I2C->PSCR = ~0;//RIF|AIF|TBIF|ACK|NACK|PCR;
 
-	//			twi_dsc->ready = false;
-	//			twi_dsc->ack = false;
-	//			twi_dsc->readedLen = 0;
+					if (wlen == 0)
+					{
+						I2C->TBUF[0] = I2C_TDF_MASTER_START | (dsc.adr << 1) | 1;
 
-	//			twi_wrPtr = (byte*)twi_dsc->wdata;	
-	//			twi_rdPtr = (byte*)twi_dsc->rdata;	
-	//			twi_wrPtr2 = (byte*)twi_dsc->wdata2;	
-	//			twi_wrCount = twi_dsc->wlen;
-	//			twi_wrCount2 = twi_dsc->wlen2;
-	//			twi_rdCount = twi_dsc->rlen;
-	//			twi_adr = twi_dsc->adr;
+						_state = READ; 
+					}
+					else
+					{
+						I2C->TBUF[0] = I2C_TDF_MASTER_START | (dsc.adr << 1) | 0;
 
-	//			if (twi_wrPtr2 == 0) twi_wrCount2 = 0;
+						_state = WRITE; 
+					};
+				};
+			};
 
-	//			i2c->PSCR = ~0;//RIF|AIF|TBIF|ACK|NACK|PCR;
+			break;
 
-	//			i2c->CCR |= RIEN|AIEN;
-	//			i2c->PCR_IICMode |= PCRIEN|NACKIEN|ARLIEN|SRRIEN|ERRIEN|ACKIEN;
+		case WRITE:
 
-	//			i2c->TBUF[0] = TDF_MASTER_START | (twi_dsc->adr << 1) | ((twi_wrCount == 0) ? 1 : 0);
-	//		}
-	//		else
-	//		{
-	//			i2c->CCR = I2C__CCR;
-	//			i2c->PCR_IICMode = I2C__PCR;
+			if(psr & (I2C_NACK|I2C_ERR|I2C_ARL|I2C_PCR))
+			{
+				I2C->TBUF[0] = I2C_TDF_MASTER_STOP;
 
-	//			twi_lastDsc = twi_dsc = 0;
-	//		};
-	//	};
-	//}
-	//else
-	//{
-	//	tm.Reset();
-	//};
-	//
-	//__enable_irq();
+				_state = STOP; 
+			}
+			else if(psr & I2C_ACK)
+			{
+				DSCI2C &dsc = *_dsc;
 
+				dsc.ack = true;
+
+				if (wlen != 0)
+				{
+					I2C->TBUF[0] = I2C_TDF_MASTER_SEND | *wrPtr++; wlen--;
+
+					if(wlen == 0 && wlen2 != 0)
+					{
+						wrPtr = wrPtr2;
+						wlen = wlen2;
+						wlen2 = 0;
+					};
+				}
+				else if (rlen > 0)
+				{
+					I2C->TBUF[0] = I2C_TDF_MASTER_RESTART | (dsc.adr << 1) | 1;
+	
+					_state = READ; 
+				}
+				else
+				{
+					I2C->TBUF[0] = I2C_TDF_MASTER_STOP;
+					
+					_state = STOP; 
+				};
+			};
+
+			I2C->PSCR = psr;
+
+			break;
+
+		case READ:
+
+			if (psr & I2C_ACK)
+			{
+				if (psr & (I2C_SCR|I2C_RSCR))
+				{
+					I2C->TBUF[0] = I2C_TDF_MASTER_RECEIVE_ACK;
+
+					I2C->PSCR = psr;
+				};
+			}
+			else if (psr & (I2C_RIF|I2C_AIF))
+			{
+//				twi_timestamp = GetMilliseconds();
+
+				byte t = I2C->RBUF;
+
+				if (rlen > 0)
+				{
+					*rdPtr++ = t; // receive data
+					rlen--;
+				};
+					
+				I2C->TBUF[0] = (rlen > 0) ? I2C_TDF_MASTER_RECEIVE_ACK : I2C_TDF_MASTER_RECEIVE_NACK; 
+
+				I2C->PSCR = psr;
+			}
+			else if(psr & (I2C_NACK|I2C_ERR|I2C_ARL|I2C_PCR))
+			{
+				I2C->TBUF[0] = I2C_TDF_MASTER_STOP;
+				
+				_state = STOP; 
+			};
+ 
+			break;
+
+		case STOP:
+
+			I2C->PSCR = ~0;
+
+			_dsc->readedLen = _dsc->rlen - rlen;
+			_dsc->ready = true;
+				
+			_dsc = 0;
+				
+			_state = WAIT; 
+
+			Usic_Unlock();
+
+			break;
+	};
+	
 #endif
 
 	return result;

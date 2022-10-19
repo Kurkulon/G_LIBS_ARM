@@ -177,9 +177,9 @@ class ComPort : public USIC
 
 #elif defined(CPU_XMC48)
 
-	ComPort(byte num, T_HW::S_PORT* ptx, T_HW::S_PORT* prx, T_HW::S_PORT* prts, byte pintx, byte pinrx, byte pinrts, byte dsel, DMA_CH *dma)
+	ComPort(byte num, T_HW::S_PORT* ptx, T_HW::S_PORT* prx, T_HW::S_PORT* prts, byte pintx, byte pinrx, byte pinrts, u32 dx0cr, DMA_CH *dma)
 		: USIC(num), _PIO_TX(ptx), _PIO_RX(prx), _PIO_RTS(prts), _PIN_TX(pintx), _PIN_RX(pinrx), _PIN_RTS(pinrts), _MASK_RTS(1UL<<pinrts),
-		_DMA(dma), _DX0CR(USIC_DSEL(dsel)), _connected(false), _status485(READ_END) {}
+		_DMA(dma), _DX0CR(dx0cr), _connected(false), _status485(READ_END) {}
 
 #else
 

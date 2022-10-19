@@ -46,6 +46,8 @@ void S_SPIM::InitHW()
 
 		_uhw->KSCFG = USIC_MODEN|USIC_BPMODEN|USIC_BPNOM|USIC_NOMCFG(0);
 
+		__dsb(15);
+
 		_uhw->CCR = 0;
 
 		_uhw->FDR = __FDR;
@@ -66,7 +68,7 @@ void S_SPIM::InitHW()
 		_uhw->TBCTR = 0;// TBCTR_SIZE8|TBCTR_LIMIT(0);
 		_uhw->RBCTR = 0;//RBCTR_SIZE8|RBCTR_LIMIT(0);
 
-		_uhw->CCR = (USIC_MODE(1));
+		_uhw->CCR = USIC_MODE_SPI;
 
 		_PIO_SPCK->ModePin(_PIN_SPCK, A2PP);
 		_PIO_MOSI->ModePin(_PIN_MOSI, A2PP);
