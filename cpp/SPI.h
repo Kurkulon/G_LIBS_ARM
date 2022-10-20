@@ -76,6 +76,8 @@ protected:
 
 	DMA_CH *	const 	_DMA;
 
+	const byte	_DRL;
+
 	const u32	_DX0CR;
 	const u32	_DX1CR;
 	const u32	_GEN_CLK;
@@ -92,7 +94,7 @@ protected:
 	List<DSCSPI>	_reqList;
 	DSCSPI*			_dsc;
 
-	enum STATE { WAIT = 0, WRITE, STOP };
+	enum STATE { WAIT = 0, WRITE_ADR, WRITE, STOP };
 
 	STATE _state;
 
@@ -121,10 +123,10 @@ public:
 #elif defined(CPU_XMC48)
 
 	S_SPIM(byte num, T_HW::S_PORT* pspck, T_HW::S_PORT* pmosi, T_HW::S_PORT* pmiso, T_HW::S_PORT* pcs, 
-		byte pinspck, byte pinmosi, byte pinmiso, byte muxspck, byte muxmosi, byte* pincs, u32 pincslen, DMA_CH *dma, u32 dx0cr, u32 dx1cr, u32 genclk)
+		byte pinspck, byte pinmosi, byte pinmiso, byte muxspck, byte muxmosi, byte* pincs, u32 pincslen, DMA_CH *dma, byte drl, u32 dx0cr, u32 dx1cr, u32 genclk)
 		: USIC(num), _PIO_SPCK(pspck), _PIO_MOSI(pmosi), _PIO_MISO(pmiso), _PIO_CS(pcs), 
 		_PIN_SPCK(pinspck), _PIN_MOSI(pinmosi), _PIN_MISO(pinmiso), _MUX_SPCK(muxspck), _MUX_MOSI(muxmosi), _PIN_CS(pincs), _PIN_CS_LEN(pincslen),
-		_DMA(dma), _DX0CR(dx0cr), _DX1CR(dx1cr), _GEN_CLK(genclk), _dsc(0), _state(WAIT) {}
+		_DMA(dma), _DRL(drl), _DX0CR(dx0cr), _DX1CR(dx1cr), _GEN_CLK(genclk), _dsc(0), _state(WAIT) {}
 
 			void ChipSelect(byte num)	{ _PIO_CS->BCLR(_PIN_CS[num]); }
 			bool CheckWriteComplete() { return _DMA->CheckComplete() /*&& (_uhw.spi->INTFLAG & SPI_TXC)*/; }

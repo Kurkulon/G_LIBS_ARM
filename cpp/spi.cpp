@@ -4,6 +4,14 @@
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+#define SPI__PCR	(SPI_MSLSEN | SPI_SELINV | SPI_TIWEN | SPI_MCLK | SPI_CTQSEL1(0) | SPI_PCTQ1(0) | SPI_DCTQ1(0))
+#define SPI__TCSR	(USIC_TDEN(1) | USIC_HPCMD(0))
+#define SPI__SCTR	(USIC_SDIR(1) | USIC_TRM(1) | USIC_FLE(0x3F) | USIC_WLE(7))
+#define SPI__BRG	(USIC_SCLKCFG(2U) | USIC_CTQSEL(0) | USIC_DCTQ(1) | USIC_PCTQ(3) | USIC_CLKSEL(0))
+#define SPI__CCR	(USIC_MODE_SPI)
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 void S_SPIM::InitHW()
 {
 	#ifdef CPU_SAME53	
@@ -51,12 +59,12 @@ void S_SPIM::InitHW()
 		_uhw->CCR = 0;
 
 		_uhw->FDR = __FDR;
-		_uhw->BRG = USIC_SCLKCFG(2UL)|USIC_CTQSEL(0)|USIC_DCTQ(1)|USIC_PCTQ(3)|USIC_CLKSEL(0);
+		_uhw->BRG = SPI__BRG;
 	    
-		_uhw->SCTR = USIC_SDIR(1) | USIC_TRM(1) | USIC_FLE(0x3F) | USIC_WLE(7);
-		_uhw->TCSR = USIC_TDEN(1)|USIC_HPCMD(0);
+		_uhw->SCTR = SPI__SCTR;
+		_uhw->TCSR = SPI__TCSR;
 
-		_uhw->PCR_SSCMode = (SPI_MSLSEN | SPI_SELINV |  SPI_TIWEN | SPI_MCLK | SPI_CTQSEL1(0) | SPI_PCTQ1(0) | SPI_DCTQ1(0));
+		_uhw->PCR_SSCMode = SPI__PCR;
 
 		_uhw->PSCR = ~0;
 
@@ -68,22 +76,24 @@ void S_SPIM::InitHW()
 		_uhw->TBCTR = 0;// TBCTR_SIZE8|TBCTR_LIMIT(0);
 		_uhw->RBCTR = 0;//RBCTR_SIZE8|RBCTR_LIMIT(0);
 
-		_uhw->CCR = USIC_MODE_SPI;
+		_uhw->CCR = SPI__CCR;
 
 		_PIO_SPCK->ModePin(_PIN_SPCK, A2PP);
 		_PIO_MOSI->ModePin(_PIN_MOSI, A2PP);
  		_PIO_MISO->ModePin(_PIN_MISO, I0DNP);
 
-		//_MASK_CS_ALL = 0;
+		_MASK_CS_ALL = 0;
 
-		//for (u32 i = 0; i < _PIN_CS_LEN; i++) _PIO_CS->ModePin(_PIN_CS[i], G_PP), _MASK_CS_ALL |= 1UL<<_PIN_CS[i];
+		for (u32 i = 0; i < _PIN_CS_LEN; i++)
+		{
+			_PIO_CS->ModePin(_PIN_CS[i], G_PP);
+			_MASK_CS_ALL |= 1UL << _PIN_CS[i];
+		};
 
 		ChipDisable();
 
-		//VectorTableExt[SPI_IRQ] = SPI_Handler_Read;
-		//CM4::NVIC->CLR_PR(SPI_IRQ);
-		//CM4::NVIC->SET_ER(SPI_IRQ);
-	
+		_DMA->SetDlrLineNum(_DRL);
+
 	#endif
 }
 
@@ -163,13 +173,6 @@ bool S_SPIM::Connect(u32 baudrate)
 
 	#elif defined(CPU_XMC48)
 
-		_MASK_CS_ALL = 0;
-
-		for (u32 i = 0; i < _PIN_CS_LEN; i++)
-		{
-			_MASK_CS_ALL |= 1UL << _PIN_CS[i];
-		};
-
 //		__SCTR = USIC_SDIR(1) | USIC_TRM(1) | USIC_FLE(0x3F) | USIC_WLE(7);
 		__FDR = ((1024 - ((_GEN_CLK + baudrate/2) / baudrate + 1) / 2) | USIC_DM(1));
 //		__BRG = USIC_SCLKCFG(2)|USIC_CTQSEL(0)|USIC_DCTQ(1)|USIC_PCTQ(3)|USIC_CLKSEL(0));
@@ -180,20 +183,6 @@ bool S_SPIM::Connect(u32 baudrate)
 //		__PCR = (USIC_MSLSEN | USIC_SELINV |  USIC_TIWEN | USIC_MCLK | USIC_CTQSEL1(0) | USIC_PCTQ1(0) | USIC_DCTQ1(0));
 
 		InitHW();
-
-		//SPI->PCR_SSCMode = SPI__PCR|SELO(1);
-		
-	//	SPI->PSCR |= TBIF;
-
-	//	SPI->CCR = SPI__CCR|TBIEN;
-	//	SPI->INPR = 0;
-
-		//SPI->IN[0] = 0x55;
-		//SPI->IN[0] = 0x55;
-
-		//while ((SPI->PSR & TSIF) == 0);
-
-	//	SPI->CCR = SPI__CCR;
 
 	#endif
 
@@ -239,6 +228,32 @@ void S_SPIM::WriteAsyncDMA(void *data, u16 count)
 		_DMATX->WritePeripheral(data, &_uhw.spi->DATA, count, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_TX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
 
 	#elif defined(CPU_XMC48)
+
+		USICHWT	&spi = _uhw;
+
+		spi->TRBSCR = TRBSCR_FLUSHTB;
+		spi->TBCTR = TBCTR_SIZE8|TBCTR_LIMIT(0);
+
+		spi->TCSR = SPI__TCSR|USIC_TDSSM(1);
+
+		spi->CCR = SPI__CCR;
+		spi->PCR_SSCMode = SPI__PCR|SPI_SELO(1);
+
+		spi->PSCR = ~0;
+
+		while(spi->PSR_SSCMode & SPI_TBIF) spi->PSCR = ~0;
+
+		_DMA->WritePeripheralByte(data, &spi->IN[4], count);
+
+		spi->PSCR = ~0;
+		spi->CCR = USIC_MODE_SPI|USIC_TBIEN;
+		spi->INPR = USIC_TBINP(Get_INPR_SR())|USIC_RINP(5)|USIC_PINP(5);
+
+		if ((spi->PSR_SSCMode & SPI_TBIF) == 0)
+		{
+			spi->FMR = USIC_CH_FMR_SIO0_Msk << Get_INPR_SR();
+		};
+
 	
 	#endif
 }
@@ -307,6 +322,31 @@ void S_SPIM::ReadAsyncDMA(void *data, u16 count)
 		_DMATX->WritePeripheral(data, &_uhw.spi->DATA, count, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_TX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
 
 	#elif defined(CPU_XMC48)
+
+		USICHWT	&SPI = _uhw;
+
+		SPI->RBCTR = 0;
+		SPI->TBCTR = 0;
+
+		SPI->CCR = SPI__CCR;
+		SPI->PCR_SSCMode = SPI__PCR|SPI_SELO(1);
+
+		while(SPI->PSR_SSCMode & (SPI_TBIF|SPI_RIF))
+		{
+			t = SPI->RBUF;
+			SPI->PSCR = ~0;
+		};
+
+		_DMA->ReadPeripheralByte(&SPI->RBUF, data, count);
+
+		SPI->INPR = USIC_RINP(Get_INPR_SR())|USIC_PINP(5)|USIC_TBINP(5);
+
+		SPI->PSCR = ~0;
+		
+		SPI->CCR = SPI__CCR | USIC_RIEN;
+		SPI->TCSR = SPI__TCSR|USIC_TDSSM(0);
+	
+		SPI->TBUF[0] = 0;
 	
 	#endif
 }
@@ -507,31 +547,125 @@ bool S_SPIM::Update()
 
 #elif defined(CPU_XMC48)
 
-	//using namespace HW;
+	USICHWT	&spi = _uhw;
 
-	//static TM32 tm;
+	switch (_state)
+	{
+		case WAIT:
 
-	//__disable_irq();
+			if (CheckReset())
+			{
+				Usic_Update();
+			}
+			else
+			{
+				_dsc = _reqList.Get();
 
-	//if (spi_dsc != 0)
-	//{
-	//	if (!spi_dsc->ready && (GetMilliseconds() - spi_timestamp) > 100)
-	//	{
-	//		result = true;
+				if (_dsc != 0)
+				{
+					Usic_Lock();
 
-	//		HW::Peripheral_Disable(SPI_PID);
+					ChipSelect(_dsc->csnum);  //_PIO_CS->CLR(_MASK_CS[_dsc->csnum]);
 
-	//		DSCSPI *dsc = spi_dsc;
+					_DMA->SetDlrLineNum(_DRL);
 
-	//		spi_dsc = 0;
+					DSCSPI &dsc = *_dsc;
 
-	//		SPI_Init();
+					dsc.ready = false;
 
-	//		SPI_WriteRead(dsc);
-	//	};
-	//};
-	//
-	//__enable_irq();
+					if (dsc.alen == 0)
+					{
+						if (dsc.wdata != 0 && dsc.wlen > 0)
+						{
+							WriteAsyncDMA(dsc.wdata, dsc.wlen);
+
+							_state = WRITE; 
+						}
+						else 
+						{
+							if (dsc.rdata != 0 && dsc.rlen > 0) ReadAsyncDMA(dsc.rdata, dsc.rlen);
+
+							_state = STOP; 
+						};
+					}
+					else
+					{
+						WriteAsyncDMA(&dsc.adr, dsc.alen);
+
+						_state = WRITE_ADR; 
+					};
+				};
+			};
+
+			break;
+
+		case WRITE_ADR:
+		{
+			DSCSPI &dsc = *_dsc;
+
+			if (CheckWriteComplete())
+			{
+				_DMA->Disable();
+
+				if (dsc.wdata != 0 && dsc.wlen > 0)
+				{
+					WriteAsyncDMA(dsc.wdata, dsc.wlen);
+
+					_state = WRITE; 
+				}
+				else 
+				{
+					if (dsc.rdata != 0 && dsc.rlen > 0) ReadAsyncDMA(dsc.rdata, dsc.rlen);
+
+					_state = STOP; 
+				};
+			};
+
+			break;
+		};
+
+		case WRITE:
+		{
+			DSCSPI &dsc = *_dsc;
+
+			//u32 psr = spi->PSR_SSCMode;
+
+			if (CheckWriteComplete() && (spi->PSR_SSCMode & SPI_MSLSEV))
+			{
+				_DMA->Disable();
+
+				if (dsc.rdata != 0 && dsc.rlen > 0)	ReadAsyncDMA(dsc.rdata, dsc.rlen);
+
+				_state = STOP; 
+			};
+
+			break;
+		};
+
+		case STOP:
+		{
+			if (CheckReadComplete())
+			{
+				_dsc->ready = true;
+				
+				_dsc = 0;
+				
+				ChipDisable();//_PIO_CS->SET(_MASK_CS_ALL);
+
+				_DMA->Disable();
+
+				spi->TCSR = SPI__TCSR|USIC_TDSSM(1);
+				spi->CCR = SPI__CCR;
+				spi->PCR_SSCMode = SPI__PCR;
+
+				_state = WAIT; 
+
+				Usic_Unlock();
+			};
+
+			break;
+		};
+	};
 
 #endif
 
