@@ -73,7 +73,7 @@ void S_SPIM::InitHW()
 		_uhw->DX0CR = _DX0CR;
 		_uhw->DX1CR = _DX1CR;
 
-		_uhw->TBCTR = 0;// TBCTR_SIZE8|TBCTR_LIMIT(0);
+		_uhw->TBCTR = 0; //TBCTR_SIZE8|TBCTR_LIMIT(0);
 		_uhw->RBCTR = 0;//RBCTR_SIZE8|RBCTR_LIMIT(0);
 
 		_uhw->CCR = SPI__CCR;
@@ -603,7 +603,9 @@ bool S_SPIM::Update()
 		{
 			DSCSPI &dsc = *_dsc;
 
-			if (CheckWriteComplete())
+			u32 psr = spi->PSR_SSCMode;
+
+			if (/*CheckWriteComplete() && */(psr & SPI_MSLS) == 0)
 			{
 				_DMA->Disable();
 
@@ -630,7 +632,7 @@ bool S_SPIM::Update()
 
 			//u32 psr = spi->PSR_SSCMode;
 
-			if (CheckWriteComplete() && (spi->PSR_SSCMode & SPI_MSLSEV))
+			if (/*CheckWriteComplete() && */(spi->PSR_SSCMode & SPI_MSLS) == 0)
 			{
 				_DMA->Disable();
 

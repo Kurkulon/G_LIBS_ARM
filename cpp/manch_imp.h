@@ -990,7 +990,7 @@ static u32 rcvManSum12 = 0;
 static u16 rcvManCount12 = 0;
 //u32 rcvManMax12 = 0;
 u16 rcvManQuality = 0;
-static RTM manRcvTime;
+static CTM32 manRcvTime;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1171,7 +1171,7 @@ void ManRcvUpdate()
 	{
 		u32 irq = Push_IRQ();
 
-		if (rcvManLen > 0 && manRcvTime.Timeout(US2RT(200)))
+		if (rcvManLen > 0 && manRcvTime.Timeout(US2CLK(200)))
 		{
 			ManRcvEnd(true);
 		}

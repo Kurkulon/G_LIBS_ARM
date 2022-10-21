@@ -675,16 +675,11 @@ static void RecieveFrame()
 #ifndef WIN32
 
 	Receive_Desc &buf = Rx_Desc[RxBufIndex];
+	Ptr<MB> &mb = Rx_MB[RxBufIndex];
 
-	if(!buf.CheckOwn())
-	{
-	//		FreeTxDesc();
-	}
-	else
+	if(buf.CheckOwn())
 	{
 		//bool c = false;
-
-		Ptr<MB> &mb = Rx_MB[RxBufIndex];
 
 		if (buf.CheckRcvFrame()) // buffer contains a whole frame
 		{
@@ -713,19 +708,7 @@ static void RecieveFrame()
 			mb.Free(); // if (c) buf.ClrAdr();
 		};
 
-		if (!mb.Valid())
-		{
-			mb = AllocMemBuffer(ETH_RX_BUF_SIZE);
-
-			if (mb.Valid())
-			{
-				buf.SetAdr(mb->GetDataPtr(), mb->MaxLen());
-			};
-		}
-		else
-		{
-			buf.SetOwn();
-		};
+		if (mb.Valid())	buf.SetOwn();
 
 		++rxCount;
 
@@ -734,6 +717,13 @@ static void RecieveFrame()
 		RxBufIndex = (buf.ChkWrap()) ? 0 : (RxBufIndex+1);
 
 		if (__debug && RxBufIndex >= ArraySize(Rx_Desc)) __breakpoint(0);
+	};
+
+	if (!mb.Valid())
+	{
+		mb = AllocMemBuffer(ETH_RX_BUF_SIZE);
+
+		if (mb.Valid())	buf.SetAdr(mb->GetDataPtr(), mb->MaxLen());
 	};
 
 #else // #ifndef WIN32
@@ -1163,15 +1153,15 @@ static void rx_descr_init (void)
 	for (u32 i = 0; i < NUM_RX_DSC; i++)
 	{
 		Receive_Desc &dsc	= Rx_Desc[i];
-		Ptr<MB> &mb			= Rx_MB[i];
+		//Ptr<MB> &mb			= Rx_MB[i];
 
-		mb = AllocMemBuffer(ETH_RX_BUF_SIZE);
+		//mb = AllocMemBuffer(ETH_RX_BUF_SIZE);
 
-		if (mb.Valid())
-		{
-			dsc.SetAdr(mb->GetDataPtr(), mb->MaxLen());
-		}
-		else
+		//if (mb.Valid())
+		//{
+		//	dsc.SetAdr(mb->GetDataPtr(), mb->MaxLen());
+		//}
+		//else
 		{
 			dsc.ClrAdr();
 		};

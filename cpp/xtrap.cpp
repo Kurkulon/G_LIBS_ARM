@@ -125,6 +125,8 @@ bool RequestTrap(Ptr<MB> &mb)
 
 void SendTrap(Ptr<MB> &mb)
 {
+	if (!EmacIsConnected())	return;
+
 	((EthIp*)mb->GetDataPtr())->iph.off = 0;
 
 	txList.Add(mb);
@@ -134,6 +136,8 @@ void SendTrap(Ptr<MB> &mb)
 
 void SendFragTrap(Ptr<MB> &mb)
 {
+	if (!EmacIsConnected())	return;
+
 	txList.Add(mb);
 }
 
@@ -223,12 +227,9 @@ static void UpdateSendTraps()
 {
 	static TM32 tm;
 
-	if (!EmacIsConnected())
-	{
-		return;
-	};
-
 	Ptr<MB> mb = txList.Get();
+
+	if (!EmacIsConnected())	return;
 
 	if (mb.Valid())
 	{

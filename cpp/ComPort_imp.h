@@ -95,6 +95,11 @@ void ComPort::InitHW()
 
 		HW::Peripheral_Enable(_upid);
 
+		if (_PIO_SCK != 0) _PIO_SCK->ModePin(_PIN_SCK, _MUX_SCK);
+		_PIO_TX->ModePin(_PIN_TX, _MUX_TX);
+		_PIO_RX->ModePin(_PIN_RX, I2DPU);
+		_PIO_RTS->ModePin(_PIN_RTS, G_PP);
+
 		_uhw->KSCFG = USIC_MODEN|USIC_BPMODEN|USIC_BPNOM|USIC_NOMCFG(0);
 
 		__dsb(15);
@@ -109,6 +114,8 @@ void ComPort::InitHW()
 		_uhw->TCSR			= __TCSR;
 		_uhw->PSCR			= ~0;
 		_uhw->CCR			= __CCR; //_ModeRegister;
+
+		_DMA->SetDlrLineNum(_DRL);
 
 	#endif
 }
@@ -173,10 +180,6 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 
 		_CTRLB |= USART_SFDE;
 
-		_writeTimeout = US2COM((24000000/speed));
-
-		InitHW();
-
 	#elif defined(CPU_XMC48)
 
 		//_dma = cb.dma;
@@ -215,9 +218,11 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 
 		};
 
-		InitHW();
-
 	#endif
+
+	_writeTimeout = US2COM((24000000/speed));
+
+	InitHW();
 
 	_status485 = READ_END;
 
@@ -270,7 +275,7 @@ word ComPort::BoudToPresc(dword speed)
 
 	#elif defined(CPU_XMC48)
 
-		presc = ((MCK + speed/2) / speed + 8) / 16;
+		presc = ((SYSCLK + speed/2) / speed + 8) / 16;
 
 		if (presc > 1024) presc = 1024;
 
@@ -356,13 +361,19 @@ void ComPort::EnableTransmit(void* src, word count)
 
 	#elif defined(CPU_XMC48)
 
-		__disable_irq();
+		_uhw->TRBSCR = TRBSCR_FLUSHTB;
+		_uhw->TBCTR = TBCTR_SIZE8|TBCTR_LIMIT(0);
 
-		_DMA->WritePeripheralByte(src, &_uhw->TBUF[0], count);
+		_DMA->SetDlrLineNum(_DRL);
+		//_DMA->Enable_DLR();
+
+		__disable_irq();
 
 		_uhw->PSCR = ~0;
 		_uhw->CCR = __CCR|USIC_TBIEN;
 		_uhw->INPR = USIC_TBINP(Get_INPR_SR());
+
+		_DMA->WritePeripheralByte(src, &_uhw->IN[4], count);
 
 		if ((_uhw->PSR & USIC_TBIF) == 0)
 		{
@@ -408,7 +419,7 @@ void ComPort::DisableTransmit()
 
 	#endif
 
-	_PIO_RTS->CLR(_MASK_RTS);
+	//_PIO_RTS->CLR(_MASK_RTS);
 
 #endif
 }
@@ -448,6 +459,11 @@ void ComPort::EnableReceive(void* dst, word count)
 
 		volatile u32 t;
 
+		_DMA->SetDlrLineNum(_DRL);
+		//_DMA->Enable_DLR();
+
+		__disable_irq();
+
 		/*_startDmaCounter = */_prevDmaCounter = (u32)dst;
 
 		t = _uhw->RBUF;
@@ -476,7 +492,7 @@ void ComPort::DisableReceive()
 {
 #ifndef WIN32
 
-	_PIO_RTS->CLR(_MASK_RTS);
+	//_PIO_RTS->CLR(_MASK_RTS);
 
 	#ifdef CPU_SAME53	
 

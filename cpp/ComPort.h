@@ -91,13 +91,19 @@ class ComPort : public USIC
 
 	#elif defined(CPU_XMC48)
 
+		T_HW::S_PORT* const _PIO_SCK;
 		T_HW::S_PORT* const _PIO_TX;
 		T_HW::S_PORT* const _PIO_RX;
 		T_HW::S_PORT* const _PIO_RTS;
 
+		const byte	_PIN_SCK;
 		const byte	_PIN_TX;
 		const byte	_PIN_RX;
 		const byte	_PIN_RTS;
+
+		const byte	_MUX_SCK;
+		const byte	_MUX_TX;
+
 		const u32	_MASK_RTS;
 
 		DMA_CH *	const _DMA;
@@ -105,7 +111,7 @@ class ComPort : public USIC
 		const byte	_DRL;
 
 		const u32	_DX0CR;
-		//const u32 __DX1CR;
+		const u32	_DX1CR;
 
 		//const u32 __SCTR;
 		u32 __FDR;
@@ -120,7 +126,7 @@ class ComPort : public USIC
 //		u16	GetDmaCounter() { return BLOCK_TS(_chdma->CTLH); }
 		u32	GetDmaCounter() { return _DMA->GetDstCounter(); }
 //		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _prevDmaCounter; }
-		u16	GetRecievedLen() { return _pReadBuffer->maxLen - GetDmaCounter(); }
+		u16	GetRecievedLen() { return GetDmaCounter(); }
 
 	#elif defined(WIN32)
 
@@ -179,9 +185,9 @@ class ComPort : public USIC
 
 #elif defined(CPU_XMC48)
 
-	ComPort(byte num, T_HW::S_PORT* ptx, T_HW::S_PORT* prx, T_HW::S_PORT* prts, byte pintx, byte pinrx, byte pinrts, u32 dx0cr, DMA_CH *dma, byte drl)
-		: USIC(num), _PIO_TX(ptx), _PIO_RX(prx), _PIO_RTS(prts), _PIN_TX(pintx), _PIN_RX(pinrx), _PIN_RTS(pinrts), _MASK_RTS(1UL<<pinrts),
-		_DMA(dma), _DRL(drl), _DX0CR(dx0cr), _connected(false), _status485(READ_END) {}
+	ComPort(byte num, T_HW::S_PORT* psck, T_HW::S_PORT* ptx, T_HW::S_PORT* prx, T_HW::S_PORT* prts, byte pinsck, byte pintx, byte pinrx, byte pinrts, byte muxsck, byte muxtx, u32 dx0cr, u32 dx1cr, DMA_CH *dma, byte drl)
+		: USIC(num), _PIO_SCK(psck), _PIO_TX(ptx), _PIO_RX(prx), _PIO_RTS(prts), _PIN_SCK(pinsck), _PIN_TX(pintx), _PIN_RX(pinrx), _PIN_RTS(pinrts), _MUX_SCK(muxsck), _MUX_TX(muxtx), _MASK_RTS(1UL<<pinrts),
+		_DMA(dma), _DRL(drl), _DX0CR(dx0cr), _DX1CR(dx1cr), _connected(false), _status485(READ_END) {}
 
 #else
 
