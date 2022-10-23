@@ -10,11 +10,16 @@ struct MB : public PtrObj<MB>
 {
 	u32			len;
 	u32			dataOffset;
-	u32			data[64];
 
-	virtual	u32		MaxLen() { return sizeof(data); }
+protected:
 
-	void*	GetDataPtr() { return data+dataOffset; }
+	u32			_data[1];
+
+public:
+
+	virtual	u32		MaxLen() { return sizeof(_data); }
+
+	void*	GetDataPtr() { return (byte*)_data+dataOffset; }
 
 	MB() : len(0), dataOffset(0) {}
 };
@@ -23,11 +28,7 @@ struct MB : public PtrObj<MB>
 
 template<int LEN> struct MEMB : public MB
 {
-#ifndef WIN32
-	u32 exData[(LEN-sizeof(data)+3)>>2];
-#else
-	u32 exData[(LEN-256+3)>>2];
-#endif
+	u32 exData[(LEN+3)>>2];
 
 protected:
 
@@ -39,7 +40,7 @@ public:
 
 	static	MEMB*	Create()	{ MEMB *p = _freeList.Get(); if (p != 0) {p->dataOffset = 0; p->len = 0; }; return p; }
 	virtual void	Destroy()	{ if (this != 0) _freeList.Add(this); }
-	virtual	u32		MaxLen() { return sizeof(data)+sizeof(exData); }
+	virtual	u32		MaxLen() { return sizeof(_data)+sizeof(exData); }
 
 					MEMB() { _freeList.Init(); _freeList.Add(this); }
 };

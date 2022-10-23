@@ -12,10 +12,12 @@
 
 #include "extern_def.h"
 
-#pragma diag_suppress 2548,546,550,177
+//#pragma diag_suppress 2548,546,550,177
 
+#ifndef WIN32
 #pragma O3
 #pragma Otime
+#endif
 
 enum trap_status
 {

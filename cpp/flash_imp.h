@@ -31,9 +31,16 @@
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+#ifndef WIN32
+
 #pragma push
 #pragma O3
 #pragma Otime
+
+#else
+
+
+#endif
 
 static bool __memcmp(ConstDataPointer s, ConstDataPointer d, u32 len)
 {
@@ -52,7 +59,13 @@ static bool __memcmp(ConstDataPointer s, ConstDataPointer d, u32 len)
 	return true;
 }
 
+#ifndef WIN32
+
 #pragma pop
+
+#else
+
+#endif
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -770,16 +783,15 @@ bool Write::Start()
 	{
 		rcvVec += 1;
 
-		if (!writeFlashEnabled || flashFull || curWrBuf->dataOffset < sizeof(VecData::Hdr))
+		if (!writeFlashEnabled || flashFull)
 		{
-//			rejVec += 1;
+			rejVec += 1;
 
-//			curWrBuf->ready[0] = true;
 			curWrBuf.Free();
 			return false;
 		};
 
-		vector = (VecData*)(curWrBuf->data + curWrBuf->dataOffset - sizeof(VecData::Hdr));
+		vector = (VecData*)curWrBuf->GetDataPtr();
 		vector->h.dataLen = curWrBuf->len;
 
 		state = (vector->h.flags) ? CRC_START : VECTOR_UPDATE;
@@ -807,14 +819,7 @@ void Write::Finish()
 
 		SaveParams();
 
-//		curWrBuf->ready[0] = true;
-
 		curWrBuf.Free();
-
-		//curWrBuf = 0;
-
-		//wr_prev_col = wr_cur_col;
-		//wr_prev_pg = wr_cur_pg;
 	};
 }
 
@@ -3034,15 +3039,9 @@ bool RequestFlashWrite(Ptr<MB> &fwb, u16 devID, bool updateCRC)
 	{
 		if (fwb->len > 0 && fwb->dataOffset >= sizeof(VecData::Hdr))
 		{
-			VecData* vd = (VecData*)(fwb->data + fwb->dataOffset - sizeof(VecData::Hdr));
+			fwb->dataOffset -= sizeof(VecData::Hdr);
 
-			//DataPointer p(vd->data);
-
-			//p.b += fwb->dataLen;
-
-			//*p.w = CRC_CCITT_DMA(vd->data, fwb->dataLen, 0xFFFF);
-
-			//fwb->dataLen += 2;
+			VecData* vd = (VecData*)fwb->GetDataPtr();
 
 			vd->h.device = deviceID = devID;
 			vd->h.flags = updateCRC;

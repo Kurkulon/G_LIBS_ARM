@@ -1,8 +1,10 @@
 #include "types.h"
 #include "CRC32.h"
 
+#ifndef WIN32
 #pragma O3
 #pragma Otime
+#endif
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

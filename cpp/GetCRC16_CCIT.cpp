@@ -1,8 +1,10 @@
 #include "types.h"
 #include "CRC16_CCIT.h"
 
+#ifndef WIN32
 #pragma O3
 #pragma Otime
+#endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

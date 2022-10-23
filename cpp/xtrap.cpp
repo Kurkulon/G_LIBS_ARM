@@ -6,10 +6,12 @@
 #include "vector.h"
 #include "extern_def.h"
 
-#pragma diag_suppress 550,177
+//#pragma diag_suppress 550,177
 
+#ifndef WIN32
 #pragma O3
 #pragma Otime
+#endif
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

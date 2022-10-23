@@ -1,8 +1,10 @@
 #include "types.h"
 #include "CRC16.h"
 
+#ifndef WIN32
 #pragma O3
 #pragma Otime
+#endif
 
 word GetCRC16(const void *data, u32 len, word init, word xorOut)
 {

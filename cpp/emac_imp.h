@@ -936,10 +936,9 @@ DWORD WINAPI RxThreadFunction(LPVOID lpParam)
 
 			if (len > 0) //(len != SOCKET_ERROR/* && len >= sizeof(ep.eip->iph)*/)
 			{
-				if (RequestIP(mb, 0))
-				{
-					mb.Free();
-				};
+				RequestIP(mb, 0);
+				
+				mb.Free();
 			};
 		};
 	};

@@ -1,9 +1,12 @@
 #include "types.h"
 
+#ifndef WIN32
 #pragma O3
 #pragma Otime
 
 #pragma arm section rwdata = "SEGGER_RTT_RW"
+
+#endif
 
 /*********************************************************************
 *              SEGGER MICROCONTROLLER GmbH & Co. KG                  *
