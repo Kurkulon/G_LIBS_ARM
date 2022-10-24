@@ -114,7 +114,7 @@ public:
 	void Enable() { _GPDMA->CHENREG = ((1<<GPDMA0_CHENREG_CH_Pos)|(1<<GPDMA0_CHENREG_WE_CH_Pos)) << _chnum; }
 	void Disable() { _GPDMA->CHENREG = (1<<GPDMA0_CHENREG_WE_CH_Pos) << _chnum; HW::DLR->LNEN &= ~_dlr_lnen_mask; }
 	bool CheckComplete() { return (_GPDMA->CHENREG & ((1<<GPDMA0_CHENREG_CH_Pos)<<_chnum)) == 0; }
-	void SetDlrLineNum(byte num) { _dlr_lnen_mask = 1UL << (_drl = num & 7);  }
+	void SetDlrLineNum(byte num) { _dlr_lnen_mask = 1UL << (_drl = num);  }
 	void Enable_DLR() { HW::DLR->LNEN |= _dlr_lnen_mask; }
 	void Disable_DLR() { HW::DLR->LNEN &= ~_dlr_lnen_mask; }
 	

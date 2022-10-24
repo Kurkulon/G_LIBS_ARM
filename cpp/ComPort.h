@@ -121,8 +121,8 @@ class ComPort : public USIC
 		u32 __PCR;
 
 
-		bool IsTransmited() { return (_uhw->PSR & USIC_BUSY) == 0 && _DMA->CheckComplete(); }
-		bool IsRecieved() { return (_uhw->PSR & USIC_BUSY); }
+		bool IsTransmited() { return (_uhw->PSR_ASCMode & UART_BUSY) == 0 && _DMA->CheckComplete(); }
+		bool IsRecieved() { u32 s = _uhw->PSR_ASCMode & (UART_BUSY|UART_RSIF); _uhw->PSCR = UART_RSIF; return s; }
 //		u16	GetDmaCounter() { return BLOCK_TS(_chdma->CTLH); }
 		u32	GetDmaCounter() { return _DMA->GetDstCounter(); }
 //		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _prevDmaCounter; }
@@ -140,7 +140,7 @@ class ComPort : public USIC
 	bool			_connected;
 	byte			_status485;
 
-	u32				_prevDmaCounter;
+	//u32				_prevDmaCounter;
 
 	ReadBuffer		*_pReadBuffer;
 	WriteBuffer		*_pWriteBuffer;

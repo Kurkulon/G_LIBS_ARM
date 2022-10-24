@@ -23,11 +23,13 @@ protected:
 	T *first;
 	T *last;
 
+	u32 count;
+
 	List* _selfPtr;
 
   public:
 
-	void Init() { if (_selfPtr != this) first = 0, last = 0, _selfPtr = this; }
+	void Init() { if (_selfPtr != this) first = 0, last = 0, count = 0, _selfPtr = this; }
 	
 	List() { Init(); }
 
@@ -77,6 +79,8 @@ template <class T> T* List<T>::Get()
 		{
 			last = 0;
 		};
+
+		count--;
 	};
 
 	Unlock();
@@ -106,6 +110,8 @@ template <class T> void List<T>::Add(T* r)
 	};
 
 	r->next = 0;
+
+	count++;
 
 	Unlock();
 }

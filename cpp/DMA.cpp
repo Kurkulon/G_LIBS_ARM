@@ -159,7 +159,7 @@ void DMA_CH::WritePeripheral(const volatile void *src, volatile void *dst, u16 l
 	_InitLLI(src, dst, len, ctrl1);
 
 	_dmach->CFGL = HS_SEL_SRC;
-	_dmach->CFGH = PROTCTL(1)|DEST_PER(_drl);
+	_dmach->CFGH = PROTCTL(1)|DEST_PER(_drl&7);
 
 	Enable();
 
@@ -190,16 +190,16 @@ void DMA_CH::ReadPeripheral(const volatile void *src, volatile void *dst, u16 le
 	
 #elif defined(CPU_XMC48)
 
-	HW::DLR->LNEN |= _dlr_lnen_mask;
-
 	_GPDMA->DMACFGREG = 1;
 
 	_InitLLI(src, dst, len, ctrl1);
 
 	_dmach->CFGL = HS_SEL_DST;
-	_dmach->CFGH = PROTCTL(1)|SRC_PER(_drl);
+	_dmach->CFGH = PROTCTL(1)|SRC_PER(_drl&7);
 
 	Enable();
+
+	HW::DLR->LNEN |= _dlr_lnen_mask;
 
 #endif
 

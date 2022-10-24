@@ -2297,37 +2297,55 @@ namespace T_HW
 #define USIC_SCLKCFG(v) 		(v<<30)                    /*!< USIC_CH BRG: SCLKCFG (Bit 30)                               */
 
 /* ---------------------------------  USIC_CH_CCR  -------------------------------- */
-//#define USIC_MODE(v)      	(v<<0UL)                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
-#define USIC_MODE_DISABLE  	(0UL)	                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
-#define USIC_MODE_SPI	  	(1UL)	                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
-#define USIC_MODE_UART  	(2UL)	                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
-#define USIC_MODE_I2S	  	(3UL)	                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
-#define USIC_MODE_I2C		(4UL)	                     /*!< USIC_CH CCR: MODE (Bit 0)                                   */
-#define USIC_HPCEN(v)     	(v<<6UL)                     /*!< USIC_CH CCR: HPCEN (Bit 6)                                  */
-#define USIC_PM(v)        	(v<<8UL)                     /*!< USIC_CH CCR: PM (Bit 8)                                     */
-#define USIC_RSIEN     		(1<<10UL)                    /*!< USIC_CH CCR: RSIEN (Bit 10)                                 */
-#define USIC_DLIEN     		(1<<11UL)                    /*!< USIC_CH CCR: DLIEN (Bit 11)                                 */
-#define USIC_TSIEN     		(1<<12UL)                    /*!< USIC_CH CCR: TSIEN (Bit 12)                                 */
-#define USIC_TBIEN     		(1<<13UL)                    /*!< USIC_CH CCR: TBIEN (Bit 13)                                 */
-#define USIC_RIEN      		(1<<14UL)                    /*!< USIC_CH CCR: RIEN (Bit 14)                                  */
-#define USIC_AIEN      		(1<<15UL)                    /*!< USIC_CH CCR: AIEN (Bit 15)                                  */
-#define USIC_BRGIEN    		(1<<16UL)                    /*!< USIC_CH CCR: BRGIEN (Bit 16)                                */
+//#define USIC_MODE(v)      	(v<<0UL)                /*!< USIC_CH CCR: MODE (Bit 0)                                   */
+#define USIC_MODE_DISABLE  	(0UL)	             		/*!< USIC_CH CCR: MODE (Bit 0)                                   */
+#define USIC_MODE_SPI	  	(1UL)	             		/*!< USIC_CH CCR: MODE (Bit 0)                                   */
+#define USIC_MODE_UART  	(2UL)	             		/*!< USIC_CH CCR: MODE (Bit 0)                                   */
+#define USIC_MODE_I2S	  	(3UL)	             		/*!< USIC_CH CCR: MODE (Bit 0)                                   */
+#define USIC_MODE_I2C		(4UL)	             		/*!< USIC_CH CCR: MODE (Bit 0)                                   */
+#define USIC_HPCEN(v)     	(v<<6UL)             		/*!< USIC_CH CCR: HPCEN (Bit 6)                                  */
+#define USIC_PM(v)        	(v<<8UL)             		/*!< USIC_CH CCR: PM (Bit 8)                                     */
+#define USIC_RSIEN     		(1<<10UL)            		/*!< USIC_CH CCR: RSIEN (Bit 10)                                 */
+#define USIC_DLIEN     		(1<<11UL)            		/*!< USIC_CH CCR: DLIEN (Bit 11)                                 */
+#define USIC_TSIEN     		(1<<12UL)            		/*!< USIC_CH CCR: TSIEN (Bit 12)                                 */
+#define USIC_TBIEN     		(1<<13UL)            		/*!< USIC_CH CCR: TBIEN (Bit 13)                                 */
+#define USIC_RIEN      		(1<<14UL)            		/*!< USIC_CH CCR: RIEN (Bit 14)                                  */
+#define USIC_AIEN      		(1<<15UL)            		/*!< USIC_CH CCR: AIEN (Bit 15)                                  */
+#define USIC_BRGIEN    		(1<<16UL)            		/*!< USIC_CH CCR: BRGIEN (Bit 16)                                */
 
 /* -----------------------------  USIC_CH_PCR_ASCMode  ---------------------------- */
 
-#define UART_SMD(v)       	(v<<0UL)                     /*!< USIC_CH PCR_ASCMode: SMD (Bit 0)                            */
-#define UART_STPB(v)      	(v<<1UL)                     /*!< USIC_CH PCR_ASCMode: STPB (Bit 1)                           */
-#define UART_IDM(v)       	(v<<2UL)                     /*!< USIC_CH PCR_ASCMode: IDM (Bit 2)                            */
-#define UART_SBIEN(v)     	(v<<3UL)                     /*!< USIC_CH PCR_ASCMode: SBIEN (Bit 3)                          */
-#define UART_CDEN(v)      	(v<<4UL)                     /*!< USIC_CH PCR_ASCMode: CDEN (Bit 4)                           */
-#define UART_RNIEN(v)     	(v<<5UL)                     /*!< USIC_CH PCR_ASCMode: RNIEN (Bit 5)                          */
-#define UART_FEIEN(v)     	(v<<6UL)                     /*!< USIC_CH PCR_ASCMode: FEIEN (Bit 6)                          */
-#define UART_FFIEN(v)     	(v<<7UL)                     /*!< USIC_CH PCR_ASCMode: FFIEN (Bit 7)                          */
-#define UART_SP(v)        	(v<<8UL)                     /*!< USIC_CH PCR_ASCMode: SP (Bit 8)                             */
-#define UART_PL(v)        	(v<<13UL)                    /*!< USIC_CH PCR_ASCMode: PL (Bit 13)                            */
-#define UART_RSTEN(v)     	(v<<16UL)                    /*!< USIC_CH PCR_ASCMode: RSTEN (Bit 16)                         */
-#define UART_TSTEN(v)     	(v<<17UL)                    /*!< USIC_CH PCR_ASCMode: TSTEN (Bit 17)                         */
-#define UART_MCLK      		(0x80000000UL)                    /*!< USIC_CH PCR_ASCMode: MCLK (Bit 31)                          */
+#define UART_SMD(v)       	(v<<0UL)             		/*!< USIC_CH PCR_ASCMode: SMD (Bit 0)                            */
+#define UART_STPB(v)      	(v<<1UL)             		/*!< USIC_CH PCR_ASCMode: STPB (Bit 1)                           */
+#define UART_IDM(v)       	(v<<2UL)             		/*!< USIC_CH PCR_ASCMode: IDM (Bit 2)                            */
+#define UART_SBIEN(v)     	(v<<3UL)             		/*!< USIC_CH PCR_ASCMode: SBIEN (Bit 3)                          */
+#define UART_CDEN(v)      	(v<<4UL)             		/*!< USIC_CH PCR_ASCMode: CDEN (Bit 4)                           */
+#define UART_RNIEN(v)     	(v<<5UL)             		/*!< USIC_CH PCR_ASCMode: RNIEN (Bit 5)                          */
+#define UART_FEIEN(v)     	(v<<6UL)             		/*!< USIC_CH PCR_ASCMode: FEIEN (Bit 6)                          */
+#define UART_FFIEN(v)     	(v<<7UL)             		/*!< USIC_CH PCR_ASCMode: FFIEN (Bit 7)                          */
+#define UART_SP(v)        	(v<<8UL)             		/*!< USIC_CH PCR_ASCMode: SP (Bit 8)                             */
+#define UART_PL(v)        	(v<<13UL)            		/*!< USIC_CH PCR_ASCMode: PL (Bit 13)                            */
+#define UART_RSTEN(v)     	(v<<16UL)            		/*!< USIC_CH PCR_ASCMode: RSTEN (Bit 16)                         */
+#define UART_TSTEN(v)     	(v<<17UL)            		/*!< USIC_CH PCR_ASCMode: TSTEN (Bit 17)                         */
+#define UART_MCLK      		(0x80000000UL)				/*!< USIC_CH PCR_ASCMode: MCLK (Bit 31)                          */
+
+#define UART_TXIDLE         (0x1UL)       				/*!< USIC_CH PSR_ASCMode: TXIDLE (Bit 0)                         */
+#define UART_RXIDLE         (0x2UL)       				/*!< USIC_CH PSR_ASCMode: RXIDLE (Bit 1)                         */
+#define UART_SBD         	(0x4UL)       				/*!< USIC_CH PSR_ASCMode: SBD (Bit 2)                            */
+#define UART_COL         	(0x8UL)       				/*!< USIC_CH PSR_ASCMode: COL (Bit 3)                            */
+#define UART_RNS         	(0x10UL)      				/*!< USIC_CH PSR_ASCMode: RNS (Bit 4)                            */
+#define UART_FER0         	(0x20UL)      				/*!< USIC_CH PSR_ASCMode: FER0 (Bit 5)                           */
+#define UART_FER1         	(0x40UL)      				/*!< USIC_CH PSR_ASCMode: FER1 (Bit 6)                           */
+#define UART_RFF         	(0x80UL)      				/*!< USIC_CH PSR_ASCMode: RFF (Bit 7)                            */
+#define UART_TFF         	(0x100UL)     				/*!< USIC_CH PSR_ASCMode: TFF (Bit 8)                            */
+#define UART_BUSY         	(0x200UL)     				/*!< USIC_CH PSR_ASCMode: BUSY (Bit 9)                           */
+#define UART_RSIF        	(0x400UL)     				/*!< USIC_CH PSR_ASCMode: RSIF (Bit 10)                          */
+#define UART_DLIF        	(0x800UL)     				/*!< USIC_CH PSR_ASCMode: DLIF (Bit 11)                          */
+#define UART_TSIF        	(0x1000UL)    				/*!< USIC_CH PSR_ASCMode: TSIF (Bit 12)                          */
+#define UART_TBIF        	(0x2000UL)    				/*!< USIC_CH PSR_ASCMode: TBIF (Bit 13)                          */
+#define UART_RIF         	(0x4000UL)    				/*!< USIC_CH PSR_ASCMode: RIF (Bit 14)                           */
+#define UART_AIF         	(0x8000UL)    				/*!< USIC_CH PSR_ASCMode: AIF (Bit 15)                           */
+#define UART_BRGIF       	(0x10000UL)   				/*!< USIC_CH PSR_ASCMode: BRGIF (Bit 16)                         */
 
 #define SPI_MSLSEN    		(0x1UL)         	/*!< USIC_CH PCR_SSCMode: MSLSEN (Bitfield-Mask: 0x01)           */
 #define SPI_SELCTR    		(0x2UL)         	/*!< USIC_CH PCR_SSCMode: SELCTR (Bitfield-Mask: 0x01)           */
@@ -2548,23 +2566,23 @@ namespace T_HW
 
 /* --------------------------------  USIC_CH_PSCR  -------------------------------- */
 
-#define USIC_TXIDLE         (0x1UL)                   /*!< USIC_CH PSCR: CST0 (Bitfield-Mask: 0x01)                    */
-#define USIC_RXIDLE         (0x2UL)                   /*!< USIC_CH PSCR: CST1 (Bitfield-Mask: 0x01)                    */
-#define USIC_SBD         	(0x4UL)                   /*!< USIC_CH PSCR: CST2 (Bitfield-Mask: 0x01)                    */
-#define USIC_COL         	(0x8UL)                   /*!< USIC_CH PSCR: CST3 (Bitfield-Mask: 0x01)                    */
-#define USIC_RNS         	(0x10UL)                  /*!< USIC_CH PSCR: CST4 (Bitfield-Mask: 0x01)                    */
-#define USIC_FER0         	(0x20UL)                  /*!< USIC_CH PSCR: CST5 (Bitfield-Mask: 0x01)                    */
-#define USIC_FER1         	(0x40UL)                  /*!< USIC_CH PSCR: CST6 (Bitfield-Mask: 0x01)                    */
-#define USIC_RFF         	(0x80UL)                  /*!< USIC_CH PSCR: CST7 (Bitfield-Mask: 0x01)                    */
-#define USIC_TFF         	(0x100UL)                 /*!< USIC_CH PSCR: CST8 (Bitfield-Mask: 0x01)                    */
-#define USIC_BUSY         	(0x200UL)                 /*!< USIC_CH PSCR: CST9 (Bitfield-Mask: 0x01)                    */
-#define USIC_RSIF        	(0x400UL)                 /*!< USIC_CH PSCR: CRSIF (Bitfield-Mask: 0x01)                   */
-#define USIC_DLIF        	(0x800UL)                 /*!< USIC_CH PSCR: CDLIF (Bitfield-Mask: 0x01)                   */
-#define USIC_TSIF        	(0x1000UL)                /*!< USIC_CH PSCR: CTSIF (Bitfield-Mask: 0x01)                   */
-#define USIC_TBIF        	(0x2000UL)                /*!< USIC_CH PSCR: CTBIF (Bitfield-Mask: 0x01)                   */
-#define USIC_RIF         	(0x4000UL)                /*!< USIC_CH PSCR: CRIF (Bitfield-Mask: 0x01)                    */
-#define USIC_AIF         	(0x8000UL)                /*!< USIC_CH PSCR: CAIF (Bitfield-Mask: 0x01)                    */
-#define USIC_BRGIF       	(0x10000UL)               /*!< USIC_CH PSCR: CBRGIF (Bitfield-Mask: 0x01)                  */
+//#define USIC_TXIDLE         (0x1UL)                   /*!< USIC_CH PSCR: CST0 (Bitfield-Mask: 0x01)                    */
+//#define USIC_RXIDLE         (0x2UL)                   /*!< USIC_CH PSCR: CST1 (Bitfield-Mask: 0x01)                    */
+//#define USIC_SBD         	(0x4UL)                   /*!< USIC_CH PSCR: CST2 (Bitfield-Mask: 0x01)                    */
+//#define USIC_COL         	(0x8UL)                   /*!< USIC_CH PSCR: CST3 (Bitfield-Mask: 0x01)                    */
+//#define USIC_RNS         	(0x10UL)                  /*!< USIC_CH PSCR: CST4 (Bitfield-Mask: 0x01)                    */
+//#define USIC_FER0         	(0x20UL)                  /*!< USIC_CH PSCR: CST5 (Bitfield-Mask: 0x01)                    */
+//#define USIC_FER1         	(0x40UL)                  /*!< USIC_CH PSCR: CST6 (Bitfield-Mask: 0x01)                    */
+//#define USIC_RFF         	(0x80UL)                  /*!< USIC_CH PSCR: CST7 (Bitfield-Mask: 0x01)                    */
+//#define USIC_TFF         	(0x100UL)                 /*!< USIC_CH PSCR: CST8 (Bitfield-Mask: 0x01)                    */
+//#define USIC_BUSY         	(0x200UL)                 /*!< USIC_CH PSCR: CST9 (Bitfield-Mask: 0x01)                    */
+//#define USIC_RSIF        	(0x400UL)                 /*!< USIC_CH PSCR: CRSIF (Bitfield-Mask: 0x01)                   */
+//#define USIC_DLIF        	(0x800UL)                 /*!< USIC_CH PSCR: CDLIF (Bitfield-Mask: 0x01)                   */
+//#define USIC_TSIF        	(0x1000UL)                /*!< USIC_CH PSCR: CTSIF (Bitfield-Mask: 0x01)                   */
+//#define USIC_TBIF        	(0x2000UL)                /*!< USIC_CH PSCR: CTBIF (Bitfield-Mask: 0x01)                   */
+//#define USIC_RIF         	(0x4000UL)                /*!< USIC_CH PSCR: CRIF (Bitfield-Mask: 0x01)                    */
+//#define USIC_AIF         	(0x8000UL)                /*!< USIC_CH PSCR: CAIF (Bitfield-Mask: 0x01)                    */
+//#define USIC_BRGIF       	(0x10000UL)               /*!< USIC_CH PSCR: CBRGIF (Bitfield-Mask: 0x01)                  */
 
 /* --------------------------------  USIC_CH_KSCFG  ------------------------------- */
 #define USIC_MODEN           (0x1UL)                 	/*!< USIC_CH KSCFG: MODEN (Bitfield-Mask: 0x01)                  */
@@ -2573,6 +2591,15 @@ namespace T_HW
 #define USIC_BPNOM           (0x80UL)                	/*!< USIC_CH KSCFG: BPNOM (Bitfield-Mask: 0x01)                  */
 #define USIC_SUMCFG(v)		(((v)&3)<<8)            	/*!< USIC_CH KSCFG: SUMCFG (Bitfield-Mask: 0x03)                 */
 #define USIC_BPSUM           (0x800UL)               	/*!< USIC_CH KSCFG: BPSUM (Bitfield-Mask: 0x01)                  */
+
+/* -------------------------------  USIC_CH_RBUFSR  ------------------------------- */
+#define RBUFSR_WLEN       	(0xFUL)     			/*!< USIC_CH RBUFSR: WLEN (Bit 0)                                */
+#define RBUFSR_SOF        	(1UL<<6UL)  			/*!< USIC_CH RBUFSR: SOF (Bit 6)                                 */
+#define RBUFSR_PAR        	(1UL<<8UL)  			/*!< USIC_CH RBUFSR: PAR (Bit 8)                                 */
+#define RBUFSR_PERR       	(1UL<<9UL)  			/*!< USIC_CH RBUFSR: PERR (Bit 9)                                */
+#define RBUFSR_RDV0       	(1UL<<13UL) 			/*!< USIC_CH RBUFSR: RDV0 (Bit 13)                               */
+#define RBUFSR_RDV1       	(1UL<<14UL) 			/*!< USIC_CH RBUFSR: RDV1 (Bit 14)                               */
+#define RBUFSR_DS         	(1UL<<15UL) 			/*!< USIC_CH RBUFSR: DS (Bit 15)                                 */
 
 /* --------------------------------  USIC_CH_TBCTR  ------------------------------- */
 #define TBCTR_DPTR(v)		(((v)&0x3F)<<0)         /*!< USIC_CH TBCTR: DPTR (Bit 0)                                 */

@@ -315,7 +315,7 @@ void ComPort::TransmitByte(byte v)
 
 		_uhw->TBUF[0] = v;
 
-		while ((_uhw->PSR & USIC_TSIF) == 0);
+		while ((_uhw->PSR_ASCMode & UART_TSIF) == 0);
 
 		_uhw->CCR = __CCR;	// Disable transmit and receive
 
@@ -361,8 +361,8 @@ void ComPort::EnableTransmit(void* src, word count)
 
 	#elif defined(CPU_XMC48)
 
-		_uhw->TRBSCR = TRBSCR_FLUSHTB;
-		_uhw->TBCTR = TBCTR_SIZE8|TBCTR_LIMIT(0);
+		_uhw->TBCTR = 0;
+		_uhw->TRBSCR = ~0;//TRBSCR_FLUSHTB;
 
 		_DMA->SetDlrLineNum(_DRL);
 		//_DMA->Enable_DLR();
@@ -371,11 +371,12 @@ void ComPort::EnableTransmit(void* src, word count)
 
 		_uhw->PSCR = ~0;
 		_uhw->CCR = __CCR|USIC_TBIEN;
+		_uhw->TBCTR = TBCTR_SIZE8|TBCTR_LIMIT(3)|TBCTR_STBTEN|TBCTR_STBTM|TBCTR_STBIEN|TBCTR_STBINP(Get_INPR_SR());
 		_uhw->INPR = USIC_TBINP(Get_INPR_SR());
 
-		_DMA->WritePeripheralByte(src, &_uhw->IN[4], count);
+		_DMA->WritePeripheralByte(src, &_uhw->IN[0], count);
 
-		if ((_uhw->PSR & USIC_TBIF) == 0)
+		if ((_uhw->PSR_ASCMode & UART_TBIF) == 0 && (_uhw->TRBSR & TRBSR_STBI) == 0)
 		{
 			_uhw->FMR = USIC_CH_FMR_SIO0_Msk << Get_INPR_SR();
 		};
@@ -415,6 +416,9 @@ void ComPort::DisableTransmit()
 	#elif defined(CPU_XMC48)
 
 		_uhw->CCR = __CCR;
+		_uhw->TBCTR = 0;
+		_uhw->RBCTR = 0;
+		_uhw->TRBSCR = ~0;
 		_DMA->Disable(); 
 
 	#endif
@@ -448,7 +452,7 @@ void ComPort::EnableReceive(void* dst, word count)
 			while(_uhw.usart->SYNCBUSY);
 		};
 
-		_DMA->ReadPeripheral(&_uhw.usart->DATA, dst, _prevDmaCounter = count, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_RX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
+		_DMA->ReadPeripheral(&_uhw.usart->DATA, dst, count, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_RX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
 
 		//while (_uhw.usart->SYNCBUSY & USART_CTRLB);
 
@@ -460,20 +464,24 @@ void ComPort::EnableReceive(void* dst, word count)
 		volatile u32 t;
 
 		_DMA->SetDlrLineNum(_DRL);
-		//_DMA->Enable_DLR();
+
+		_uhw->RBCTR = 0;
+		_uhw->TRBSCR = ~0;
 
 		__disable_irq();
 
-		/*_startDmaCounter = */_prevDmaCounter = (u32)dst;
+		while(_uhw->RBUFSR & (RBUFSR_RDV0|RBUFSR_RDV1))
+		{
+			t = _uhw->RBUF;
+		};
 
-		t = _uhw->RBUF;
-		t = _uhw->RBUF;
 		_uhw->PSCR = ~0;
 
-		_DMA->ReadPeripheralByte(&_uhw->RBUF, dst, count);
+		_uhw->RBCTR = RBCTR_SIZE8|RBCTR_LIMIT(0)|RBCTR_LOF|RBCTR_SRBIEN|RBCTR_SRBINP(Get_INPR_SR());
+		_uhw->CCR = __CCR;//|USIC_RIEN;//|USIC_AIEN;
+		_uhw->INPR = ~0;//USIC_RINP(Get_INPR_SR())|USIC_AINP(Get_INPR_SR());
 
-		_uhw->CCR = __CCR|USIC_RIEN;
-		_uhw->INPR = USIC_RINP(Get_INPR_SR());
+		_DMA->ReadPeripheralByte(&_uhw->OUTR, dst, count);
 
 		__enable_irq();
 
@@ -512,6 +520,9 @@ void ComPort::DisableReceive()
 	#elif defined(CPU_XMC48)
 
 		_uhw->CCR = __CCR;
+		_uhw->TBCTR = 0;
+		_uhw->RBCTR = 0;
+		_uhw->TRBSCR = ~0;
 		_DMA->Disable(); 
 
 	#endif
