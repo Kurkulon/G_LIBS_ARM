@@ -3003,6 +3003,57 @@ namespace T_HW
 	  __I  u32  ECRD1;                             /*!< (@ 0x4000C1BC) Extended Read Back 1                                   */
 	} CCU4_CC4_Type;
 
+	#define P0_14_CCU42_IN3			2
+	#define P0_15_CCU42_IN2			2
+
+	#define P1_0_CCU40_IN3			0
+	#define P1_1_CCU40_IN2			0
+	#define P1_2_CCU40_IN1			0
+	#define P1_3_CCU40_IN0			0
+	#define P1_4_CCU41_IN0			2
+	#define P1_5_CCU41_IN1			2
+	#define P1_10_CCU41_IN2			2
+	#define P1_11_CCU41_IN3			2
+
+	#define P2_0_CCU40_IN1			2
+	#define P2_1_CCU40_IN0			2
+	#define P2_2_CCU41_IN3			0
+	#define P2_3_CCU41_IN2			0
+	#define P2_4_CCU41_IN1			0
+	#define P2_5_CCU41_IN0			0
+	#define P2_6_CCU40_IN3			2
+	#define P2_7_CCU40_IN2			2
+	#define P2_8_CCU40_IN0			1
+	#define P2_8_CCU40_IN1			1
+	#define P2_8_CCU40_IN2			1
+	#define P2_8_CCU40_IN3			1
+	#define P2_9_CCU41_IN0			1
+	#define P2_9_CCU41_IN1			1
+	#define P2_9_CCU41_IN2			1
+	#define P2_9_CCU41_IN3			1
+	#define P2_12_CCU43_IN3			2
+	#define P2_13_CCU43_IN2			2
+	#define P2_14_CCU43_IN0			1
+	#define P2_14_CCU43_IN1			1
+	#define P2_14_CCU43_IN2			1
+	#define P2_14_CCU43_IN3			1
+	#define P2_15_CCU42_IN0			1
+	#define P2_15_CCU42_IN1			1
+	#define P2_15_CCU42_IN2			1
+	#define P2_15_CCU42_IN3			1
+
+	#define P3_3_CCU42_IN3			0
+	#define P3_4_CCU42_IN2			0
+	#define P3_5_CCU42_IN1			0
+	#define P3_6_CCU42_IN0			0
+
+	#define P4_2_CCU43_IN1			2
+	#define P4_3_CCU43_IN3			0
+	#define P4_4_CCU43_IN2			0
+	#define P4_5_CCU43_IN1			0
+	#define P4_6_CCU43_IN0			0
+	#define P4_7_CCU43_IN0			2
+
 
 	/* ================================================================================ */
 	/* ================                  CCU8 [CCU80]                  ================ */
