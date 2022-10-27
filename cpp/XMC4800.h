@@ -3124,6 +3124,43 @@ namespace T_HW
 	  __I  u32  ECRD1;                             /*!< (@ 0x400201BC) Extended Read Back 1                                   */
 	} CCU8_CC8_Type;
 
+	#define CCU8_OUT0_CR	1
+	#define CCU8_OUT1_CR	1
+	#define CCU8_OUT2_CR	2
+	#define CCU8_OUT3_CR	2
+
+	#define P0_0_CCU		80
+	#define P0_1_CCU		80
+	#define P0_2_CCU		80
+	#define P0_3_CCU		80
+	#define P0_4_CCU		80
+	#define P0_9_CCU		80
+	#define P0_10_CCU		80
+
+	#define P0_0_CCU80_CC		2
+	#define P0_1_CCU80_CC		1
+	#define P0_2_CCU80_CC		0
+	#define P0_3_CCU80_CC		2
+	#define P0_4_CCU80_CC		1
+	#define P0_9_CCU80_CC		1
+	#define P0_10_CCU80_CC		0
+
+	#define P0_0_CCU80_OUT2		1		
+	#define P0_1_CCU80_OUT1		1		
+	#define P0_2_CCU80_OUT0		1
+	#define P0_3_CCU80_OUT2		0		
+	#define P0_4_CCU80_OUT1		0		
+	#define P0_9_CCU80_OUT1		2		
+	#define P0_10_CCU80_OUT0	2		
+
+	#define P0_0_CCU80_OUT21		A3PP
+	#define P0_1_CCU80_OUT11		A3PP
+	#define P0_2_CCU80_OUT01		A3PP
+	#define P0_3_CCU80_OUT20		A3PP
+	#define P0_4_CCU80_OUT10		A3PP
+	#define P0_9_CCU80_OUT12		A3PP
+	#define P0_10_CCU80_OUT02		A3PP
+
 
 	/* ================================================================================ */
 	/* ================                 POSIF [POSIF0]                 ================ */
