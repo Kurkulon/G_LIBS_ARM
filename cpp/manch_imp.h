@@ -145,8 +145,24 @@
 
 	#else // #ifdef MAN_TRANSMIT_V1
 
-		//P0_0_CCU
+		#define PIO_L1					HW::PORT_L1
+		#define PIO_L2					HW::PORT_L2
 
+		#if !defined(PORT_H1) || !defined(PORT_H2) || !defined(PIN_H1) || !defined(PIN_H2)
+
+			#define PORT_H1		PORT_L2
+			#define PORT_H2		PORT_L1
+			#define PIN_H1		PIN_L2
+			#define PIN_H2		PIN_L1
+
+		#else
+
+			#define PIO_H1					HW::PORT_H1
+			#define PIO_H2					HW::PORT_H2
+
+		#endif
+
+		//P0_0_CCU
 		#define MANT_L1_CCU_NUM			CONCAT4(PORT_L1,_,PIN_L1,_CCU)
 		#define MANT_L2_CCU_NUM			CONCAT4(PORT_L2,_,PIN_L2,_CCU)
 		#define MANT_H1_CCU_NUM			CONCAT4(PORT_H1,_,PIN_H1,_CCU)
@@ -189,17 +205,28 @@
 		#define MANT_H1_OUT				CONCAT7(PORT_H1,_,PIN_H1,_,MANT_CCU8_NAME,_OUT,MANT_H1_CC_NUM)
 		#define MANT_H2_OUT				CONCAT7(PORT_H2,_,PIN_H2,_,MANT_CCU8_NAME,_OUT,MANT_H2_CC_NUM)
 
-		#define MANT_OCS				(((CC8_OCS1<<MANT_L2_OUT)<<(MANT_L2_CC_NUM*5))|((CC8_OCS1<<MANT_H1_OUT)<<(MANT_H1_CC_NUM*5)))
+										// P0_0_CCU80_OUT21
+		#define MANT_L1_PINMODE			CONCAT8(PORT_L1,_,PIN_L1,_,MANT_CCU8_NAME,_OUT,MANT_L1_CC_NUM,MANT_L1_OUT)
+		#define MANT_L2_PINMODE			CONCAT8(PORT_L2,_,PIN_L2,_,MANT_CCU8_NAME,_OUT,MANT_L2_CC_NUM,MANT_L2_OUT)
+		#define MANT_H1_PINMODE			CONCAT8(PORT_H1,_,PIN_H1,_,MANT_CCU8_NAME,_OUT,MANT_H1_CC_NUM,MANT_H1_OUT)
+		#define MANT_H2_PINMODE			CONCAT8(PORT_H2,_,PIN_H2,_,MANT_CCU8_NAME,_OUT,MANT_H2_CC_NUM,MANT_H2_OUT)
+
+		#define MANT_OCS				(((CC8_OCS1<<MANT_L1_OUT)<<(MANT_L1_CC_NUM*5))|((CC8_OCS1<<MANT_H1_OUT)<<(MANT_H1_CC_NUM*5))|((CC8_OCS1<<MANT_L2_OUT)<<(MANT_L2_CC_NUM*5))|((CC8_OCS1<<MANT_H2_OUT)<<(MANT_H2_CC_NUM*5)))
 
 		#define MANT_CHC_L1				((MANT_OCS>>(MANT_L1_CC_NUM*5))&(CC8_OCS1|CC8_OCS2|CC8_OCS3|CC8_OCS4))
 		#define MANT_CHC_L2				((MANT_OCS>>(MANT_L2_CC_NUM*5))&(CC8_OCS1|CC8_OCS2|CC8_OCS3|CC8_OCS4))
 		#define MANT_CHC_H1				((MANT_OCS>>(MANT_H1_CC_NUM*5))&(CC8_OCS1|CC8_OCS2|CC8_OCS3|CC8_OCS4))
 		#define MANT_CHC_H2				((MANT_OCS>>(MANT_H2_CC_NUM*5))&(CC8_OCS1|CC8_OCS2|CC8_OCS3|CC8_OCS4))
 	
-		#define MANT_CCU8_SS_L1			(CCU8_SS0I<<(MANT_L1_CC_NUM))
-		#define MANT_CCU8_SS_L2			(CCU8_SS0I<<(MANT_L2_CC_NUM))
-		#define MANT_CCU8_SS_H1			(CCU8_SS0I<<(MANT_H1_CC_NUM))
-		#define MANT_CCU8_SS_H2			(CCU8_SS0I<<(MANT_H2_CC_NUM))
+		#define MANT_CCU8_GIDLS_L1		(CCU8_SS0I<<(MANT_L1_CC_NUM))
+		#define MANT_CCU8_GIDLS_L2		(CCU8_SS0I<<(MANT_L2_CC_NUM))
+		#define MANT_CCU8_GIDLS_H1		(CCU8_SS0I<<(MANT_H1_CC_NUM))
+		#define MANT_CCU8_GIDLS_H2		(CCU8_SS0I<<(MANT_H2_CC_NUM))
+
+		#define MANT_CCU8_SS_L1			(CCU8_S0SE<<(MANT_L1_CC_NUM*4))
+		#define MANT_CCU8_SS_L2			(CCU8_S0SE<<(MANT_L2_CC_NUM*4))
+		#define MANT_CCU8_SS_H1			(CCU8_S0SE<<(MANT_H1_CC_NUM*4))
+		#define MANT_CCU8_SS_H2			(CCU8_S0SE<<(MANT_H2_CC_NUM*4))
 
 										// CCU8_OUT0_CR	
 		#define MANT_L1_CR_NUM			CONCAT3(CCU8_OUT,MANT_L1_OUT,_CR)
@@ -211,6 +238,11 @@
 		#define MANT_L2_CRS				CONCAT3(CR,MANT_L2_CR_NUM,S)
 		#define MANT_H1_CRS				CONCAT3(CR,MANT_H1_CR_NUM,S)
 		#define MANT_H2_CRS				CONCAT3(CR,MANT_H2_CR_NUM,S)
+
+		#define MANT_L1_STBIT			(CCU8_S0ST1S << (MANT_L1_CC_NUM + (MANT_L1_CR_NUM-1)*4))
+		#define MANT_L2_STBIT			(CCU8_S0ST1S << (MANT_L2_CC_NUM + (MANT_L2_CR_NUM-1)*4))
+		#define MANT_H1_STBIT			(CCU8_S0ST1S << (MANT_H1_CC_NUM + (MANT_H1_CR_NUM-1)*4))
+		#define MANT_H2_STBIT			(CCU8_S0ST1S << (MANT_H2_CC_NUM + (MANT_H2_CR_NUM-1)*4))
 
 		#define MANT_SET_PR_L1(v)		MANT_L1->PRS = (v)
 		#define MANT_SET_CR_L1(v)		MANT_L1->MANT_L1_CRS = (v)
@@ -306,24 +338,22 @@
 		#if ((MANT_H2_CC_NUM == MANT_L1_CC_NUM) && (MANT_H2_CR_NUM == MANT_L1_CR_NUM)) || ((MANT_H2_CC_NUM == MANT_L2_CC_NUM) && (MANT_H2_CR_NUM == MANT_L2_CR_NUM)) || ((MANT_H2_CC_NUM == MANT_H1_CC_NUM) && (MANT_H2_CR_NUM == MANT_H1_CR_NUM))
 			#define MANT_SET_CR_H2(v)		
 		#else
-			#define MANT_SET_CR_H2(v)		MANT_H1->MANT_H2_CRS = (v)
+			#define MANT_SET_CR_H2(v)		MANT_H2->MANT_H2_CRS = (v)
 		#endif
 
 		#define MANT_CCUCON				CONCAT3(SCU_GENERAL_CCUCON_GSC,MANT_CCU_NUM,_Msk)
 
 		#define MANT_CCU8				HW::MANT_CCU8_NAME
 		#define MANT_CCU8_IRQ			CONCAT2(MANT_CCU8_NAME,_0_IRQn)
-		#define MANT_CCU8_GIDLC			(MANT_CCU8_SS_L1 | MANT_CCU8_SS_L2 | MANT_CCU8_SS_H1 | MANT_CCU8_SS_H2 | CCU8_SPRB)	
-		#define MANT_CCU8_GIDLS			(MANT_CCU8_SS_L1 | MANT_CCU8_SS_L2 | MANT_CCU8_SS_H1 | MANT_CCU8_SS_H2 | CCU8_CPRB)	
-		#define MANT_CCU8_GCSS			(MANT_CCU8_SS_L1 | MANT_CCU8_SS_L2 | MANT_CCU8_SS_H1 | MANT_CCU8_SS_H2)				
+		#define MANT_CCU8_GIDLC			(MANT_CCU8_GIDLS_L1	| MANT_CCU8_GIDLS_L2	| MANT_CCU8_GIDLS_H1	| MANT_CCU8_GIDLS_H2 | CCU8_CPRB)	
+		//#define MANT_CCU8_GIDLS		(MANT_CCU8_GIDLS_L1	| MANT_CCU8_GIDLS_L2	| MANT_CCU8_GIDLS_H1	| MANT_CCU8_GIDLS_H2 | CCU8_CPRB)	
+		#define MANT_CCU8_GCSS			(MANT_CCU8_SS_L1	| MANT_CCU8_SS_L2		| MANT_CCU8_SS_H1		| MANT_CCU8_SS_H2)				
 		//#define ManT1_PSL				(0) 
-		//#define MANT1_CHC				(CC8_OCS2 | CC8_OCS3)			
-		//#define MANT2_CHC				(CC8_OCS2 | CC8_OCS3)			
-		//#define MANT3_CHC				(CC8_OCS2)			
-		#define MANT_OUT_GCSS			(CCU8_S1ST1C | CCU8_S1ST2S | CCU8_S1ST2S)
-		#define MANT_OUT_GCSC			(CCU8_S0ST2C)
-
-		//#define ManT_SHADOW_SYNC()		{ ManT_CCU8->GCSS = ManT_CCU8_GCSS; }	
+		//#define MANT1_CHC				(CC8_OCS2 | CC8_OCS3)	// H2-CR2-OUT2	inverted		
+		//#define MANT2_CHC				(CC8_OCS2 | CC8_OCS3)	// H1-CR1-OUT1, L2-CR2-OUT2
+		//#define MANT3_CHC				(CC8_OCS2)				// L1-CR1-OUT1		
+		#define MANT_OUT_GCSS			(MANT_H1_STBIT | MANT_L2_STBIT)
+		#define MANT_OUT_GCSC			(MANT_L1_STBIT | MANT_H2_STBIT)
 
 		inline void ManDisableTransmit()
 		{ 
@@ -361,9 +391,9 @@
 
 	#elif defined(CPU_XMC48) //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-		#define ManT_SET_PR(v)			{ MANT_SET_PR_L1(v); MANT_SET_PR_L2(v); MANT_SET_PR_H1(v); MANT_SET_PR_H2(v); }
-		#define ManT_SET_CR(v)			{ MANT_SET_CR_L1(v); /*MANT_SET_CR_L2(v); MANT_SET_CR_H1(v); MANT_SET_CR_H2(v);*/ }
-		#define ManT_SHADOW_SYNC()		{ MANT_CCU8->GCSS = MANT_CCU8_GCSS; }	
+		#define MANT_SET_PR(v)			{ MANT_SET_PR_L1(v); MANT_SET_PR_L2(v); MANT_SET_PR_H1(v); MANT_SET_PR_H2(v); }
+		#define MANT_SET_CR(v)			{ MANT_SET_CR_L1(v); MANT_SET_CR_L2(v); MANT_SET_CR_H1(v); MANT_SET_CR_H2(v); }
+		#define MANT_SHADOW_SYNC()		{ MANT_CCU8->GCSS = MANT_CCU8_GCSS; }	
 
 	#endif
 
@@ -752,20 +782,20 @@ static __irq void ManTrmIRQ2()
 
 				u32 tadd = (cmd) ? trmHalfPeriod : 0;
 
-				ManT_SET_CR(trmHalfPeriod3+tadd);
+				MANT_SET_CR(trmHalfPeriod3+tadd);
 
 				if (tw & 0x10000)
 				{
-					ManT_SET_PR(trmHalfPeriod7+tadd); //US2MT(96);
+					MANT_SET_PR(trmHalfPeriod7+tadd); //US2MT(96);
 					stateManTrans += 2;
 				}
 				else
 				{
-					ManT_SET_PR(trmHalfPeriod6+tadd); //US2MT(72);
+					MANT_SET_PR(trmHalfPeriod6+tadd); //US2MT(72);
 					stateManTrans++;
 				};
 
-				ManT_SHADOW_SYNC();
+				MANT_SHADOW_SYNC();
 
 				tw <<= 1;
 				count--;
@@ -779,11 +809,11 @@ static __irq void ManTrmIRQ2()
 
 		case 2:	
 
-			ManT_SET_CR(trmHalfPeriod);
+			MANT_SET_CR(trmHalfPeriod);
 
 			if (count == 0)
 			{
-				ManT_SET_PR(trmHalfPeriod2);
+				MANT_SET_PR(trmHalfPeriod2);
 				cmd = false;
 				stateManTrans = 1;
 			}
@@ -791,7 +821,7 @@ static __irq void ManTrmIRQ2()
 			{
 				if (tw & 0x10000)
 				{
-					ManT_SET_PR(trmHalfPeriod3);
+					MANT_SET_PR(trmHalfPeriod3);
 
 					if (count == 1)
 					{
@@ -805,14 +835,14 @@ static __irq void ManTrmIRQ2()
 				}
 				else
 				{
-					ManT_SET_PR(trmHalfPeriod2);
+					MANT_SET_PR(trmHalfPeriod2);
 				};
 
 				tw <<= 1;
 				count--;
 			};
 
-			ManT_SHADOW_SYNC();
+			MANT_SHADOW_SYNC();
 
 			break;
 
@@ -820,8 +850,8 @@ static __irq void ManTrmIRQ2()
 
 			if (tw & 0x10000)
 			{
-				ManT_SET_CR(trmHalfPeriod);
-				ManT_SET_PR(trmHalfPeriod2);
+				MANT_SET_CR(trmHalfPeriod);
+				MANT_SET_PR(trmHalfPeriod2);
 
 				tw <<= 1;
 				count--;
@@ -837,11 +867,11 @@ static __irq void ManTrmIRQ2()
 				tw <<= 1;
 				count--;
 
-				ManT_SET_CR(trmHalfPeriod2);
+				MANT_SET_CR(trmHalfPeriod2);
 
 				if (tw & 0x10000)
 				{
-					ManT_SET_PR(trmHalfPeriod4);
+					MANT_SET_PR(trmHalfPeriod4);
 					
 					if (count == 1)
 					{
@@ -851,7 +881,7 @@ static __irq void ManTrmIRQ2()
 				}
 				else
 				{
-					ManT_SET_PR(trmHalfPeriod3);
+					MANT_SET_PR(trmHalfPeriod3);
 
 					if (count == 0)
 					{
@@ -871,7 +901,7 @@ static __irq void ManTrmIRQ2()
 				};
 			};
 
-			ManT_SHADOW_SYNC();
+			MANT_SHADOW_SYNC();
 
 			break;
 
@@ -951,7 +981,7 @@ bool SendManData(MTB* mtb)
 
 		#elif defined(CPU_XMC48)
 
-			ManT_SET_PR(US2MT(50)-1); //trmHalfPeriod - 1;
+			MANT_SET_PR(US2MT(50)-1); //trmHalfPeriod - 1;
 			MANT_SET_CR_H2(~0); MANT_SET_CR_L2(0); MANT_SET_CR_H1(0); MANT_SET_CR_L1(~0);
 
 			MANT_SET_PSC_L1(MANRT_PSC);
@@ -1044,15 +1074,18 @@ void InitManTransmit()
 	MANT_CCU8->GCSS = MANT_OUT_GCSS;
 	MANT_CCU8->GCSC = MANT_OUT_GCSC;
 
-	PIO_L1->ModePin(PIN_L1, A3PP);
-	PIO_H1->ModePin(PIN_H1, A3PP);
-	PIO_L2->ModePin(PIN_L2, A3PP);
-	PIO_H2->ModePin(PIN_H2, A3PP);
-
 	MANT_SET_CHC_L1(MANT_CHC_L1);
 	MANT_SET_CHC_L2(MANT_CHC_L2);
 	MANT_SET_CHC_H1(MANT_CHC_H1);
 	MANT_SET_CHC_H2(MANT_CHC_H2);
+
+	PIO_L1->ModePin(PIN_L1, MANT_L1_PINMODE);
+	PIO_L2->ModePin(PIN_L2, MANT_L2_PINMODE);
+
+	#if defined(PIO_H1) && defined(PIO_H2)
+		PIO_H1->ModePin(PIN_H1, MANT_H1_PINMODE);
+		PIO_H2->ModePin(PIN_H2, MANT_H2_PINMODE);
+	#endif
 
 #endif
 

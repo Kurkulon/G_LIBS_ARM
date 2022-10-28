@@ -791,7 +791,7 @@ bool Write::Start()
 			return false;
 		};
 
-		vector = (VecData*)curWrBuf->GetDataPtr();
+		vector = (VecData*)((byte*)curWrBuf->GetDataPtr()-sizeof(VecData::Hdr));
 		vector->h.dataLen = curWrBuf->len;
 
 		state = (vector->h.flags) ? CRC_START : VECTOR_UPDATE;
@@ -3039,9 +3039,9 @@ bool RequestFlashWrite(Ptr<MB> &fwb, u16 devID, bool updateCRC)
 	{
 		if (fwb->len > 0 && fwb->dataOffset >= sizeof(VecData::Hdr))
 		{
-			fwb->dataOffset -= sizeof(VecData::Hdr);
+			//fwb->dataOffset -= sizeof(VecData::Hdr);
 
-			VecData* vd = (VecData*)fwb->GetDataPtr();
+			VecData* vd = (VecData*)((byte*)fwb->GetDataPtr()-sizeof(VecData::Hdr));
 
 			vd->h.device = deviceID = devID;
 			vd->h.flags = updateCRC;
