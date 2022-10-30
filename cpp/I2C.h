@@ -109,7 +109,7 @@ protected:
 	List<DSCI2C>	_reqList;
 	DSCI2C*			_dsc;
 
-	enum STATE { WAIT = 0, WRITE, READ, STOP };
+	enum STATE { I2C_WAIT = 0, I2C_WRITE, I2C_READ, I2C_STOP, I2C_RESET };
 
 	STATE _state;
 
@@ -127,7 +127,7 @@ public:
 
 	S_I2C(byte num, T_HW::S_PORT* pio_scl, byte pin_scl, byte mux_scl, T_HW::S_PORT* pio_sda, byte pin_sda, byte mux_sda, DMA_CH *dma, u32 dx0cr, u32 dx1cr, u32 genclk)
 		: USIC(num), _PIO_SCL(pio_scl), _PIO_SDA(pio_sda), _PIN_SCL(pin_scl), _PIN_SDA(pin_sda), _MUX_SCL(mux_scl), _MUX_SDA(mux_sda), _DMA(dma),
-		_DX0CR(dx0cr), _DX1CR(dx1cr), _GEN_CLK(genclk), _dsc(0), _state(WAIT) {}
+		_DX0CR(dx0cr), _DX1CR(dx1cr), _GEN_CLK(genclk), _dsc(0), _state(I2C_WAIT) {}
 
 #endif
 

@@ -328,7 +328,7 @@ bool S_I2C::Update()
 
 	switch (_state)
 	{
-		case WAIT:
+		case I2C_WAIT:
 
 			if (CheckReset())
 			{
@@ -355,44 +355,46 @@ bool S_I2C::Update()
 					wlen2	= dsc.wlen2;
 					rlen	= dsc.rlen;
 
-					I2C->PSCR = ~0;//RIF|AIF|TBIF|ACK|NACK|PCR;
+					I2C->PSCR = ~I2C_PCR;//RIF|AIF|TBIF|ACK|NACK|PCR;
 
 					if (wlen == 0)
 					{
 						I2C->TBUF[0] = I2C_TDF_MASTER_START | (dsc.adr << 1) | 1;
 
-						_state = READ; 
+						_state = I2C_READ;
 					}
 					else
 					{
 						I2C->TBUF[0] = I2C_TDF_MASTER_START | (dsc.adr << 1) | 0;
 
-						_state = WRITE; 
+						_state = I2C_WRITE;
 					};
 				};
 			};
 
 			break;
 
-		case WRITE:
+		case I2C_WRITE:
 
-			if(psr & (I2C_NACK|I2C_ERR|I2C_ARL|I2C_PCR))
+			if (psr & (I2C_NACK | I2C_ERR | I2C_ARL | I2C_WTDF))
 			{
 				I2C->TBUF[0] = I2C_TDF_MASTER_STOP;
 
-				_state = STOP; 
+				_state = I2C_STOP;
 			}
-			else if(psr & I2C_ACK)
+			else if (psr & I2C_ACK)
 			{
-				DSCI2C &dsc = *_dsc;
+				DSCI2C& dsc = *_dsc;
 
 				dsc.ack = true;
+
+				I2C->PSCR = I2C_ACK | I2C_PCR;
 
 				if (wlen != 0)
 				{
 					I2C->TBUF[0] = I2C_TDF_MASTER_SEND | *wrPtr++; wlen--;
 
-					if(wlen == 0 && wlen2 != 0)
+					if (wlen == 0 && wlen2 != 0)
 					{
 						wrPtr = wrPtr2;
 						wlen = wlen2;
@@ -402,22 +404,24 @@ bool S_I2C::Update()
 				else if (rlen > 0)
 				{
 					I2C->TBUF[0] = I2C_TDF_MASTER_RESTART | (dsc.adr << 1) | 1;
-	
-					_state = READ; 
+
+					_state = I2C_READ;
 				}
 				else
 				{
 					I2C->TBUF[0] = I2C_TDF_MASTER_STOP;
-					
-					_state = STOP; 
-				};
-			};
 
-			I2C->PSCR = psr;
+					_state = I2C_STOP;
+				};
+			}
+			else if (psr == 0)
+			{
+				_state = I2C_RESET;
+			};
 
 			break;
 
-		case READ:
+		case I2C_READ:
 
 			if (psr & I2C_ACK)
 			{
@@ -425,7 +429,7 @@ bool S_I2C::Update()
 				{
 					I2C->TBUF[0] = I2C_TDF_MASTER_RECEIVE_ACK;
 
-					I2C->PSCR = psr;
+					I2C->PSCR = I2C_ACK | I2C_PCR;
 				};
 			}
 			else if (psr & (I2C_RIF|I2C_AIF))
@@ -442,27 +446,47 @@ bool S_I2C::Update()
 					
 				I2C->TBUF[0] = (rlen > 0) ? I2C_TDF_MASTER_RECEIVE_ACK : I2C_TDF_MASTER_RECEIVE_NACK; 
 
-				I2C->PSCR = psr;
+				I2C->PSCR = I2C_RIF | I2C_AIF | I2C_PCR;
 			}
-			else if(psr & (I2C_NACK|I2C_ERR|I2C_ARL|I2C_PCR))
+			else if(psr & (I2C_NACK|I2C_ERR|I2C_ARL|I2C_WTDF))
 			{
 				I2C->TBUF[0] = I2C_TDF_MASTER_STOP;
 				
-				_state = STOP; 
+				_state = I2C_STOP;
+			}
+			else if (psr == 0)
+			{
+				_state = I2C_RESET;
 			};
- 
+
 			break;
 
-		case STOP:
+		case I2C_STOP:
 
-			I2C->PSCR = ~0;
+			I2C->PSCR = ~I2C_PCR;
 
 			_dsc->readedLen = _dsc->rlen - rlen;
 			_dsc->ready = true;
 				
 			_dsc = 0;
 				
-			_state = WAIT; 
+			_state = I2C_WAIT;
+
+			Usic_Unlock();
+
+			break;
+
+		case I2C_RESET:
+
+			RequestReset();
+
+			_dsc->ready = false;
+
+			_reqList.Add(_dsc);
+				
+			_dsc = 0;
+				
+			_state = I2C_WAIT;
 
 			Usic_Unlock();
 

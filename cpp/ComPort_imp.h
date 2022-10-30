@@ -296,6 +296,8 @@ void ComPort::TransmitByte(byte v)
 
 	_PIO_RTS->SET(_MASK_RTS);
 
+	Usic_Lock();
+
 	#ifdef CPU_SAME53	
 
 		_uhw.usart->CTRLB = _CTRLB|USART_TXEN;
@@ -321,6 +323,8 @@ void ComPort::TransmitByte(byte v)
 
 	#endif
 
+	Usic_Unlock();
+
 	_PIO_RTS->CLR(_MASK_RTS);
 
 #endif
@@ -335,6 +339,8 @@ void ComPort::EnableTransmit(void* src, word count)
 	if (count == 0) return;
 
 	_PIO_RTS->SET(_MASK_RTS);
+
+	Usic_Lock();
 
 	#ifdef CPU_SAME53	
 
@@ -423,7 +429,9 @@ void ComPort::DisableTransmit()
 
 	#endif
 
-	//_PIO_RTS->CLR(_MASK_RTS);
+	Usic_Unlock();
+
+	_PIO_RTS->CLR(_MASK_RTS);
 
 #endif
 }
@@ -435,6 +443,8 @@ void ComPort::EnableReceive(void* dst, word count)
 #ifndef WIN32
 
 	_PIO_RTS->CLR(_MASK_RTS);
+
+	Usic_Lock();
 
 	#ifdef CPU_SAME53	
 
@@ -500,7 +510,7 @@ void ComPort::DisableReceive()
 {
 #ifndef WIN32
 
-	//_PIO_RTS->CLR(_MASK_RTS);
+	_PIO_RTS->CLR(_MASK_RTS);
 
 	#ifdef CPU_SAME53	
 
@@ -526,6 +536,8 @@ void ComPort::DisableReceive()
 		_DMA->Disable(); 
 
 	#endif
+
+	Usic_Unlock();
 
 #endif
 }
@@ -560,6 +572,8 @@ bool ComPort::Update()
 					_status485 = READ_END;
 
 					DisableTransmit();
+
+					_status485 = READ_END;
 
 					r = false;
 				};
