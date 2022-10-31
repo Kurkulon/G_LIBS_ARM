@@ -181,7 +181,7 @@ bool S_I2C::Update()
 
 	switch (_state)
 	{
-		case WAIT:
+		case I2C_WAIT:
 
 			if (CheckReset())
 			{
@@ -211,27 +211,27 @@ bool S_I2C::Update()
 						_DMA->ReadPeripheral(&i2c->DATA, _dsc->rdata, _dsc->rlen, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_RX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
 
 						i2c->ADDR = ((_dsc->rlen <= 255) ? (I2C_LEN(_dsc->rlen)|I2C_LENEN) : 0) | (_dsc->adr << 1) | 1;
-						_state = READ; 
+						_state = I2C_READ; 
 					}
 					else
 					{
 						_DMA->WritePeripheral(_dsc->wdata, &i2c->DATA, _dsc->wlen, _dsc->wdata2, _dsc->wlen2, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_TX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
 
 						i2c->ADDR = (_dsc->adr << 1);
-						_state = WRITE; 
+						_state = I2C_WRITE; 
 					};
 				};
 			};
 
 			break;
 
-		case WRITE:
+		case I2C_WRITE:
 
 			if((i2c->INTFLAG & I2C_ERROR) || i2c->STATUS.RXNACK)
 			{
 				i2c->CTRLB = I2C_SMEN|I2C_CMD_STOP;
 				
-				_state = STOP; 
+				_state = I2C_STOP; 
 			}
 			else
 			{
@@ -253,26 +253,26 @@ bool S_I2C::Update()
 
 						i2c->ADDR = ((_dsc->rlen <= 255) ? (I2C_LEN(_dsc->rlen)|I2C_LENEN) : 0) | (_dsc->adr << 1) | 1;
 		
-						_state = READ; 
+						_state = I2C_READ; 
 					}
 					else
 					{
 						i2c->CTRLB = I2C_SMEN|I2C_ACKACT|I2C_CMD_STOP;
 						
-						_state = STOP; 
+						_state = I2C_STOP; 
 					};
 				};
 			};
 
 			break;
 
-		case READ:
+		case I2C_READ:
 
 			if((i2c->INTFLAG & I2C_ERROR) || i2c->STATUS.RXNACK)
 			{
 				i2c->CTRLB = I2C_SMEN|I2C_ACKACT|I2C_CMD_STOP;
 				
-				_state = STOP; 
+				_state = I2C_STOP; 
 			}
 			else
 			{
@@ -290,7 +290,7 @@ bool S_I2C::Update()
 
 					i2c->CTRLB = I2C_SMEN|I2C_ACKACT|I2C_CMD_STOP;
 						
-					_state = STOP; 
+					_state = I2C_STOP; 
 				};
 			};
 
@@ -298,7 +298,7 @@ bool S_I2C::Update()
 
 			break;
 
-		case STOP:
+		case I2C_STOP:
 
 			if (i2c->STATUS.BUSSTATE == BUSSTATE_IDLE)
 			{
@@ -308,7 +308,7 @@ bool S_I2C::Update()
 				
 				i2c->CTRLB = I2C_SMEN;
 
-				_state = WAIT; 
+				_state = I2C_WAIT; 
 
 				Usic_Unlock();
 			}

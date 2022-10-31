@@ -2222,7 +2222,7 @@ static void InitSessionsNew()
 			{
 				rdspr.Start(&spare, &adr);	while (rdspr.Update());
 
-				if (spare.v1.crc == 0 ) break;
+				if (spare.v1.crc == 0 || spare.v1.start == ~0 || spare.v1.fpn == ~0 || spare.v1.rawPage == ~0) break;
 
 				adr.NextPage();
 			};
@@ -2271,6 +2271,7 @@ static bool UpdateBlackBoxSendSessions()
 	//static u32	curFileFirstBlock = ~0;
 //	static u32	curFileLastBlock = ~0;
 	static u16	curFileNum = ~0;
+	static bool	curFileValid = false;
 	static u64	curFileStartAdr = ~0;
 //	static u64	curFileEndAdr = ~0;
 	//static u32	curFileFPN = ~0;
@@ -2341,6 +2342,7 @@ static bool UpdateBlackBoxSendSessions()
 //			curFileFirstBlock = ~0;
 //			curFileLastBlock = ~0;
 			curFileNum = ~0;
+			curFileValid = false;
 			curFileStartAdr = ~0;
 //			curFileEndAdr = ~0;
 //			curFileFPN = ~0;
@@ -2398,6 +2400,7 @@ static bool UpdateBlackBoxSendSessions()
 
 					lastSessionBlock	= rd.GetRawBlock();
 					curFileNum			= spare.v1.file;
+					curFileValid		= true;
 //					curFileEndAdr		= rd.GetRawAdr();
 
 					rd.NextBlock();
@@ -2549,9 +2552,9 @@ static bool UpdateBlackBoxSendSessions()
 
 		case 9: //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-			if (!firstSessionSended)
+			if (firstSessionValid && !firstSessionSended)
 			{
-				if (curFileNum == firstSessionNum)
+				if (curFileValid && curFileNum == firstSessionNum)
 				{
 					firstSessionStartAdr = curFileStartAdr;
 				};
@@ -2565,7 +2568,7 @@ static bool UpdateBlackBoxSendSessions()
 
 				state = 3;
 			}
-			else if (curFileNum != sendedFileNum)
+			else if (curFileValid && curFileNum != sendedFileNum)
 			{
 				findFileNum = curFileNum;
 				findFileStartAdr = curFileStartAdr;

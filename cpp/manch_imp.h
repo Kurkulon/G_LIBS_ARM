@@ -385,9 +385,9 @@
 
 	#ifdef CPU_SAME53	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-		#define ManT_SET_PR(v)			{ MNTTCC->PERBUF = (v); }
-		#define ManT_SET_CR(v)			{ MNTTCC->CCBUF[L1_CC_NUM] = (v); MNTTCC->CCBUF[L2_CC_NUM] = (v); }
-		#define ManT_SHADOW_SYNC()			
+		#define MANT_SET_PR(v)			{ MNTTCC->PERBUF = (v); }
+		#define MANT_SET_CR(v)			{ MNTTCC->CCBUF[L1_CC_NUM] = (v); MNTTCC->CCBUF[L2_CC_NUM] = (v); }
+		#define MANT_SHADOW_SYNC()			
 
 	#elif defined(CPU_XMC48) //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
