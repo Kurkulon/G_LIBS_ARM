@@ -201,10 +201,14 @@ bool S_I2C::Update()
 					dsc.ack = false;
 					dsc.readedLen = 0;
 
+					while (i2c->SYNCBUSY) __nop();
+
 					i2c->CTRLB = I2C_SMEN;
 					i2c->STATUS.BUSSTATE = BUSSTATE_IDLE;
 
 					i2c->INTFLAG = ~0;
+
+					while (i2c->SYNCBUSY) __nop();
 
 					if (_dsc->wlen == 0)
 					{
@@ -229,6 +233,8 @@ bool S_I2C::Update()
 
 			if((i2c->INTFLAG & I2C_ERROR) || i2c->STATUS.RXNACK)
 			{
+				while (i2c->SYNCBUSY) __nop();
+
 				i2c->CTRLB = I2C_SMEN|I2C_CMD_STOP;
 				
 				_state = I2C_STOP; 
@@ -245,7 +251,11 @@ bool S_I2C::Update()
 
 				if (c)
 				{
+					_DMA->Disable();
+
 					dsc.ack = true;
+
+					while (i2c->SYNCBUSY) __nop();
 
 					if (_dsc->rlen > 0)
 					{
@@ -270,6 +280,8 @@ bool S_I2C::Update()
 
 			if((i2c->INTFLAG & I2C_ERROR) || i2c->STATUS.RXNACK)
 			{
+				while (i2c->SYNCBUSY) __nop();
+
 				i2c->CTRLB = I2C_SMEN|I2C_ACKACT|I2C_CMD_STOP;
 				
 				_state = I2C_STOP; 
@@ -286,7 +298,11 @@ bool S_I2C::Update()
 
 				if (c)
 				{
+					_DMA->Disable();
+
 					dsc.ack = true;
+
+					while (i2c->SYNCBUSY) __nop();
 
 					i2c->CTRLB = I2C_SMEN|I2C_ACKACT|I2C_CMD_STOP;
 						
@@ -309,6 +325,27 @@ bool S_I2C::Update()
 				i2c->CTRLB = I2C_SMEN;
 
 				_state = I2C_WAIT; 
+
+				Usic_Unlock();
+			}
+			else if (i2c->SYNCBUSY == 0)
+			{
+				i2c->CTRLB = I2C_SMEN|I2C_ACKACT|I2C_CMD_STOP;
+			};
+
+			break;
+
+		case I2C_RESET:
+
+			if (i2c->STATUS.BUSSTATE == BUSSTATE_IDLE)
+			{
+				_dsc->ready = false;
+
+				_reqList.Add(_dsc);
+					
+				_dsc = 0;
+					
+				_state = I2C_WAIT;
 
 				Usic_Unlock();
 			}

@@ -71,12 +71,16 @@ void ComPort::InitHW()
 		
 		T_HW::S_USART* uhw = _uhw.usart;
 		
-		_PIO_TX->SetWRCONFIG(_MASK_TX, _PMUX_TX|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_PULLEN);
-		_PIO_RX->SetWRCONFIG(_MASK_RX, _PMUX_RX|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_PULLEN);
+		if (_PIO_SCK != 0) _PIO_SCK->SetWRCONFIG(1UL<<_PIN_SCK, _PMUX_SCK|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_PULLEN);
+		if (_PIO_TX != 0) _PIO_TX->SetWRCONFIG(1UL<<_PIN_TX, _PMUX_TX|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_PULLEN);
+		if (_PIO_RX != 0) _PIO_RX->SetWRCONFIG(1UL<<_PIN_RX, _PMUX_RX|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_PULLEN);
 
-		_PIO_RTS->SetWRCONFIG(_MASK_RTS, PORT_WRPINCFG|PORT_WRPMUX);
-		_PIO_RTS->DIRSET = _MASK_RTS; 
-		_PIO_RTS->SET(_MASK_RTS); 
+		if (_PIO_RTS != 0)
+		{
+			_PIO_RTS->SetWRCONFIG(_MASK_RTS, PORT_WRPINCFG|PORT_WRPMUX);
+			_PIO_RTS->DIRSET = _MASK_RTS; 
+			_PIO_RTS->SET(_MASK_RTS); 
+		};
 
 		uhw->CTRLA = USART_SWRST;
 
@@ -294,7 +298,7 @@ void ComPort::TransmitByte(byte v)
 {
 #ifndef WIN32
 
-	_PIO_RTS->SET(_MASK_RTS);
+	Set_RTS();
 
 	Usic_Lock();
 
@@ -325,7 +329,7 @@ void ComPort::TransmitByte(byte v)
 
 	Usic_Unlock();
 
-	_PIO_RTS->CLR(_MASK_RTS);
+	Clr_RTS();
 
 #endif
 }
@@ -338,7 +342,7 @@ void ComPort::EnableTransmit(void* src, word count)
 
 	if (count == 0) return;
 
-	_PIO_RTS->SET(_MASK_RTS);
+	Set_RTS();
 
 	Usic_Lock();
 
@@ -431,7 +435,7 @@ void ComPort::DisableTransmit()
 
 	Usic_Unlock();
 
-	_PIO_RTS->CLR(_MASK_RTS);
+	Clr_RTS();
 
 #endif
 }
@@ -442,7 +446,7 @@ void ComPort::EnableReceive(void* dst, word count)
 {
 #ifndef WIN32
 
-	_PIO_RTS->CLR(_MASK_RTS);
+	Clr_RTS();
 
 	Usic_Lock();
 
@@ -510,7 +514,7 @@ void ComPort::DisableReceive()
 {
 #ifndef WIN32
 
-	_PIO_RTS->CLR(_MASK_RTS);
+	Clr_RTS();
 
 	#ifdef CPU_SAME53	
 

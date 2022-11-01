@@ -3054,6 +3054,14 @@ namespace T_HW
 	#define P4_6_CCU43_IN0			0
 	#define P4_7_CCU43_IN0			2
 
+	#define P0_14_CCU				40
+	#define P0_15_CCU				40
+
+	#define P0_14_CCU40_CC			1
+	#define P0_15_CCU40_CC			0
+
+	#define P0_14_CCU40_OUT1		A3PP		
+	#define P0_15_CCU40_OUT0		A3PP		
 
 	/* ================================================================================ */
 	/* ================                  CCU8 [CCU80]                  ================ */

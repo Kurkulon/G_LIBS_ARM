@@ -58,22 +58,27 @@ class ComPort : public USIC
 
 	#ifdef CPU_SAME53
 
+		T_HW::S_PORT* const _PIO_SCK;
 		T_HW::S_PORT* const _PIO_TX;
 		T_HW::S_PORT* const _PIO_RX;
 		T_HW::S_PORT* const _PIO_RTS;
 
-		const u32 _MASK_TX;
-		const u32 _MASK_RX;
-		const u32 _MASK_RTS;
+		const byte	_PIN_SCK;
+		const byte	_PIN_TX;
+		const byte	_PIN_RX;
+		//const byte	_PIN_RTS;
 
-		const u32 _PMUX_TX;
-		const u32 _PMUX_RX;
+		const u32	_MASK_RTS;
 
-		const u32 _GEN_SRC;
-		const u32 _GEN_CLK;
+		const u32 	_PMUX_SCK;
+		const u32 	_PMUX_TX;
+		const u32 	_PMUX_RX;
 
-		const u32 			_TXPO;
-		const u32 			_RXPO;
+		const u32 	_GEN_SRC;
+		const u32 	_GEN_CLK;
+
+		const u32	_TXPO;
+		const u32	_RXPO;
 
 		DMA_CH *	const _DMA;
 
@@ -174,14 +179,16 @@ class ComPort : public USIC
 
 	word 		BoudToPresc(dword speed);
 
+	void		Set_RTS() { if (_PIO_RTS != 0) _PIO_RTS->SET(_MASK_RTS); }
+	void		Clr_RTS() { if (_PIO_RTS != 0) _PIO_RTS->CLR(_MASK_RTS); }
 
   public:
 	  
 #ifdef CPU_SAME53
 
-	ComPort(byte num, T_HW::S_PORT* ptx, T_HW::S_PORT* prx, T_HW::S_PORT* prts, u32 mtx, u32 mrx, u32 mrts, u32 muxtx, u32 muxrx, u32 txpo, u32 rxpo, u32 gen_src, u32 gen_clk, DMA_CH *dma)
-		: USIC(num), _PIO_TX(ptx), _PIO_RX(prx), _PIO_RTS(prts), _MASK_TX(mtx), _MASK_RX(mrx), _MASK_RTS(mrts),
-		_PMUX_TX(muxtx), _PMUX_RX(muxrx), _GEN_SRC(gen_src), _GEN_CLK(gen_clk), _TXPO(txpo), _RXPO(rxpo), _DMA(dma), _status485(READ_END) {}
+	ComPort(byte num, T_HW::S_PORT* psck, T_HW::S_PORT* ptx, T_HW::S_PORT* prx, T_HW::S_PORT* prts, byte pinsck, byte pintx, byte pinrx, byte pinrts, u32 muxsck, u32 muxtx, u32 muxrx, u32 txpo, u32 rxpo, u32 gen_src, u32 gen_clk, DMA_CH *dma)
+		: USIC(num), _PIO_SCK(psck), _PIO_TX(ptx), _PIO_RX(prx), _PIO_RTS(prts), _PIN_SCK(pinsck), _PIN_TX(pintx), _PIN_RX(pinrx), _MASK_RTS(1UL<<pinrts),
+		_PMUX_SCK(muxsck), _PMUX_TX(muxtx), _PMUX_RX(muxrx), _GEN_SRC(gen_src), _GEN_CLK(gen_clk), _TXPO(txpo), _RXPO(rxpo), _DMA(dma), _status485(READ_END) {}
 
 #elif defined(CPU_XMC48)
 
