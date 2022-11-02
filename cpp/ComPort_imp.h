@@ -224,7 +224,11 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 
 	#endif
 
-	_writeTimeout = US2COM((24000000/speed));
+	u32 t = 24000000/speed;
+
+	if (t < 20) t = 20;
+
+	_writeTimeout = US2COM(t);
 
 	InitHW();
 
@@ -362,12 +366,12 @@ void ComPort::EnableTransmit(void* src, word count)
 			while(_uhw.usart->SYNCBUSY);
 		};
 
+		_uhw.usart->CTRLB = _CTRLB|USART_TXEN;
+		_uhw.usart->INTFLAG = ~0;
+
 		_DMA->WritePeripheral(src, &_uhw.usart->DATA, count, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_TX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE); 
 
 		//while (_uhw.usart->SYNCBUSY & USART_CTRLB);
-
-		_uhw.usart->CTRLB = _CTRLB|USART_TXEN;
-		_uhw.usart->INTFLAG = ~0;
 
 	#elif defined(CPU_XMC48)
 

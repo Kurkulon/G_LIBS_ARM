@@ -38,6 +38,8 @@ protected:
 
 	bool	Empty() { return first == 0; }
 
+	u32		Count() { return count; }
+
 
 #ifdef WIN32
 
@@ -161,6 +163,7 @@ public:
 	void Free()						{ if (ptr != 0) { if (ptr->count != 0) { ptr->count--; if (ptr->count == 0) ptr->Destroy(); };	ptr = 0; }; }
 	T* operator->()					{ return ptr; }
 	T& operator*()					{ return *ptr; }
+	u32	 Count()					{ return (ptr != 0) ? ptr->count : 0; }
 };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -180,6 +183,7 @@ public:
 
 	virtual	void	Destroy() = 0;
 
+	u32		Count() { return count; }
 
 	PtrObj() : next(0), count(0) { }
 };

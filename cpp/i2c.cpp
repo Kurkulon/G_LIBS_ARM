@@ -201,14 +201,10 @@ bool S_I2C::Update()
 					dsc.ack = false;
 					dsc.readedLen = 0;
 
-					while (i2c->SYNCBUSY) __nop();
-
 					i2c->CTRLB = I2C_SMEN;
 					i2c->STATUS.BUSSTATE = BUSSTATE_IDLE;
 
 					i2c->INTFLAG = ~0;
-
-					while (i2c->SYNCBUSY) __nop();
 
 					if (_dsc->wlen == 0)
 					{
@@ -219,11 +215,15 @@ bool S_I2C::Update()
 					}
 					else
 					{
+						i2c->ADDR = (_dsc->adr << 1);
+
 						_DMA->WritePeripheral(_dsc->wdata, &i2c->DATA, _dsc->wlen, _dsc->wdata2, _dsc->wlen2, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_TX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
 
-						i2c->ADDR = (_dsc->adr << 1);
 						_state = I2C_WRITE; 
 					};
+
+					_prevCount = 0;
+					_tm.Reset();
 				};
 			};
 
@@ -233,11 +233,15 @@ bool S_I2C::Update()
 
 			if((i2c->INTFLAG & I2C_ERROR) || i2c->STATUS.RXNACK)
 			{
-				while (i2c->SYNCBUSY) __nop();
-
 				i2c->CTRLB = I2C_SMEN|I2C_CMD_STOP;
 				
 				_state = I2C_STOP; 
+			}
+			else if (_tm.Timeout(100))
+			{
+				i2c->CTRLB = I2C_SMEN|I2C_CMD_STOP;
+				
+				_state = I2C_RESET; 
 			}
 			else
 			{
@@ -255,8 +259,6 @@ bool S_I2C::Update()
 
 					dsc.ack = true;
 
-					while (i2c->SYNCBUSY) __nop();
-
 					if (_dsc->rlen > 0)
 					{
 						_DMA->ReadPeripheral(&i2c->DATA, _dsc->rdata, _dsc->rlen, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_RX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
@@ -271,6 +273,15 @@ bool S_I2C::Update()
 						
 						_state = I2C_STOP; 
 					};
+
+					_prevCount = 0;
+					_tm.Reset();
+				}
+				else
+				{
+					u32 t = _DMA->GetBytesLeft();
+
+					if (t != _prevCount) _prevCount = t, _tm.Reset();
 				};
 			};
 
@@ -280,11 +291,15 @@ bool S_I2C::Update()
 
 			if((i2c->INTFLAG & I2C_ERROR) || i2c->STATUS.RXNACK)
 			{
-				while (i2c->SYNCBUSY) __nop();
-
 				i2c->CTRLB = I2C_SMEN|I2C_ACKACT|I2C_CMD_STOP;
 				
 				_state = I2C_STOP; 
+			}
+			else if (_tm.Timeout(100))
+			{
+				i2c->CTRLB = I2C_SMEN|I2C_CMD_STOP;
+				
+				_state = I2C_RESET; 
 			}
 			else
 			{
@@ -307,6 +322,12 @@ bool S_I2C::Update()
 					i2c->CTRLB = I2C_SMEN|I2C_ACKACT|I2C_CMD_STOP;
 						
 					_state = I2C_STOP; 
+				}
+				else
+				{
+					u32 t = _DMA->GetBytesLeft();
+
+					if (t != _prevCount) _prevCount = t, _tm.Reset();
 				};
 			};
 
@@ -339,6 +360,8 @@ bool S_I2C::Update()
 
 			if (i2c->STATUS.BUSSTATE == BUSSTATE_IDLE)
 			{
+				_DMA->Disable();
+
 				_dsc->ready = false;
 
 				_reqList.Add(_dsc);

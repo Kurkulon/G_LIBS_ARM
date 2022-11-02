@@ -18,6 +18,7 @@ protected:
 public:
 
 	virtual	u32		MaxLen() { return sizeof(_data); }
+	virtual	u32		FreeCount() = 0;
 
 	void*	GetDataPtr() { return (byte*)_data+dataOffset; }
 
@@ -40,7 +41,8 @@ public:
 
 	static	MEMB*	Create()	{ MEMB *p = _freeList.Get(); if (p != 0) {p->dataOffset = 0; p->len = 0; }; return p; }
 	virtual void	Destroy()	{ if (this != 0) _freeList.Add(this); }
-	virtual	u32		MaxLen() { return sizeof(_data)+sizeof(exData); }
+	virtual	u32		MaxLen()	{ return sizeof(_data)+sizeof(exData); }
+	virtual	u32		FreeCount() { return _freeList.Count(); }
 
 					MEMB() { _freeList.Init(); _freeList.Add(this); }
 };

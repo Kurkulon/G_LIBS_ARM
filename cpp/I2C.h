@@ -5,6 +5,7 @@
 #include "usic.h"
 #include "list.h"
 #include "DMA.h"
+#include "time.h"
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -113,7 +114,10 @@ protected:
 
 	STATE _state;
 
-	u32	 _baud;
+	u32	_baud;
+	u32	_prevCount;
+
+	TM32 _tm;
 
 public:
 
