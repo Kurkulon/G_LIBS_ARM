@@ -3654,8 +3654,9 @@ namespace T_HW
 		bool TBSET(u16 b) { return IN & (1<<b); }
 		bool TBCLR(u16 b) { return (IN & (1<<b)) == 0; }
 
-		void DIRSET(u16 m) { for (byte i = 0; i < 16; i++) { if (m&1) PC0[i] = G_PP; m >>= 1; }; }
-		void DIRCLR(u16 m) { for (byte i = 0; i < 16; i++) { if (m&1) PC0[i] = I2DPU; m >>= 1; };} 
+		void DIRSET(u16 m)	{ for (byte i = 0; i < 16; i++) { if (m&1) ModePin(i, G_PP); m >>= 1; }; }
+		void DIRCLR(u16 m)	{ for (byte i = 0; i < 16; i++) { if (m&1) ModePin(i, I2DPU); m >>= 1; };} 
+		void DIR(u16 m)		{ for (byte i = 0; i < 16; i++) { ModePin(i, ((m&1) ? G_PP : I2DPU)); m >>= 1; }; }
 
 		//void PIOF0(byte f0=0, byte f1=0, byte f2=0, byte f3=0) { IOCR0 =	((f0 |(f1<<8)|(f2<<16)|(f3<<24)) & 0x1F1F1F1F)<<3; ((byte*)&HWSEL)[0] = ((f0>>5)&3)|(((f1>>5)&3)<<2)|(((f2>>5)&3)<<4)|(((f3>>5)&3)<<6);}
 		//void PIOF4(byte f0=0, byte f1=0, byte f2=0, byte f3=0) { IOCR4 =	((f0 |(f1<<8)|(f2<<16)|(f3<<24)) & 0x1F1F1F1F)<<3; ((byte*)&HWSEL)[1] = ((f0>>5)&3)|(((f1>>5)&3)<<2)|(((f2>>5)&3)<<4)|(((f3>>5)&3)<<6);}
@@ -3699,6 +3700,133 @@ namespace T_HW
 	};
 	
 	typedef S_PORT PORT_Type;
+
+	#define P0_0 	(1UL<<0)
+	#define P0_1 	(1UL<<1)
+	#define P0_2 	(1UL<<2)
+	#define P0_3 	(1UL<<3)
+	#define P0_4 	(1UL<<4)
+	#define P0_5 	(1UL<<5)
+	#define P0_6 	(1UL<<6)
+	#define P0_7 	(1UL<<7)
+	#define P0_8 	(1UL<<8)
+	#define P0_9 	(1UL<<9)
+	#define P0_10 	(1UL<<10)
+	#define P0_11 	(1UL<<11)
+	#define P0_12 	(1UL<<12)
+	#define P0_13 	(1UL<<13)
+	#define P0_14 	(1UL<<14)
+	#define P0_15 	(1UL<<15)
+
+	#define P1_0 	(1UL<<0)
+	#define P1_1 	(1UL<<1)
+	#define P1_2 	(1UL<<2)
+	#define P1_3 	(1UL<<3)
+	#define P1_4 	(1UL<<4)
+	#define P1_5 	(1UL<<5)
+	#define P1_6 	(1UL<<6)
+	#define P1_7 	(1UL<<7)
+	#define P1_8 	(1UL<<8)
+	#define P1_9 	(1UL<<9)
+	#define P1_10 	(1UL<<10)
+	#define P1_11 	(1UL<<11)
+	#define P1_12 	(1UL<<12)
+	#define P1_13 	(1UL<<13)
+	#define P1_14 	(1UL<<14)
+	#define P1_15 	(1UL<<15)
+
+	#define P2_0 	(1UL<<0)
+	#define P2_1 	(1UL<<1)
+	#define P2_2 	(1UL<<2)
+	#define P2_3 	(1UL<<3)
+	#define P2_4 	(1UL<<4)
+	#define P2_5 	(1UL<<5)
+	#define P2_6 	(1UL<<6)
+	#define P2_7 	(1UL<<7)
+	#define P2_8 	(1UL<<8)
+	#define P2_9 	(1UL<<9)
+	#define P2_10 	(1UL<<10)
+	#define P2_11 	(1UL<<11)
+	#define P2_12 	(1UL<<12)
+	#define P2_13 	(1UL<<13)
+	#define P2_14 	(1UL<<14)
+	#define P2_15 	(1UL<<15)
+
+	#define P3_0 	(1UL<<0)
+	#define P3_1 	(1UL<<1)
+	#define P3_2 	(1UL<<2)
+	#define P3_3 	(1UL<<3)
+	#define P3_4 	(1UL<<4)
+	#define P3_5 	(1UL<<5)
+	#define P3_6 	(1UL<<6)
+	#define P3_7 	(1UL<<7)
+	#define P3_8 	(1UL<<8)
+	#define P3_9 	(1UL<<9)
+	#define P3_10 	(1UL<<10)
+	#define P3_11 	(1UL<<11)
+	#define P3_12 	(1UL<<12)
+	#define P3_13 	(1UL<<13)
+	#define P3_14 	(1UL<<14)
+	#define P3_15 	(1UL<<15)
+
+	#define P4_0 	(1UL<<0)
+	#define P4_1 	(1UL<<1)
+	#define P4_2 	(1UL<<2)
+	#define P4_3 	(1UL<<3)
+	#define P4_4 	(1UL<<4)
+	#define P4_5 	(1UL<<5)
+	#define P4_6 	(1UL<<6)
+	#define P4_7 	(1UL<<7)
+
+	#define P5_0 	(1UL<<0)
+	#define P5_1 	(1UL<<1)
+	#define P5_2 	(1UL<<2)
+	#define P5_3 	(1UL<<3)
+	#define P5_4 	(1UL<<4)
+	#define P5_5 	(1UL<<5)
+	#define P5_6 	(1UL<<6)
+	#define P5_7 	(1UL<<7)
+	#define P5_8 	(1UL<<8)
+	#define P5_9 	(1UL<<9)
+	#define P5_10 	(1UL<<10)
+	#define P5_11 	(1UL<<11)
+
+	#define P6_0 	(1UL<<0)
+	#define P6_1 	(1UL<<1)
+	#define P6_2 	(1UL<<2)
+	#define P6_3 	(1UL<<3)
+	#define P6_4 	(1UL<<4)
+	#define P6_5 	(1UL<<5)
+	#define P6_6 	(1UL<<6)
+
+	#define P14_0 	(1UL<<0)
+	#define P14_1 	(1UL<<1)
+	#define P14_2 	(1UL<<2)
+	#define P14_3 	(1UL<<3)
+	#define P14_4 	(1UL<<4)
+	#define P14_5 	(1UL<<5)
+	#define P14_6 	(1UL<<6)
+	#define P14_7 	(1UL<<7)
+	#define P14_8 	(1UL<<8)
+	#define P14_9 	(1UL<<9)
+	#define P14_12 	(1UL<<12)
+	#define P14_13 	(1UL<<13)
+	#define P14_14 	(1UL<<14)
+	#define P14_15 	(1UL<<15)
+
+	#define P15_2 	(1UL<<2)
+	#define P15_3 	(1UL<<3)
+	#define P15_4 	(1UL<<4)
+	#define P15_5 	(1UL<<5)
+	#define P15_6 	(1UL<<6)
+	#define P15_7 	(1UL<<7)
+	#define P15_8 	(1UL<<8)
+	#define P15_9 	(1UL<<9)
+	#define P15_12 	(1UL<<12)
+	#define P15_13 	(1UL<<13)
+	#define P15_14 	(1UL<<14)
+	#define P15_15 	(1UL<<15)
+
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

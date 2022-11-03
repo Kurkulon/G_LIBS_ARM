@@ -1074,11 +1074,26 @@ void NAND_Init()
 
 #elif defined(CPU_XMC48)
 
+	PIO_D0->ModePin			( PIN_D0,		HWIO1	);
+	PIO_D1->ModePin			( PIN_D1,		HWIO1	);
+	PIO_D2->ModePin			( PIN_D2,		HWIO1	);
+	PIO_D3->ModePin			( PIN_D3,		HWIO1	);
+	PIO_D4->ModePin			( PIN_D4,		HWIO1	);
+	PIO_D5->ModePin			( PIN_D5,		HWIO1	);
+	PIO_D6->ModePin			( PIN_D6,		HWIO1	);
+	PIO_D7->ModePin			( PIN_D7,		HWIO1	);
+	PIO_NANDCLE->ModePin	( PIN_NANDCLE,	HWIO1	);
+	PIO_NANDALE->ModePin	( PIN_NANDALE,	HWIO1	);
+	PIO_NANDOE->ModePin		( PIN_NANDOE,	HWIO1	);
+	PIO_NANDwE->ModePin		( PIN_NANDwE,	HWIO1	);
+	PIO_WP->ModePin			( PIN_WP,		G_PP	);
+	PIO_FLREADY->ModePin	( PIN_FLREADY,	I2DPU	);
+
+	PIO_FCS->DIRSET(maskChipSelect);
+
+	NAND_Chip_Disable();
+
 	HW::EBU_Enable(__EBU_DIV);
-
-	HW::Peripheral_Enable(PID_DMA0);
-
-	//NAND_DMA->DMACFGREG = 1;
 
 	EBU->CLC = 0;
 	EBU->MODCON = /*EBU_ARBSYNC|*/EBU_ARBMODE(3);

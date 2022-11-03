@@ -30,17 +30,17 @@ extern "C" void SystemInit()
 
 	#ifdef CPU_SAME53	
 
-		HW::PIOA->DIRSET =	PIOA_INIT_DIR;
-		HW::PIOA->CLR(		PIOA_INIT_CLR);
-		HW::PIOA->SET(		PIOA_INIT_SET);
+		HW::PIOA->DIR =	PIOA_INIT_DIR;
+		HW::PIOA->CLR(	PIOA_INIT_CLR);
+		HW::PIOA->SET(	PIOA_INIT_SET);
 
-		HW::PIOB->DIRSET =	PIOB_INIT_DIR;
-		HW::PIOB->CLR(		PIOB_INIT_CLR);
-		HW::PIOB->SET(		PIOB_INIT_SET);
+		HW::PIOB->DIR =	PIOB_INIT_DIR;
+		HW::PIOB->CLR(	PIOB_INIT_CLR);
+		HW::PIOB->SET(	PIOB_INIT_SET);
 
-		HW::PIOC->DIRSET =	PIOC_INIT_DIR;
-		HW::PIOC->CLR(		PIOC_INIT_CLR);
-		HW::PIOC->SET(		PIOC_INIT_SET);
+		HW::PIOC->DIR =	PIOC_INIT_DIR;
+		HW::PIOC->CLR(	PIOC_INIT_CLR);
+		HW::PIOC->SET(	PIOC_INIT_SET);
 
 		Pin_MainLoop_Set();
 
@@ -185,169 +185,52 @@ extern "C" void SystemInit()
 
 		while (SCU_GENERAL->MIRRSTS & SCU_GENERAL_MIRRSTS_HDCR_Msk);	SCU_HIBERNATE->HDCR |= SCU_HIBERNATE_HDCR_RCS_Msk | SCU_HIBERNATE_HDCR_STDBYSEL_Msk;
 
+		P0->OUT = P0_INIT_OUT;
+		P1->OUT = P1_INIT_OUT;
+		P2->OUT = P2_INIT_OUT;
+		P3->OUT = P3_INIT_OUT;
+		P4->OUT = P4_INIT_OUT;
+		P5->OUT = P5_INIT_OUT;
+		P6->OUT = P6_INIT_OUT;
 
-		//P2->ModePin10(	G_PP	);
-		//P2->BSET(10);
-
-		P0->ModePin0(	G_PP	);
-		P0->ModePin1(	G_PP	);
-		P0->ModePin2(	HWIO1	);
-		P0->ModePin3(	HWIO1	);
-		P0->ModePin4(	HWIO1	);
-		P0->ModePin5(	HWIO1	);
-		P0->ModePin6(	I1DPD	);
-		P0->ModePin7(	HWIO1	);
-		P0->ModePin8(	HWIO1	);
-		P0->ModePin9(	G_PP	);
-		P0->ModePin10(	G_PP	);
-		P0->ModePin11(	G_PP	);
-		P0->ModePin12(	G_PP	);
-		P0->ModePin13(	G_PP	);
-		P0->ModePin14(	G_PP	);
-		P0->ModePin15(	G_PP	);
+		P0->DIR(P0_INIT_DIR);
+		P1->DIR(P1_INIT_DIR);
+		P2->DIR(P2_INIT_DIR);
+		P3->DIR(P3_INIT_DIR);
+		P4->DIR(P4_INIT_DIR);
+		P5->DIR(P5_INIT_DIR);
+		P6->DIR(P6_INIT_DIR);
 
 		P0->PPS = 0;
-
-		P1->ModePin0(	G_PP	);
-		P1->ModePin1(	G_PP	);
-		P1->ModePin2(	G_PP	);
-		P1->ModePin3(	G_PP	);
-		P1->ModePin4(	I2DPU	);
-		P1->ModePin5(	A2PP	);
-		P1->ModePin6(	G_PP	);
-		P1->ModePin7(	G_PP	);
-		P1->ModePin8(	G_PP	);
-		P1->ModePin9(	G_PP	);
-		P1->ModePin10(	I2DPU	);
-		P1->ModePin11(	I2DPU	);
-		P1->ModePin12(	G_PP	);
-		P1->ModePin13(	G_PP	);
-		P1->ModePin14(	HWIO1	);
-		P1->ModePin15(	HWIO1	);
-
 		P1->PPS = 0;
-
-		P2->ModePin0(	HWIO0	);
-		P2->ModePin1(	I1DPD	);
-		P2->ModePin2(	I2DPU	);
-		P2->ModePin3(	I1DPD	);
-		P2->ModePin4(	I1DPD	);
-		P2->ModePin5(	A1PP	);
-		P2->ModePin6(	G_PP	);
-		P2->ModePin7(	A1PP	);
-		P2->ModePin8(	A1PP	);
-		P2->ModePin9(	A1PP	);
-		P2->ModePin10(	G_PP	);
-		P2->ModePin11(	G_PP	);
-		P2->ModePin12(	G_PP	);
-		P2->ModePin13(	G_PP	);
-		//P2->ModePin14(	A2PP	);
-		//P2->ModePin15(	I2DPU	);
-
 		P2->PPS = 0;
-
-		P3->ModePin0(	HWIO1	);
-		P3->ModePin1(	HWIO1	);
-		P3->ModePin2(	G_PP	);
-		P3->ModePin3(	G_PP	);
-		P3->ModePin4(	G_PP	);
-		P3->ModePin5(	HWIO1	);
-		P3->ModePin6(	HWIO1	);
-		P3->ModePin7(	G_PP	);
-		P3->ModePin8(	G_PP	);
-		P3->ModePin9(	G_PP	);
-		P3->ModePin10(	G_PP	);
-		P3->ModePin11(	G_PP	);
-		P3->ModePin12(	G_PP	);
-		P3->ModePin13(	G_PP	);
-		P3->ModePin14(	I2DPU	);
-		P3->ModePin15(	A2PP	);
-
 		P3->PPS = 0;
-
-		P4->ModePin0(	G_PP	);
-		P4->ModePin1(	G_PP	);
-		P4->ModePin2(	G_PP	);
-		P4->ModePin3(	G_PP	);
-		P4->ModePin4(	G_PP	);
-		P4->ModePin5(	G_PP	);
-		P4->ModePin6(	I2DPU	);
-		P4->ModePin7(	A1PP	);
-
 		P4->PPS = 0;
-
-		P5->ModePin0(	HWIO0	);
-		P5->ModePin1(	G_PP	);
-		P5->ModePin2(	A1OD	);
-		P5->ModePin3(	G_PP	);
-		P5->ModePin4(	G_PP	);
-		P5->ModePin5(	G_PP	);
-		P5->ModePin6(	G_PP	);
-		P5->ModePin7(	G_PP	);
-		//P5->ModePin8(	A2PP	);
-		//P5->ModePin9(	G_PP	);
-		P5->ModePin10(	G_PP	);
-		//P5->ModePin11(	G_PP	);
-
 		P5->PPS = 0;
-
-
-		P6->ModePin0(	G_PP	);
-		P6->ModePin1(	G_PP	);
-		P6->ModePin2(	G_PP	);
-		P6->ModePin3(	I2DPU	);
-		P6->ModePin4(	A2PP	);
-		P6->ModePin5(	G_PP	);
-		P6->ModePin6(	G_PP	);
-
 		P6->PPS = 0;
-
-		P14->ModePin0(	I2DPU	);
-		P14->ModePin1(	I2DPU	);
-		P14->ModePin2(	I2DPU	);
-		P14->ModePin3(	I2DPU	);
-		P14->ModePin4(	I2DPU	);
-		P14->ModePin5(	I2DPU	);
-		P14->ModePin6(	I2DPU	);
-		P14->ModePin7(	I2DPU	);
-		P14->ModePin8(	I2DPU	);
-		P14->ModePin9(	I2DPU	);
-		P14->ModePin12(	I0DNP	);
-		P14->ModePin13(	I2DPU	);
-		P14->ModePin14(	I2DPU	);
-		P14->ModePin15(	I2DPU	);
-
 		P14->PPS = 0;
-		P14->PDISC = (1<<0);
-
-		P15->ModePin2(	I2DPU	);
-		P15->ModePin3(	I2DPU	);
-		P15->ModePin4(	I2DPU	);
-		P15->ModePin5(	I2DPU	);
-		P15->ModePin6(	I2DPU	);
-		P15->ModePin7(	I2DPU	);
-		P15->ModePin8(	I2DPU	);
-		P15->ModePin9(	I1DPD	);
-		P15->ModePin12(	I2DPU	);
-		P15->ModePin13(	I2DPU	);
-		P15->ModePin14(	I2DPU	);
-		P15->ModePin15(	I2DPU	);
-
 		P15->PPS = 0;
-		P15->PDISC = 0;
+
+		P14->PDISC = P14_INIT_PDISC;
+		P15->PDISC = P15_INIT_PDISC;
 
 		HW::Peripheral_Enable(PID_DMA0);
 		HW::Peripheral_Enable(PID_DMA1);
 
-		//HW::DLR->SRSEL0 = SRSEL0(10,11,0,0,0,0,0,0);
-		//HW::DLR->SRSEL1 = SRSEL1(0,0,0,0);
+		HW::DLR->DRL0 	= DRL_RS0;
+		HW::DLR->DRL1 	= DRL_RS1;
+		HW::DLR->DRL2 	= DRL_RS2;
+		HW::DLR->DRL3 	= DRL_RS3;
+		HW::DLR->DRL4 	= DRL_RS4;
+		HW::DLR->DRL5 	= DRL_RS5;
+		HW::DLR->DRL6 	= DRL_RS6;
+		HW::DLR->DRL7 	= DRL_RS7;
+		HW::DLR->DRL8 	= DRL_RS8;	
+		HW::DLR->DRL9 	= DRL_RS9;	
+		HW::DLR->DRL10	= DRL_RS10;
+		HW::DLR->DRL11	= DRL_RS11;
 
-		HW::DLR->DRL0 = DRL0_USIC0_SR0;
-		HW::DLR->DRL1 = DRL1_USIC1_SR0;
-		HW::DLR->DRL2 = DRL2_USIC0_SR1;
-		HW::DLR->DRL9 = DRL9_USIC2_SR1;
-
-		HW::DLR->LNEN |= (1<<0)|(1<<2)|(1<<9);
+		HW::DLR->LNEN = 0;
 
 	#endif
 
