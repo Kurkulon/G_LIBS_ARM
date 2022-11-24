@@ -179,8 +179,10 @@ class ComPort : public USIC
 
 	word 		BoudToPresc(dword speed);
 
+#ifndef WIN32
 	void		Set_RTS() { if (_PIO_RTS != 0) _PIO_RTS->SET(_MASK_RTS); }
 	void		Clr_RTS() { if (_PIO_RTS != 0) _PIO_RTS->CLR(_MASK_RTS); }
+#endif
 
   public:
 	  

@@ -18,6 +18,7 @@
 #define __attribute__(v)
 #define __func__ __FUNCTION__
 
+inline  void __breakpoint(int v) { __debugbreak(); }
 inline void __disable_irq() {}
 inline void __enable_irq() {}
 //inline void __nop() {}
