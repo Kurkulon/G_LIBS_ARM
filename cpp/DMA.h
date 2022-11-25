@@ -55,6 +55,13 @@ protected:
 	
 	void _InitLLI(const volatile void *src, volatile void *dst, u16 len, u32 ctrl);
 
+#elif defined(CPU_LPC824)
+
+	T_HW::S_DMA::S_CHNL*		const _dmach;
+	T_HW::DMADESC*				const _dmadsc;
+
+	const u32					_act_mask;
+
 #endif
 
 	const byte		_chnum;
@@ -129,6 +136,12 @@ public:
 
 	u32 GetSrcCounter()	{ return _dmach->SAR - _startSrcAdr; }
 	u32 GetDstCounter()	{ return _dmach->DAR - _startDstAdr; }
+
+#elif defined(CPU_LPC824)
+
+	DMA_CH(byte chnum) : _dmach(HW::DMA->CH+chnum), _dmadsc(_DmaTable+chnum), _act_mask(1UL<<chnum), _chnum(chnum) {}
+
+	bool CheckComplete() { return (HW::DMA->ACTIVE0 & _act_mask) == 0; }
 
 #endif
 

@@ -89,6 +89,11 @@ protected:
 	//u32 __CCR;
 	//u32 __PCR;
 
+#elif defined(CPU_LPC824)
+
+	DMA_CH				_DMARX;
+	DMA_CH				_DMATX;
+
 #endif
 
 	List<DSCSPI>	_reqList;
@@ -132,6 +137,15 @@ public:
 			bool CheckWriteComplete() { return _DMA->CheckComplete() /*&& (_uhw.spi->INTFLAG & SPI_TXC)*/; }
 			bool CheckReadComplete() { return _DMA->CheckComplete(); }
 			void ChipDisable()			{ _PIO_CS->SET(_MASK_CS_ALL); }
+
+#elif defined(CPU_LPC824)
+
+	S_SPIM(byte num) : USIC(num), _DMARX(num*2), _DMATX(num*2+1) {}
+
+			void ChipSelect(byte num)	{  }
+			bool CheckWriteComplete()	{ return _DMATX.CheckComplete() /*&& (_uhw.spi->INTFLAG & SPI_TXC)*/; }
+			bool CheckReadComplete()	{ return _DMARX.CheckComplete(); }
+			void ChipDisable()			{  }
 
 #elif defined(WIN32)
 

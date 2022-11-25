@@ -69,6 +69,13 @@ inline word ReverseWord(word v) { return ((v&0x00FF)<<8 | (v&0xFF00)>>8); }
 inline dword ReverseDword(dword v) { v = (v&0x00FF00FF)<<8 | (v&0xFF00FF00)>>8;	return (v&0x0000FFFF)<<16 | (v&0xFFFF0000)>>16; }
 inline dword SwapDword(dword v) { return (v&0x00FF00FF)<<8 | (v&0xFF00FF00)>>8; }
 
+//#elif defined(__TARGET_ARCH_ARM)
+//
+//inline void Read32(u32 v) { u32 t; __asm { add t, v }; }
+//inline u16 ReverseWord(u16 v) { __asm	{ rev16 v, v };	return v; }
+//inline u32 ReverseDword(u32 v) { return __rev(v); }
+//inline dword SwapDword(dword v) { __asm { rev16 v, v }; return v; }
+
 #else
 
 inline void Read32(u32 v) { u32 t; __asm { add t, v }; }

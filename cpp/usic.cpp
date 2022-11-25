@@ -17,6 +17,11 @@ const byte	USIC::_usic_gclk[USIC_NUM]		= {	GCLK_SERCOM0_CORE,	GCLK_SERCOM1_CORE,
 const byte	USIC::_usic_pid[USIC_NUM]		= {	PID_USIC0,		PID_USIC0,		PID_USIC1,		PID_USIC1,		PID_USIC2,		PID_USIC2		};
 USICHWT		const USIC::_usic_hw[USIC_NUM]	= {	HW::USIC0_CH0,	HW::USIC0_CH1,	HW::USIC1_CH0,	HW::USIC1_CH1,	HW::USIC2_CH0,	HW::USIC2_CH1	};
 
+#elif defined(CPU_LPC824)
+
+const byte	USIC::_usic_pid[USIC_NUM]		= {	0 };
+USICHWT		const USIC::_usic_hw[USIC_NUM]	= {	0 };
+
 #elif defined(WIN32)
 
 const byte	USIC::_usic_pid[USIC_NUM] = {0};

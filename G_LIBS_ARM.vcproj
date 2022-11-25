@@ -114,6 +114,46 @@
 				CompileAsManaged=""
 			/>
 		</Configuration>
+		<Configuration
+			Name="LPC824_Debug|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="wmake -h version=Debug targetcpu=LPC824"
+				ReBuildCommandLine="wmake -h -a version=Debug targetcpu=LPC824"
+				CleanCommandLine="@del /Q $(OutDir)\*.*"
+				Output="$(ProjectDir)\LPC824_d.a"
+				PreprocessorDefinitions="_DEBUG,__softfp=,CPU_LPC824"
+				IncludeSearchPath="$(ARMCC50INC);"
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="LPC824_Release|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="wmake -h version=Release targetcpu=LPC824"
+				ReBuildCommandLine="wmake -h -a version=Release targetcpu=LPC824"
+				CleanCommandLine="@del /Q $(OutDir)\*.*"
+				Output="$(ProjectDir)\LPC824_r.a"
+				PreprocessorDefinitions="__softfp=,CPU_LPC824"
+				IncludeSearchPath="$(ARMCC50INC);"
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -218,6 +258,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\cm0.h"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\cm4.h"
 				>
 			</File>
@@ -291,6 +335,10 @@
 			</File>
 			<File
 				RelativePath=".\cpp\list.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\lpc82x.h"
 				>
 			</File>
 			<File

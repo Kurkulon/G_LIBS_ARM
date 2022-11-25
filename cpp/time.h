@@ -67,7 +67,8 @@ inline u32 GetCYCCNT()
 
 	return t.LowPart; 
 }
-#else
+
+#elif (__TARGET_ARCH_ARM == 0 && __TARGET_ARCH_THUMB == 4)
 
 inline u32 GetCYCCNT() { return CM4::DWT->CYCCNT; }
 
@@ -111,6 +112,8 @@ struct TM32
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+#if (__TARGET_ARCH_ARM == 0 && __TARGET_ARCH_THUMB == 4)
+
 struct CTM32
 {
 	u32 pt;
@@ -120,6 +123,8 @@ struct CTM32
 	bool Timeout(u32 v) { return (u32)(GetCYCCNT() - pt) >= v; }
 	void Reset() { pt = GetCYCCNT(); }
 };
+
+#endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

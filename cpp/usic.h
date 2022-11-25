@@ -23,6 +23,12 @@ typedef T_HW::SERCOM USICHWT;
 
 typedef T_HW::USIC_CH_Type *USICHWT;
 
+#elif defined(CPU_LPC824)
+
+#define USIC_NUM 9
+
+typedef void *USICHWT;
+
 #elif defined(WIN32)
 
 #define USIC_NUM 8

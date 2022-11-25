@@ -35,33 +35,37 @@ libsuffix = r
 
 ##################################################################################################
 
-target_name = G7A_MEM_$(targetcpu)
-
-##################################################################################################
-
 !ifeq targetcpu SAM7X
 
 cpu_compiler_options = --cpu=ARM7TDMI --thumb --apcs=/softfp/interwork
-cpu_asm_options = --cpu ARM7TDMI --apcs /softfp/interwork	--pd "__PROGNAME__ SETS \"KAPCAP G7A.2.1(MC ynp)-1.1\""
+cpu_asm_options = --cpu ARM7TDMI --apcs /softfp/interwork
 cpu_link_options = --cpu ARM7TDMI
-cpu_obj = $(objdir)\SAM7.o
-cpu_scatter = SAM7X.sct
+#cpu_obj = $(objdir)\SAM7.o
+#cpu_scatter = SAM7X.sct
 
 !else ifeq targetcpu SAME53
 
 cpu_compiler_options = --cpu=CORTEX-M4.fp.sp --thumb
-cpu_asm_options = --cpu CORTEX-M4.fp.sp --apcs /interwork	--pd "__PROGNAME__ SETS \"KAPCAP G7A.2.1(MC ynp)-3.1\""
+cpu_asm_options = --cpu CORTEX-M4.fp.sp --apcs /interwork
 cpu_link_options = --cpu CORTEX-M4.fp.sp
-cpu_obj = $(objdir)\startup_SAME53.o
-cpu_scatter = SAME53.sct
+#cpu_obj = $(objdir)\startup_SAME53.o
+#cpu_scatter = SAME53.sct
 
 !else ifeq targetcpu XMC48
 
 cpu_compiler_options = --cpu=CORTEX-M4.fp.sp --thumb
-cpu_asm_options = --cpu CORTEX-M4.fp.sp --apcs /interwork	--pd "__PROGNAME__ SETS \"KAPCAP G7A.2.1(MC ynp)-2.2\""
+cpu_asm_options = --cpu CORTEX-M4.fp.sp --apcs /interwork
 cpu_link_options = --cpu CORTEX-M4.fp.sp
-cpu_obj = $(objdir)\startup_SAME53.o
-cpu_scatter = XMC48.sct
+#cpu_obj = $(objdir)\startup_SAME53.o
+#cpu_scatter = XMC48.sct
+
+!else ifeq targetcpu LPC824
+
+cpu_compiler_options = --cpu=Cortex-M0plus --thumb
+cpu_asm_options = --cpu Cortex-M0plus --apcs /interwork
+cpu_link_options = --cpu Cortex-M0plus
+#cpu_obj = $(objdir)\startup_SAME53.o
+#cpu_scatter = XMC48.sct
 
 !else
 

@@ -209,10 +209,22 @@ void InitTimer(u32 cpuclk)
 	timeBDC.year = 2000;
 	timeBDC.time = 0;
 
-	CM4::SysTick->LOAD = (cpuclk+freq/2)/freq;
 	VectorTableInt[15] = Timer_Handler;
+
+#ifdef CORTEX_M4
+
+	CM4::SysTick->LOAD = (cpuclk+freq/2)/freq;
 	CM4::SysTick->VAL = 0;
 	CM4::SysTick->CTRL = 7;
+
+#elif defined(CORTEX_M0)
+
+	CM0::SysTick->LOAD = (cpuclk+freq/2)/freq;
+	CM0::SysTick->VAL = 0;
+	CM0::SysTick->CTRL = 7;
+
+#endif
+
 	__enable_irq();
 
 #endif
@@ -224,7 +236,7 @@ void InitTimer(u32 cpuclk)
 
 static void InitCycleCountTimer()
 {
-#ifndef WIN32
+#if (__TARGET_ARCH_ARM == 0 && __TARGET_ARCH_THUMB == 4)
 
 	CM4::CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 
@@ -244,7 +256,6 @@ static void InitCycleCountTimer()
 	};
 
 #endif
-
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

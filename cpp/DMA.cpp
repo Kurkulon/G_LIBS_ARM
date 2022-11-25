@@ -58,6 +58,29 @@ DMA_CH		DMA_CH9		(HW::DMA1,	9	);
 DMA_CH		DMA_CH10	(HW::DMA1,	10	);
 DMA_CH		DMA_CH11	(HW::DMA1,	11	);
 
+#elif defined(CPU_LPC824)
+
+__align(512) T_HW::DMADESC _DmaTable[18] = {0};
+
+//DMA_CH		DMA_CH0		(0	);
+//DMA_CH		DMA_CH1		(1	);
+//DMA_CH		DMA_CH2		(2	);
+//DMA_CH		DMA_CH3		(3	);
+//DMA_CH		DMA_CH4		(4	);
+//DMA_CH		DMA_CH5		(5	);
+//DMA_CH		DMA_CH6		(6	);
+//DMA_CH		DMA_CH7		(7	);
+//DMA_CH		DMA_CH8		(8	);
+//DMA_CH		DMA_CH9		(9	);
+//DMA_CH		DMA_CH10	(10	);
+//DMA_CH		DMA_CH11	(11	);
+//DMA_CH		DMA_CH12	(12	);
+//DMA_CH		DMA_CH13	(13	);
+//DMA_CH		DMA_CH14	(14	);
+//DMA_CH		DMA_CH15	(15	);
+//DMA_CH		DMA_CH16	(16	);
+//DMA_CH		DMA_CH17	(17	);
+
 #endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

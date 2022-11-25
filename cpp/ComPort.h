@@ -133,6 +133,12 @@ class ComPort : public USIC
 //		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _prevDmaCounter; }
 		u16	GetRecievedLen() { return GetDmaCounter(); }
 
+	#elif defined (CPU_LPC824)
+
+		bool IsTransmited() { return false; }
+		bool IsRecieved() { return false; }
+		u16	GetRecievedLen() { return 0; }
+
 	#elif defined(WIN32)
 
 		bool IsTransmited() { return true; }
@@ -163,8 +169,6 @@ class ComPort : public USIC
 	dword			_readTimeout;
 	dword			_writeTimeout;
 
-	CTM32			_rtm;
-
 	void 		EnableTransmit(void* src, word count);
 	void 		DisableTransmit();
 	void 		EnableReceive(void* dst, word count);
@@ -179,9 +183,20 @@ class ComPort : public USIC
 
 	word 		BoudToPresc(dword speed);
 
-#ifndef WIN32
+#if defined(CPU_SAME53) || defined(CPU_XMC48)
+
+	CTM32			_rtm;
+
 	void		Set_RTS() { if (_PIO_RTS != 0) _PIO_RTS->SET(_MASK_RTS); }
 	void		Clr_RTS() { if (_PIO_RTS != 0) _PIO_RTS->CLR(_MASK_RTS); }
+
+#elif defined (CPU_LPC824)
+
+	TM32			_rtm;
+
+	void		Set_RTS() {  }
+	void		Clr_RTS() {  }
+
 #endif
 
   public:
