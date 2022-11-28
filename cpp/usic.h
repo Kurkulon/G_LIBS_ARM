@@ -27,7 +27,7 @@ typedef T_HW::USIC_CH_Type *USICHWT;
 
 #define USIC_NUM 9
 
-typedef void *USICHWT;
+typedef T_HW::USIC USICHWT;
 
 #elif defined(WIN32)
 

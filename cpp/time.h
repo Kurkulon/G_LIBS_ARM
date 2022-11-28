@@ -72,6 +72,18 @@ inline u32 GetCYCCNT()
 
 inline u32 GetCYCCNT() { return CM4::DWT->CYCCNT; }
 
+#define NS2CTM(x) NS2CLK(x)
+#define US2CTM(x) US2CLK(x)
+#define MS2CTM(x) MS2CLK(x)
+
+#elif defined(CPU_LPC824)
+
+inline u32 GetCYCCNT() { return ~HW::WKT->COUNT; }
+
+#define NS2CTM(x) (((x)*75+50000)/100000)
+#define US2CTM(x) (((x)*75+50)/100)
+#define MS2CTM(x) ((x)*750)
+
 #endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -112,8 +124,6 @@ struct TM32
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#if (__TARGET_ARCH_ARM == 0 && __TARGET_ARCH_THUMB == 4)
-
 struct CTM32
 {
 	u32 pt;
@@ -123,8 +133,6 @@ struct CTM32
 	bool Timeout(u32 v) { return (u32)(GetCYCCNT() - pt) >= v; }
 	void Reset() { pt = GetCYCCNT(); }
 };
-
-#endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

@@ -427,6 +427,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\cpp\startup_CM0.s"
+			>
+		</File>
+		<File
 			RelativePath=".\cpp\startup_CM4.s"
 			>
 		</File>

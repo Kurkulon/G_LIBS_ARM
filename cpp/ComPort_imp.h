@@ -121,6 +121,38 @@ void ComPort::InitHW()
 
 		_DMA->SetDlrLineNum(_DRL);
 
+	#elif defined(CPU_LPC824)
+
+		HW::SYSCON->SYSAHBCLKCTRL |= HW::CLK::UART0_M << _usic_num;
+
+		if(_usic_num == 0)
+		{
+			HW::SWM->U0_SCLK	= _PIN_SCK;
+			HW::SWM->U0_RXD		= _PIN_RX;
+			HW::SWM->U0_TXD		= _PIN_TX;
+		}
+		else if(_usic_num == 1)
+		{
+			HW::SWM->U1_SCLK	= _PIN_SCK;
+			HW::SWM->U1_RXD		= _PIN_RX;
+			HW::SWM->U1_TXD		= _PIN_TX;
+		}
+		else if(_usic_num == 2)
+		{
+			HW::SWM->U2_SCLK	= _PIN_SCK;
+			HW::SWM->U2_RXD		= _PIN_RX;
+			HW::SWM->U2_TXD		= _PIN_TX;
+		};
+
+		HW::GPIO->DIRSET0 = _MASK_RTS;
+
+
+		T_HW::S_USART* &uhw = _uhw.usart;
+
+		uhw->CFG = _CFG;
+		uhw->BRG = _BRG;
+		uhw->OSR = _OSR;
+
 	#endif
 }
 
@@ -222,11 +254,65 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 
 		};
 
+	#elif defined(CPU_LPC824)
+
+		switch (ct)
+		{
+			case ASYNC:
+
+				_CFG = (1UL<<2);
+				_BRG = BoudToPresc(speed);
+
+				break;
+
+			case SYNC_M:
+
+				_CFG = (1UL<<2)|(1UL<<11)|(1UL<<14);
+				_BRG = (MCK+speed/2) / speed - 1;
+
+				break;
+
+			case SYNC_S:
+
+				_CFG = (1UL<<2)|(1UL<<11);
+				_BRG = ~0;
+
+				break;
+
+		};
+
+		if (stopBits == 2) { _CFG |= 1UL<<6; };
+
+		switch (parity)
+		{
+			case 0:		// нет четности
+				//_CFG |= 0<<4;
+				break;
+
+			case 1:
+				_CFG |= 3<<4;
+				break;
+
+			case 2:
+				_CFG |= 2<<4;
+				break;
+		};
+
+		_OSR = 15;
+
 	#endif
 
-	u32 t = 24000000/speed;
+	#if defined(CPU_XMC48) || defined(CPU_XMC48)
 
-	if (t < 20) t = 20;
+		u32 t = 24000000/speed;
+
+		if (t < 20) t = 20;
+
+	#else
+
+		u32 t = 1;
+
+	#endif
 
 	_writeTimeout = US2COM(t);
 
@@ -271,23 +357,25 @@ word ComPort::BoudToPresc(dword speed)
 {
 	if (speed == 0) return 0;
 
-	word presc;
-
 	#ifdef CPU_SAME53	
 
 		//presc = (((MCK+8)/16) + speed/2) / speed;
-		presc = 65536ULL*(_GEN_CLK - 16*speed)/_GEN_CLK;
+		word presc = 65536ULL*(_GEN_CLK - 16*speed)/_GEN_CLK;
 		//presc = 65536 * (1 - 16.0f*speed/MCK);
 
 		return presc;
 
 	#elif defined(CPU_XMC48)
 
-		presc = ((SYSCLK + speed/2) / speed + 8) / 16;
+		word presc = ((SYSCLK + speed/2) / speed + 8) / 16;
 
 		if (presc > 1024) presc = 1024;
 
 		return 1024 - presc;
+
+	#elif defined(CPU_LPC824)
+
+		return (MCK/16+speed/2) / speed - 1;
 
 	#elif defined(WIN32)
 		
@@ -397,6 +485,26 @@ void ComPort::EnableTransmit(void* src, word count)
 
 		__enable_irq();
 
+	#elif defined(CPU_LPC824)
+
+		_uhw.usart->CFG &= ~1;	// Disable transmit and receive
+
+		_DMATX.WritePeripheralByte(src, &_uhw.usart->TXDATA, count);
+
+		//HW::DMA->ENABLESET0 = _txDmaMask;	
+
+		//HW::DMA->CH[_txDmaCh].CFG = PERIPHREQEN | TRIGBURST_SNGL | CHPRIORITY(3);	
+
+		//DmaTable[_txDmaCh].SEA = (byte*)src + count - 1;	
+		//DmaTable[_txDmaCh].DEA = &_usart->TXDATA;			
+		//DmaTable[_txDmaCh].NEXT = 0;
+
+		//HW::DMA->CH[_txDmaCh].XFERCFG = CFGVALID | SETINTA | SWTRIG | WIDTH_8 | SRCINC_1 | DSTINC_0 | XFERCOUNT(count);
+
+		//HW::DMA->SETVALID0 = _txDmaMask;
+
+		_uhw.usart->CFG |= 1;
+
 	#endif
 
 	_status485 = WRITEING;
@@ -434,6 +542,13 @@ void ComPort::DisableTransmit()
 		_uhw->RBCTR = 0;
 		_uhw->TRBSCR = ~0;
 		_DMA->Disable(); 
+
+	#elif defined(CPU_LPC824)
+
+		_uhw.usart->CFG &= ~1;	// Disable transmit and receive
+		_uhw.usart->INTENCLR = 4;
+
+		_DMATX.Disable();
 
 	#endif
 
@@ -503,6 +618,14 @@ void ComPort::EnableReceive(void* dst, word count)
 
 		__enable_irq();
 
+	#elif defined(CPU_LPC824)
+
+		_uhw.usart->CFG &= ~1;	// Disable transmit and receive
+
+		_DMARX.ReadPeripheralByte(&_uhw.usart->RXDATA, dst, count);
+
+		_uhw.usart->CFG |= 1;
+
 	#endif
 
 #endif
@@ -542,6 +665,13 @@ void ComPort::DisableReceive()
 		_uhw->RBCTR = 0;
 		_uhw->TRBSCR = ~0;
 		_DMA->Disable(); 
+
+	#elif defined(CPU_LPC824)
+
+		_uhw.usart->CFG &= ~1;	// Disable transmit and receive
+		_uhw.usart->INTENCLR = 1;
+
+		_DMARX.Disable();
 
 	#endif
 

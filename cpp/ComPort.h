@@ -11,8 +11,8 @@
 //	#include "COM_DEF.h"
 //#endif
 
-#define US2COM(v) US2CLK(v)
-#define MS2COM(v) MS2CLK(v)
+#define US2COM(v) US2CTM(v)
+#define MS2COM(v) MS2CTM(v)
 
 class ComPort : public USIC
 {
@@ -135,8 +135,22 @@ class ComPort : public USIC
 
 	#elif defined (CPU_LPC824)
 
+		const byte	_PIN_SCK;
+		const byte	_PIN_TX;
+		const byte	_PIN_RX;
+		const byte	_PIN_RTS;
+
+		const u32	_MASK_RTS;
+
+		DMA_CH		_DMARX;
+		DMA_CH		_DMATX;
+
+		u32			_CFG;  
+		u32			_BRG; 
+		u32			_OSR; 
+
 		bool IsTransmited() { return false; }
-		bool IsRecieved() { return false; }
+		bool IsRecieved() {  u32 s = _uhw.usart->STAT & (1<<12); _uhw.usart->STAT = (1<<12); return s; }
 		u16	GetRecievedLen() { return 0; }
 
 	#elif defined(WIN32)
@@ -183,16 +197,14 @@ class ComPort : public USIC
 
 	word 		BoudToPresc(dword speed);
 
-#if defined(CPU_SAME53) || defined(CPU_XMC48)
-
 	CTM32			_rtm;
+
+#if defined(CPU_SAME53) || defined(CPU_XMC48)
 
 	void		Set_RTS() { if (_PIO_RTS != 0) _PIO_RTS->SET(_MASK_RTS); }
 	void		Clr_RTS() { if (_PIO_RTS != 0) _PIO_RTS->CLR(_MASK_RTS); }
 
 #elif defined (CPU_LPC824)
-
-	TM32			_rtm;
 
 	void		Set_RTS() {  }
 	void		Clr_RTS() {  }
@@ -212,6 +224,11 @@ class ComPort : public USIC
 	ComPort(byte num, T_HW::S_PORT* psck, T_HW::S_PORT* ptx, T_HW::S_PORT* prx, T_HW::S_PORT* prts, byte pinsck, byte pintx, byte pinrx, byte pinrts, byte muxsck, byte muxtx, u32 dx0cr, u32 dx1cr, DMA_CH *dma, byte drl)
 		: USIC(num), _PIO_SCK(psck), _PIO_TX(ptx), _PIO_RX(prx), _PIO_RTS(prts), _PIN_SCK(pinsck), _PIN_TX(pintx), _PIN_RX(pinrx), _PIN_RTS(pinrts), _MUX_SCK(muxsck), _MUX_TX(muxtx), _MASK_RTS(1UL<<pinrts),
 		_DMA(dma), _DRL(drl), _DX0CR(dx0cr), _DX1CR(dx1cr), _connected(false), _status485(READ_END) {}
+
+#elif defined (CPU_LPC824)
+
+	ComPort(byte num, byte pinsck, byte pintx, byte pinrx, byte pinrts)
+		: USIC(num), _PIN_SCK(pinsck), _PIN_TX(pintx), _PIN_RX(pinrx), _PIN_RTS(pinrts), _MASK_RTS(1UL<<pinrts), _DMARX(num*2), _DMATX(num*2+1), _status485(READ_END) {}
 
 #else
 

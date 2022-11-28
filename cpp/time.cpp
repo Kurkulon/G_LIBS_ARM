@@ -131,65 +131,69 @@ static __irq void Timer_Handler (void)
 {
 	msec++;
 
-	if (timeBDC.msec < 999)
-	{
-		timeBDC.msec += 1;
-	}
-	else
-	{
-		timeBDC.msec = 0;
+	#if defined(CPU_SAME53) || defined(CPU_XMC48)
 
-		if (timeBDC.sec < 59)
+		if (timeBDC.msec < 999)
 		{
-			timeBDC.sec += 1;
+			timeBDC.msec += 1;
 		}
 		else
 		{
-			timeBDC.sec = 0;
+			timeBDC.msec = 0;
 
-			if (timeBDC.min < 59)
+			if (timeBDC.sec < 59)
 			{
-				timeBDC.min += 1;
+				timeBDC.sec += 1;
 			}
 			else
 			{
-				timeBDC.min = 0;
+				timeBDC.sec = 0;
 
-				if (timeBDC.hour < 23)
+				if (timeBDC.min < 59)
 				{
-					timeBDC.hour += 1;
+					timeBDC.min += 1;
 				}
 				else
 				{
-					timeBDC.hour = 0;
+					timeBDC.min = 0;
 
-					byte day = daysInMonth[timeBDC.mon] + ((timeBDC.mon == 2 && (timeBDC.year&3) == 0) ? 1 : 0);
-
-//					if ((timeBDC.dayofweek += 1) > 6) timeBDC.dayofweek = 0;
-
-					if (timeBDC.day < day)
+					if (timeBDC.hour < 23)
 					{
-						timeBDC.day += 1;
+						timeBDC.hour += 1;
 					}
 					else
 					{
-						timeBDC.day = 1;
+						timeBDC.hour = 0;
 
-						if (timeBDC.mon < 12)
+						byte day = daysInMonth[timeBDC.mon] + ((timeBDC.mon == 2 && (timeBDC.year&3) == 0) ? 1 : 0);
+
+	//					if ((timeBDC.dayofweek += 1) > 6) timeBDC.dayofweek = 0;
+
+						if (timeBDC.day < day)
 						{
-							timeBDC.mon += 1;
+							timeBDC.day += 1;
 						}
 						else
 						{
-							timeBDC.mon = 1;
+							timeBDC.day = 1;
 
-							timeBDC.year += 1;
+							if (timeBDC.mon < 12)
+							{
+								timeBDC.mon += 1;
+							}
+							else
+							{
+								timeBDC.mon = 1;
+
+								timeBDC.year += 1;
+							};
 						};
 					};
 				};
 			};
 		};
-	};
+
+	#endif
 }
 
 #endif
@@ -234,6 +238,17 @@ void InitTimer(u32 cpuclk)
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+#ifdef CPU_LPC824
+
+static __irq void WKT_Handler()
+{
+	HW::WKT->COUNT = ~0;
+}
+
+#endif
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 static void InitCycleCountTimer()
 {
 #if (__TARGET_ARCH_ARM == 0 && __TARGET_ARCH_THUMB == 4)
@@ -254,6 +269,21 @@ static void InitCycleCountTimer()
 	{
 		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_RED "!!! ERROR !!! Cycle counter not supported\n");
 	};
+
+#elif defined (CPU_LPC824)
+
+	using namespace HW;
+
+	SYSCON->SYSAHBCLKCTRL |= CLK::WKT_M;
+	SYSCON->PDRUNCFG &= ~(PDRUNCFG_IRC_PD|PDRUNCFG_IRCOUT_PD);
+
+	VectorTableExt[WKT_IRQ] = WKT_Handler;
+
+	HW::WKT->CTRL = WKT_CLKSEL_IRC_750kHz;
+	HW::WKT->COUNT = ~0;
+
+	CM0::NVIC->CLR_PR(WKT_IRQ);
+	CM0::NVIC->SET_ER(WKT_IRQ);
 
 #endif
 }

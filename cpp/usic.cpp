@@ -20,7 +20,7 @@ USICHWT		const USIC::_usic_hw[USIC_NUM]	= {	HW::USIC0_CH0,	HW::USIC0_CH1,	HW::US
 #elif defined(CPU_LPC824)
 
 const byte	USIC::_usic_pid[USIC_NUM]		= {	0 };
-USICHWT		const USIC::_usic_hw[USIC_NUM]	= {	0 };
+USICHWT		const USIC::_usic_hw[USIC_NUM]	= {	HW::USART0, HW::USART1, HW::USART2, HW::SPI0, HW::SPI1, HW::I2C0, HW::I2C1, HW::I2C2, HW::I2C3 };
 
 #elif defined(WIN32)
 

@@ -141,7 +141,12 @@ public:
 
 	DMA_CH(byte chnum) : _dmach(HW::DMA->CH+chnum), _dmadsc(_DmaTable+chnum), _act_mask(1UL<<chnum), _chnum(chnum) {}
 
+	void Enable() {  }
+	void Disable() { HW::DMA->ENABLECLR0 = _act_mask; HW::DMA->ABORT0 = _act_mask; HW::DMA->ERRINT0 = _act_mask; }
 	bool CheckComplete() { return (HW::DMA->ACTIVE0 & _act_mask) == 0; }
+
+	void WritePeripheralByte(const volatile void *src, volatile void *dst, u16 len)	{ WritePeripheral(src, dst, len, PERIPHREQEN | TRIGBURST_SNGL | CHPRIORITY(3), CFGVALID | SETINTA | SWTRIG | WIDTH_8 | SRCINC_1 | DSTINC_0); }
+	void ReadPeripheralByte(const volatile void *src, volatile void *dst, u16 len)	{ ReadPeripheral(src, dst, len, PERIPHREQEN | TRIGBURST_SNGL | CHPRIORITY(3), CFGVALID | SWTRIG | WIDTH_8 | SRCINC_0 | DSTINC_1); }
 
 #endif
 

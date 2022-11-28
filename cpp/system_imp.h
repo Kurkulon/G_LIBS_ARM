@@ -15,11 +15,9 @@
 extern "C" void SystemInit()
 {
 	//u32 i;
-	using namespace CM4;
 	using namespace HW;
 
 //	__breakpoint(0);
-
 
 	#ifndef BOOTLOADER
 
@@ -29,6 +27,8 @@ extern "C" void SystemInit()
 	#endif
 
 	#ifdef CPU_SAME53	
+
+		using namespace CM4;
 
 		HW::PIOA->DIR =	PIOA_INIT_DIR;
 		HW::PIOA->CLR(	PIOA_INIT_CLR);
@@ -102,6 +102,8 @@ extern "C" void SystemInit()
 		Pin_MainLoop_Clr();
 
 	#elif defined(CPU_XMC48)
+
+		using namespace CM4;
 
 		__disable_irq();
 
@@ -232,17 +234,70 @@ extern "C" void SystemInit()
 
 		HW::DLR->LNEN = 0;
 
+	#elif defined(CPU_LPC824)
+
+		u32 i;
+		using namespace CM0;
+		using namespace HW;
+
+		SYSCON->SYSAHBCLKCTRL |= CLK::SWM_M | CLK::IOCON_M | CLK::GPIO_M | HW::CLK::MRT_M | HW::CLK::UART0_M | HW::CLK::CRC_M | HW::CLK::DMA_M;
+
+		GPIO->DIR0	= GPIO_INIT_DIRSET0; //(1<<27)|(1<<14)|(1<<17)|(1<<18)|(1<<19)|(1<<20)|(1<<21)|(1<<22)|(1<<12)|(1<<15);
+		GPIO->PIN0	= GPIO_INIT_PIN0;
+		GPIO->MASK0	= 0;
+
+		//GPIO->CLR0 = (1<<27)|(1<<14)|(1<<20)|(1<<21)|(1<<22)|(1<<4);
+		//GPIO->SET0 = (1<<17)|(1<<18)|(1<<19);
+
+		IOCON->PIO0_1.B.MODE = 0;
+
+		HW::GPIO->NOT0 = 1<<12;
+
+		SWM->PINENABLE0.B.CLKIN = 0;
+
+		for (i = 0; i < 200; i++) __nop();
+
+		SYSCON->SYSPLLCLKSEL  = 3;					/* Select PLL Input         */
+		SYSCON->SYSPLLCLKUEN  = 0;					/* Update Clock Source      */
+		SYSCON->SYSPLLCLKUEN  = 1;					/* Update Clock Source      */
+		while (!(SYSCON->SYSPLLCLKUEN & 1));		/* Wait Until Updated       */
+
+		HW::GPIO->NOT0 = 1<<12;
+
+		SYSCON->MAINCLKSEL    = 1;					/* Select PLL Clock Output  */
+		SYSCON->MAINCLKUEN    = 0;					/* Update MCLK Clock Source */
+		SYSCON->MAINCLKUEN    = 1;					/* Update MCLK Clock Source */
+		while (!(SYSCON->MAINCLKUEN & 1));			/* Wait Until Updated       */
+
+		HW::GPIO->NOT0 = 1<<12;
+
+	//	SYSCON->SYSAHBCLKDIV  = SYSAHBCLKDIV_Val;
+
+		SYSCON->UARTCLKDIV = 1;
+		//SWM->U0_RXD = 26;
+		//SWM->U0_TXD = 16;
+
+		DMA->SRAMBASE = _DmaTable;
+		DMA->CTRL = 1;
+
+		HW::GPIO->NOT0 = 1<<12;
+
 	#endif
 
-	#if ((__FPU_PRESENT == 1) && (__FPU_USED == 1))
-		CM4::SCB->CPACR |= ((3UL << 10*2) |                 /* set CP10 Full Access */
-							(3UL << 11*2)  );               /* set CP11 Full Access */
-	#else
-		CM4::SCB->CPACR = 0;
-	#endif
 
-  /* Enable unaligned memory access - SCB_CCR.UNALIGN_TRP = 0 */
-	CM4::SCB->CCR &= ~(SCB_CCR_UNALIGN_TRP_Msk);
+	#ifdef CORTEX_M4
+
+		#if ((__FPU_PRESENT == 1) && (__FPU_USED == 1))
+			CM4::SCB->CPACR |= ((3UL << 10*2) |                 /* set CP10 Full Access */
+								(3UL << 11*2)  );               /* set CP11 Full Access */
+		#else
+			CM4::SCB->CPACR = 0;
+		#endif
+
+	  /* Enable unaligned memory access - SCB_CCR.UNALIGN_TRP = 0 */
+		CM4::SCB->CCR &= ~(SCB_CCR_UNALIGN_TRP_Msk);
+
+	#endif
 
 	#ifndef BOOTLOADER
 		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_GREEN "OK\n");

@@ -186,6 +186,20 @@ void DMA_CH::WritePeripheral(const volatile void *src, volatile void *dst, u16 l
 
 	Enable();
 
+#elif defined(CPU_LPC824)
+
+	HW::DMA->ENABLESET0 = _act_mask;	
+
+	_dmach->CFG = ctrl1;	
+
+	_dmadsc->SEA = (byte*)src + len - 1;	
+	_dmadsc->DEA = dst;			
+	_dmadsc->NEXT = 0;
+
+	_dmach->XFERCFG = ctrl2 | XFERCOUNT(len);
+
+	HW::DMA->SETVALID0 = _act_mask;
+
 #endif
 
 }
@@ -223,6 +237,20 @@ void DMA_CH::ReadPeripheral(const volatile void *src, volatile void *dst, u16 le
 	Enable();
 
 	HW::DLR->LNEN |= _dlr_lnen_mask;
+
+#elif defined(CPU_LPC824)
+
+	HW::DMA->ENABLESET0 = _act_mask;	
+
+	_dmach->CFG = ctrl1;	
+
+	_dmadsc->SEA = (void*)src;		
+	_dmadsc->DEA = (byte*)dst + len - 1;	
+	_dmadsc->NEXT = 0;
+
+	_dmach->XFERCFG = ctrl2 | XFERCOUNT(len);
+
+	HW::DMA->SETVALID0 = _act_mask;
 
 #endif
 

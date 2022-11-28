@@ -179,6 +179,16 @@ namespace T_HW
 
 	};
 
+	#define PDRUNCFG_IRCOUT_PD           (0x1U)
+	#define PDRUNCFG_IRC_PD              (0x2U)
+	#define PDRUNCFG_FLASH_PD            (0x4U)
+	#define PDRUNCFG_BOD_PD              (0x8U)
+	#define PDRUNCFG_ADC_PD              (0x10U)
+	#define PDRUNCFG_SYSOSC_PD           (0x20U)
+	#define PDRUNCFG_WDTOSC_PD           (0x40U)
+	#define PDRUNCFG_SYSPLL_PD           (0x80U)
+	#define PDRUNCFG_ACMP                (0x8000U)
+
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	struct S_IOCON							/*!< (@ 0x40044000) IOCONFIG Structure     */
@@ -1094,9 +1104,33 @@ namespace T_HW
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+	union USIC
+	{
+		S_USART		*usart;
+		S_SPI		*spi;
+		S_TWI		*i2c;
 
+		USIC()				: usart(0)	{}
+		USIC(S_USART *p)	: usart(p)	{}
+		USIC(S_SPI *p)		: spi(p)	{}
+		USIC(S_TWI *p)		: i2c(p)	{}
+	};
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	struct S_WKT								/*!< (@ 0x40008000) WKT Structure							*/
+	{                                                                           
+	  LPC_REG  CTRL;                            /*!< (@ 0x40008000) Self wake-up timer control register.	*/
+	  LPC_REG  z__RESERVED0[2];
+	  LPC_REG  COUNT;                           /*!< (@ 0x4000800C) Counter register.                       */
+	};
+
+	#define WKT_CLKSEL_IRC_750kHz				(0x0U)
+	#define WKT_CLKSEL_LP_10kHz					(0x1U)
+	#define WKT_ALARMFLAG		    			(0x2U)
+	#define WKT_CLEARCTR						(0x4U)
+	#define WKT_SEL_EXTCLK						(0x8U)
+
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 };
@@ -1115,6 +1149,7 @@ namespace HW
 
 	MK_PTR(WDT,				0x40000000);
 	MK_PTR(MRT, 			0x40004000);
+	MK_PTR(WKT, 			0x40008000);
 	MK_PTR(SWM,				0x4000C000);
 	MK_PTR(ADC,				0x4001C000);
 	MK_PTR(PMU,				0x40020000);
