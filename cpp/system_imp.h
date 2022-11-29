@@ -242,7 +242,7 @@ extern "C" void SystemInit()
 
 		SYSCON->SYSAHBCLKCTRL |= CLK::SWM_M | CLK::IOCON_M | CLK::GPIO_M | HW::CLK::MRT_M | HW::CLK::UART0_M | HW::CLK::CRC_M | HW::CLK::DMA_M;
 
-		GPIO->DIR0	= GPIO_INIT_DIRSET0; //(1<<27)|(1<<14)|(1<<17)|(1<<18)|(1<<19)|(1<<20)|(1<<21)|(1<<22)|(1<<12)|(1<<15);
+		GPIO->DIR0	= GPIO_INIT_DIR0; //(1<<27)|(1<<14)|(1<<17)|(1<<18)|(1<<19)|(1<<20)|(1<<21)|(1<<22)|(1<<12)|(1<<15);
 		GPIO->PIN0	= GPIO_INIT_PIN0;
 		GPIO->MASK0	= 0;
 

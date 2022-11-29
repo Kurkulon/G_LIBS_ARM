@@ -242,6 +242,7 @@ void InitTimer(u32 cpuclk)
 
 static __irq void WKT_Handler()
 {
+	HW::WKT->CTRL = WKT_CLKSEL_IRC_750kHz|WKT_ALARMFLAG;
 	HW::WKT->COUNT = ~0;
 }
 
@@ -278,12 +279,12 @@ static void InitCycleCountTimer()
 	SYSCON->PDRUNCFG &= ~(PDRUNCFG_IRC_PD|PDRUNCFG_IRCOUT_PD);
 
 	VectorTableExt[WKT_IRQ] = WKT_Handler;
-
-	HW::WKT->CTRL = WKT_CLKSEL_IRC_750kHz;
-	HW::WKT->COUNT = ~0;
-
 	CM0::NVIC->CLR_PR(WKT_IRQ);
 	CM0::NVIC->SET_ER(WKT_IRQ);
+
+	HW::WKT->CTRL = WKT_CLKSEL_IRC_750kHz;
+	HW::WKT->COUNT = 750000;
+
 
 #endif
 }

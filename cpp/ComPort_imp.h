@@ -302,17 +302,9 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 
 	#endif
 
-	#if defined(CPU_XMC48) || defined(CPU_XMC48)
+	u32 t = 24000000/speed;
 
-		u32 t = 24000000/speed;
-
-		if (t < 20) t = 20;
-
-	#else
-
-		u32 t = 1;
-
-	#endif
+	if (t < 20) t = 20;
 
 	_writeTimeout = US2COM(t);
 

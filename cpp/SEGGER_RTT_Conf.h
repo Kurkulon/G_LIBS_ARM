@@ -28,13 +28,19 @@ Purpose : Implementation of SEGGER real-time terminal which allows
 #define SEGGER_RTT_MAX_NUM_DOWN_BUFFERS           (1)     // Max. number of down-buffers (H->T) available on this target  (Default: 2)
 
 #ifdef CPU_LPC824
-#define BUFFER_SIZE_UP                            (512)  // Size of the buffer for terminal output of target, up to host (Default: 1k)
+
+#define BUFFER_SIZE_UP                            (256-96-16)  // Size of the buffer for terminal output of target, up to host (Default: 1k)
+#define SEGGER_RTT_PRINTF_BUFFER_SIZE             (128)    // Size of buffer for RTT printf to bulk-send chars via RTT     (Default: 64)
+
 #else
+
 #define BUFFER_SIZE_UP                            (0x1D90)  // Size of the buffer for terminal output of target, up to host (Default: 1k)
+#define SEGGER_RTT_PRINTF_BUFFER_SIZE             (512)    // Size of buffer for RTT printf to bulk-send chars via RTT     (Default: 64)
+
 #endif
+
 #define BUFFER_SIZE_DOWN                          (16)    // Size of the buffer for terminal input to target from host (Usually keyboard input) (Default: 16)
 
-#define SEGGER_RTT_PRINTF_BUFFER_SIZE             (512)    // Size of buffer for RTT printf to bulk-send chars via RTT     (Default: 64)
 
 //
 // Target is not allowed to perform other RTT operations while string still has not been stored completely.

@@ -74,7 +74,7 @@ public:
 	void ReadPeripheral(const volatile void *src, volatile void *dst, u16 len, u32 ctrl1, u32 ctrl2);
 	
 
-#ifdef CPU_SAME53
+#ifdef CPU_SAME53	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	DMA_CH(byte chnum) : _dmach(&HW::DMAC->CH[chnum]), _dmadsc(&DmaTable[chnum]), _dmawrb(&DmaWRB[chnum]), _act_mask(0x8000|(chnum<<8)), _chnum(chnum) { _dmach->PRILVL = DMCH_PRILVL_LVL0; }
 
@@ -113,9 +113,7 @@ public:
 		SoftwareTrigger(); //HW::DMAC->SWTRIGCTRL = 1UL << CRC_DMACH;
 	}
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-#elif defined(CPU_XMC48)
+#elif defined(CPU_XMC48)	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	DMA_CH(T_HW::GPDMA_Type* gpdma, byte chnum) : _GPDMA(gpdma), _dmach(&gpdma->CH[chnum&7]), _chnumabs(chnum), _chnum(chnum&7) {}
 
@@ -137,13 +135,14 @@ public:
 	u32 GetSrcCounter()	{ return _dmach->SAR - _startSrcAdr; }
 	u32 GetDstCounter()	{ return _dmach->DAR - _startDstAdr; }
 
-#elif defined(CPU_LPC824)
+#elif defined(CPU_LPC824)	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	DMA_CH(byte chnum) : _dmach(HW::DMA->CH+chnum), _dmadsc(_DmaTable+chnum), _act_mask(1UL<<chnum), _chnum(chnum) {}
 
 	void Enable() {  }
 	void Disable() { HW::DMA->ENABLECLR0 = _act_mask; HW::DMA->ABORT0 = _act_mask; HW::DMA->ERRINT0 = _act_mask; }
 	bool CheckComplete() { return (HW::DMA->ACTIVE0 & _act_mask) == 0; }
+	u32 GetBytesLeft()	{ return ((_dmach->XFERCFG >> 16) & 0x3FF) + 1; }
 
 	void WritePeripheralByte(const volatile void *src, volatile void *dst, u16 len)	{ WritePeripheral(src, dst, len, PERIPHREQEN | TRIGBURST_SNGL | CHPRIORITY(3), CFGVALID | SETINTA | SWTRIG | WIDTH_8 | SRCINC_1 | DSTINC_0); }
 	void ReadPeripheralByte(const volatile void *src, volatile void *dst, u16 len)	{ ReadPeripheral(src, dst, len, PERIPHREQEN | TRIGBURST_SNGL | CHPRIORITY(3), CFGVALID | SWTRIG | WIDTH_8 | SRCINC_0 | DSTINC_1); }

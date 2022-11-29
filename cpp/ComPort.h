@@ -151,7 +151,7 @@ class ComPort : public USIC
 
 		bool IsTransmited() { return false; }
 		bool IsRecieved() {  u32 s = _uhw.usart->STAT & (1<<12); _uhw.usart->STAT = (1<<12); return s; }
-		u16	GetRecievedLen() { return 0; }
+		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _DMARX.GetBytesLeft(); }
 
 	#elif defined(WIN32)
 
