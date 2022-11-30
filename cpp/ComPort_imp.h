@@ -726,9 +726,9 @@ bool ComPort::Update()
 			{
 				if (_rtm.Timeout(_readTimeout))
 				{
-					DisableReceive();
 					_pReadBuffer->len = GetRecievedLen();
 					_pReadBuffer->recieved = _pReadBuffer->len > 0;
+					DisableReceive();
 					_status485 = READ_END;
 					r = false;
 				};

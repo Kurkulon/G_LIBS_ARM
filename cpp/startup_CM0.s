@@ -175,6 +175,14 @@ Reset_Handler   PROC
                 LDR		R2, =SysTick_Handler
                 STR		R2, [R1,R0]
 
+                LDR		R0, =Stack_Size
+                LDR		R1, =Stack_Mem
+                LDR		R2, =(0xAAAAAAAA)
+|L1.17|
+                SUBS	R0, #4
+				STR		R2, [R1,R0]
+                BNE		|L1.17|
+
                 LDR     R0, =SystemInit
                 BLX     R0
                 LDR     R0, =__main

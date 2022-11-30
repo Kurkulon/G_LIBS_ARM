@@ -149,7 +149,7 @@ class ComPort : public USIC
 		u32			_BRG; 
 		u32			_OSR; 
 
-		bool IsTransmited() { return false; }
+		bool IsTransmited() { return (_uhw.usart->STAT & 8) && _DMATX.CheckComplete(); }
 		bool IsRecieved() {  u32 s = _uhw.usart->STAT & (1<<12); _uhw.usart->STAT = (1<<12); return s; }
 		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _DMARX.GetBytesLeft(); }
 
@@ -206,8 +206,8 @@ class ComPort : public USIC
 
 #elif defined (CPU_LPC824)
 
-	void		Set_RTS() {  }
-	void		Clr_RTS() {  }
+	void		Set_RTS() { HW::GPIO->SET(_MASK_RTS); }
+	void		Clr_RTS() { HW::GPIO->CLR(_MASK_RTS); }
 
 #endif
 
