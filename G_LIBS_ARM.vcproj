@@ -258,6 +258,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\BOOT_LPC824_IMP.h"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\cm0.h"
 				>
 			</File>
