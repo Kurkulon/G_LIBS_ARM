@@ -48,9 +48,6 @@ typedef void (*IAP)(unsigned int [],unsigned int[]);
 enum IAP_STATUS { CMD_SUCCESS = 0,  INVALID_COMMAND,  SRC_ADDR_ERROR,  DST_ADDR_ERROR,  SRC_ADDR_NOT_MAPPED,  DST_ADDR_NOT_MAPPED,  COUNT_ERROR,  INVALID_SECTOR,  SECTOR_NOT_BLANK, 
  SECTOR_NOT_PREPARED_FOR_WRITE_OPERATION, COMPARE_ERROR, BUSY, ERR_ISP_IRC_NO_POWER , ERR_ISP_FLASH_NO_POWER,  ERR_ISP_FLASH_NO_CLOCK  };
 
-const unsigned __int64 masterGUID	= BOOT_MGUID;
-const unsigned __int64 slaveGUID	= BOOT_SGUID;
-
 //static ComPort com;
 
 //static ComPort* actCom = 0;
@@ -77,8 +74,6 @@ static bool run = true;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-__packed struct ReqHS { unsigned __int64 guid; u16 crc; };
-__packed struct RspHS { unsigned __int64 guid; u16 crc; };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -350,6 +345,12 @@ static bool WritePage(u32 pagenum, u32 *pbuf)
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef BOOT_HANDSHAKE
 
+const unsigned __int64 masterGUID	= BOOT_MGUID;
+const unsigned __int64 slaveGUID	= BOOT_SGUID;
+
+__packed struct ReqHS { unsigned __int64 guid; u16 crc; };
+__packed struct RspHS { unsigned __int64 guid; u16 crc; };
+
 bool HandShake()
 {
 	static ReqHS req;
@@ -594,7 +595,7 @@ int main()
 		if(tm.Check(MS2CTM(50))) Pin_MainLoop_Tgl();
 	};
 
-	__breakpoint(0);
+	//__breakpoint(0);
 
 	__disable_irq();
 
