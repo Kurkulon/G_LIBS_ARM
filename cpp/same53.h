@@ -755,7 +755,7 @@ namespace T_HW
 		RW8		CLEAR;       		/**< \brief Offset: 0xC ( /W  8) Clear */
 
 		void Reset()	{ if (SYNCBUSY == 0) CLEAR = 0xA5; }
-		void Update()	{ CLEAR = 0xA5; }
+		void Update()	{ if (SYNCBUSY == 0) CLEAR = 0xA5; }
 	};
 
 	/* ========== Instance parameters for WDT peripheral ========== */

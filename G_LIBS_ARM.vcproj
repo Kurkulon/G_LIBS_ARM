@@ -224,10 +224,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\cpp\tftp.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\cpp\time.cpp"
 				>
 			</File>
@@ -255,6 +251,14 @@
 			</File>
 			<File
 				RelativePath=".\cpp\at25df021_imp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\boot_com_emac_imp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\boot_isp.h"
 				>
 			</File>
 			<File
@@ -311,6 +315,10 @@
 			</File>
 			<File
 				RelativePath=".\cpp\emac_imp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\emac_imp_v2.h"
 				>
 			</File>
 			<File
@@ -390,7 +398,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\cpp\tftp_def.h"
+				RelativePath=".\cpp\tftp_imp.h"
 				>
 			</File>
 			<File

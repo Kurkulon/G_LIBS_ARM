@@ -154,8 +154,28 @@ union ConstDataPointer
 	void operator=(__packed const void *p) { v = p; } 
 };
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#define __CONCAT1(s1)						s1
+#define __CONCAT2(s1,s2)					s1##s2
+#define __CONCAT3(s1,s2,s3)					s1##s2##s3
+#define __CONCAT4(s1,s2,s3,s4)				s1##s2##s3##s4
+#define __CONCAT5(s1,s2,s3,s4,s5)			s1##s2##s3##s4##s5
+#define __CONCAT6(s1,s2,s3,s4,s5,s6)		s1##s2##s3##s4##s5##s6
+#define __CONCAT7(s1,s2,s3,s4,s5,s6,s7)		s1##s2##s3##s4##s5##s6##s7
+#define __CONCAT8(s1,s2,s3,s4,s5,s6,s7,s8)	s1##s2##s3##s4##s5##s6##s7##s8
+
+
+#define CONCAT1(s1)							__CONCAT1(s1)
+#define CONCAT2(s1,s2)						__CONCAT2(s1,s2)
+#define CONCAT3(s1,s2,s3)					__CONCAT3(s1,s2,s3)
+#define CONCAT4(s1,s2,s3,s4)				__CONCAT4(s1,s2,s3,s4)
+#define CONCAT5(s1,s2,s3,s4,s5)				__CONCAT4(s1,s2,s3,s4,s5)
+#define CONCAT6(s1,s2,s3,s4,s5,s6)			__CONCAT6(s1,s2,s3,s4,s5,s6)		
+#define CONCAT7(s1,s2,s3,s4,s5,s6,s7)		__CONCAT7(s1,s2,s3,s4,s5,s6,s7)		
+#define CONCAT8(s1,s2,s3,s4,s5,s6,s7,s8)	__CONCAT8(s1,s2,s3,s4,s5,s6,s7,s8)
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 #endif // TYPES_H__15_05_2009__14_37
