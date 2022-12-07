@@ -50,12 +50,12 @@ extern "C" void SystemInit()
 			HW::SUPC->BOD33 = BOD33_HYST(15) | BOD33_ACTION_INT| BOD33_LEVEL(200); // Vbod = 1.5 + 6mV * BOD33_LEVEL
 			HW::SUPC->BOD33 |= BOD33_ENABLE;
 
-			HW::PIOA->BCLR(25);
+			Pin_MainLoop_Clr();
 
 			while ((HW::SUPC->STATUS & (SUPC_BOD33RDY|SUPC_B33SRDY)) != (SUPC_BOD33RDY|SUPC_B33SRDY));
 			while ((HW::SUPC->STATUS & SUPC_BOD33DET) != 0);
 
-			HW::PIOA->BSET(25);
+			Pin_MainLoop_Set();
 
 			HW::SUPC->BOD33 = 0;
 			HW::SUPC->BOD33 = BOD33_HYST(15) | BOD33_ACTION_RESET | BOD33_LEVEL(200); // Vbod = 1.5 + 6mV * BOD33_LEVEL

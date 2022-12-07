@@ -210,6 +210,7 @@
 #define LINKMDCS_CABLE_DIAG_EN      (1 << 15)
 #define LINKMDCS_CABLE_DIAG_RES1    (1 << 14)
 #define LINKMDCS_CABLE_DIAG_RES0    (1 << 13)
+#define LINKMDCS_CABLE_DIAG_MASK	(3 << 13)
 #define LINKMDCS_SHORT_CABLE        (1 << 12)
 #define LINKMDCS_CABLE_FAULT_CNT8   (1 << 8)
 #define LINKMDCS_CABLE_FAULT_CNT7   (1 << 7)

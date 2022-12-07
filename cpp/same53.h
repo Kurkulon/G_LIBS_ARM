@@ -756,6 +756,7 @@ namespace T_HW
 
 		void Reset()	{ if (SYNCBUSY == 0) CLEAR = 0xA5; }
 		void Update()	{ if (SYNCBUSY == 0) CLEAR = 0xA5; }
+		void Disable()	{ CTRLA = 0; }
 	};
 
 	/* ========== Instance parameters for WDT peripheral ========== */
@@ -860,22 +861,22 @@ namespace T_HW
 
 		RO8		z__Reserved2[0x20];
 
-		void 	SET(u32 m) 			{ OUTSET = m; }
-		void 	CLR(u32 m) 			{ OUTCLR = m; }
-		void 	NOT(u32 m) 			{ OUTTGL = m; }
-		void 	WBIT(u32 m, bool c) { if (c) SET(m); else CLR(m); }
-		void 	BSET(u16 b) 		{ OUTSET = 1 << b; }
-		void 	BCLR(u16 b) 		{ OUTCLR = 1 << b; }
-		void 	BTGL(u16 b) 		{ OUTTGL = 1 << b; }
+		__forceinline void 	SET(u32 m) 			{ OUTSET = m; }
+		__forceinline void 	CLR(u32 m) 			{ OUTCLR = m; }
+		__forceinline void 	NOT(u32 m) 			{ OUTTGL = m; }
+		__forceinline void 	WBIT(u32 m, bool c) { if (c) SET(m); else CLR(m); }
+		__forceinline void 	BSET(u16 b) 		{ OUTSET = 1 << b; }
+		__forceinline void 	BCLR(u16 b) 		{ OUTCLR = 1 << b; }
+		__forceinline void 	BTGL(u16 b) 		{ OUTTGL = 1 << b; }
 
-		void	OUT8(byte v)		{ *((byte*)&OUT) = v; }
+		__forceinline void	OUT8(byte v)		{ *((byte*)&OUT) = v; }
 
-		bool 	TBSET(u16 b) 		{ return IN & (1<<b); }
-		bool 	TBCLR(u16 b) 		{ return (IN & (1<<b)) == 0; }
+		__forceinline bool 	TBSET(u16 b) 		{ return IN & (1<<b); }
+		__forceinline bool 	TBCLR(u16 b) 		{ return (IN & (1<<b)) == 0; }
 
 		//void 	SetPinMux(byte pinnum, byte value) { byte sh = (pinnum&1)<<2; pinnum >>= 1; PMUX[pinnum] = (PMUX[pinnum] & ~(0xF<<sh)) | (value<<sh); };
 		
-		void 	SetWRCONFIG(u32 mask, u32 mux) 
+		__forceinline void 	SetWRCONFIG(u32 mask, u32 mux) 
 		{ 
 			u32 t = (mux & 0xFFFF0000); 
 			WRCONFIG = t | (mask & 0xFFFF); 
@@ -923,7 +924,107 @@ namespace T_HW
 	#define	PINGFG_INEN			(1<<1)
 	#define	PINGFG_PULLEN       (1<<2)
 	#define	PINGFG_DRVSTR       (1<<6)
-											
+
+	#define PA00 	(1UL<<0)
+	#define PA01 	(1UL<<1)
+	#define PA02 	(1UL<<2)
+	#define PA03 	(1UL<<3)
+	#define PA04 	(1UL<<4)
+	#define PA05 	(1UL<<5)
+	#define PA06 	(1UL<<6)
+	#define PA07 	(1UL<<7)
+	#define PA08 	(1UL<<8)
+	#define PA09 	(1UL<<9)
+	#define PA10 	(1UL<<10)
+	#define PA11 	(1UL<<11)
+	#define PA12 	(1UL<<12)
+	#define PA13 	(1UL<<13)
+	#define PA14 	(1UL<<14)
+	#define PA15 	(1UL<<15)
+	#define PA16 	(1UL<<16)
+	#define PA17 	(1UL<<17)
+	#define PA18 	(1UL<<18)
+	#define PA19 	(1UL<<19)
+	#define PA20 	(1UL<<20)
+	#define PA21 	(1UL<<21)
+	#define PA22 	(1UL<<22)
+	#define PA23 	(1UL<<23)
+	#define PA24 	(1UL<<24)
+	#define PA25 	(1UL<<25)
+	#define PA26 	(1UL<<26)
+	#define PA27 	(1UL<<27)
+	#define PA28 	(1UL<<28)
+	#define PA29 	(1UL<<29)
+	#define PA30 	(1UL<<30)
+	#define PA31 	(1UL<<31)
+
+	#define PB00 	(1UL<<0)
+	#define PB01 	(1UL<<1)
+	#define PB02 	(1UL<<2)
+	#define PB03 	(1UL<<3)
+	#define PB04 	(1UL<<4)
+	#define PB05 	(1UL<<5)
+	#define PB06 	(1UL<<6)
+	#define PB07 	(1UL<<7)
+	#define PB08 	(1UL<<8)
+	#define PB09 	(1UL<<9)
+	#define PB10 	(1UL<<10)
+	#define PB11 	(1UL<<11)
+	#define PB12 	(1UL<<12)
+	#define PB13 	(1UL<<13)
+	#define PB14 	(1UL<<14)
+	#define PB15 	(1UL<<15)
+	#define PB16 	(1UL<<16)
+	#define PB17 	(1UL<<17)
+	#define PB18 	(1UL<<18)
+	#define PB19 	(1UL<<19)
+	#define PB20 	(1UL<<20)
+	#define PB21 	(1UL<<21)
+	#define PB22 	(1UL<<22)
+	#define PB23 	(1UL<<23)
+	#define PB24 	(1UL<<24)
+	#define PB25 	(1UL<<25)
+	#define PB26 	(1UL<<26)
+	#define PB27 	(1UL<<27)
+	#define PB28 	(1UL<<28)
+	#define PB29 	(1UL<<29)
+	#define PB30 	(1UL<<30)
+	#define PB31 	(1UL<<31)
+
+	#define PC00 	(1UL<<0)
+	#define PC01 	(1UL<<1)
+	#define PC02 	(1UL<<2)
+	#define PC03 	(1UL<<3)
+	#define PC04 	(1UL<<4)
+	#define PC05 	(1UL<<5)
+	#define PC06 	(1UL<<6)
+	#define PC07 	(1UL<<7)
+	#define PC08 	(1UL<<8)
+	#define PC09 	(1UL<<9)
+	#define PC10 	(1UL<<10)
+	#define PC11 	(1UL<<11)
+	#define PC12 	(1UL<<12)
+	#define PC13 	(1UL<<13)
+	#define PC14 	(1UL<<14)
+	#define PC15 	(1UL<<15)
+	#define PC16 	(1UL<<16)
+	#define PC17 	(1UL<<17)
+	#define PC18 	(1UL<<18)
+	#define PC19 	(1UL<<19)
+	#define PC20 	(1UL<<20)
+	#define PC21 	(1UL<<21)
+	#define PC22 	(1UL<<22)
+	#define PC23 	(1UL<<23)
+	#define PC24 	(1UL<<24)
+	#define PC25 	(1UL<<25)
+	#define PC26 	(1UL<<26)
+	#define PC27 	(1UL<<27)
+	#define PC28 	(1UL<<28)
+	#define PC29 	(1UL<<29)
+	#define PC30 	(1UL<<30)
+	#define PC31 	(1UL<<31)
+
+
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	struct S_NVMCTRL

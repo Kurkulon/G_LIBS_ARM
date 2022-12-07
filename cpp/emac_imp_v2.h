@@ -1,5 +1,5 @@
-#ifndef EMAC_IMP_H__11_10_2022__18_02
-#define EMAC_IMP_H__11_10_2022__18_02
+#ifndef EMAC_IMP_V2_H__07_12_2022__10_23
+#define EMAC_IMP_V2_H__07_12_2022__10_23
 
 #ifdef WIN32
 
@@ -117,6 +117,10 @@ static const u32 ipMask = OUR_IP_MASK;
 bool emacConnected = false;
 bool emacEnergyDetected = false;
 bool emacCableNormal = false;
+
+u16 reg_BMSR = 0;
+u16 reg_LINKMDCS = 0;
+u16 reg_PHYCON1 = 0;
 
 /* Local variables */
 //static const byte PHYA = HW_EMAC_GetAdrPHY();
@@ -1325,33 +1329,48 @@ bool HW_EMAC_UpdateLink()
 	{
 		case 0:		
 
-			ReqReadPHY(PHY_REG_BMSR);
+			ReqWritePHY(PHY_REG_LINKMDCS, LINKMDCS_CABLE_DIAG_EN);
 
 			linkState++;
 
 			break;
 
-		case 1:
+		case 1:		
 
 			if (IsReadyPHY())
 			{
-				if (ResultPHY() & BMSR_LINKST)
-				{
-					linkState++;
-				}
-				else
-				{
-					linkState = 0;
-				};
+				ReqReadPHY(PHY_REG_LINKMDCS);
+
+				linkState++;
 			};
 
 			break;
 
 		case 2:
 
-			ReqWritePHY(PHY_REG_BMCR, BMCR_ANENABLE|BMCR_FULLDPLX);
+			if (IsReadyPHY())
+			{
+				reg_LINKMDCS = ResultPHY();
 
-			linkState++;
+				if ((reg_LINKMDCS & LINKMDCS_CABLE_DIAG_EN) == 0)
+				{
+					emacCableNormal = (reg_LINKMDCS & LINKMDCS_CABLE_DIAG_MASK) == 0;
+
+					const char * diagRes[4] = { RTT_CTRL_TEXT_BRIGHT_GREEN "NORMAL", RTT_CTRL_TEXT_BRIGHT_YELLOW "OPEN", RTT_CTRL_TEXT_BRIGHT_YELLOW "SHORT", RTT_CTRL_TEXT_BRIGHT_RED "FAILED" };
+
+					SEGGER_RTT_printf(0, RTT_CTRL_TEXT_WHITE "Ethernet cable diagnosic test ... %s - %u ms\n", diagRes[(reg_LINKMDCS>>13)&3], GetMilliseconds());
+
+					if (reg_LINKMDCS & LINKMDCS_SHORT_CABLE) SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_WHITE "Ethernet Short cable (<10 meter) has been detected\n");
+
+					ReqReadPHY(PHY_REG_PHYCON1);
+
+					linkState++;
+				}
+				else
+				{
+					ReqReadPHY(PHY_REG_LINKMDCS);
+				};
+			};
 
 			break;
 
@@ -1359,7 +1378,35 @@ bool HW_EMAC_UpdateLink()
 
 			if (IsReadyPHY())
 			{
-//				ReqReadPHY(PHY_REG_BMSR);
+				reg_PHYCON1 = ResultPHY();
+
+				if (reg_PHYCON1 & PHYCON1_ENERGY_DETECT)
+				{
+					if (!emacEnergyDetected) SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_WHITE "Ethernet Signal present on receive differential pair\n");
+
+					emacEnergyDetected = true;
+				};
+
+				if (reg_PHYCON1 & PHYCON1_LINK_STATUS)
+				{
+					emacCableNormal = true;
+
+					ReqWritePHY(PHY_REG_BMCR, BMCR_ANENABLE|BMCR_FULLDPLX);
+
+					linkState++;
+
+					SEGGER_RTT_printf(0, RTT_CTRL_TEXT_WHITE "Ethernet Link is up - %u ms\n", GetMilliseconds());
+				}
+				else
+				{
+					ReqReadPHY(PHY_REG_PHYCON1);
+				};
+			};
+
+		case 4:
+
+			if (IsReadyPHY())
+			{
 				ReqReadPHY(PHY_REG_PHYCON1);
 
 				linkState++;
@@ -1367,11 +1414,13 @@ bool HW_EMAC_UpdateLink()
 
 			break;
 
-		case 4:
+		case 5:
 
 			if (IsReadyPHY())
 			{
-				if (ResultPHY() & PHYCON1_OP_MODE_MASK /*BMSR_LINKST*/)
+				reg_PHYCON1 = ResultPHY();
+
+				if (reg_PHYCON1 & PHYCON1_OP_MODE_MASK /*BMSR_LINKST*/)
 				{
 					#ifdef CPU_SAME53	
 						HW::GMAC->NCFGR &= ~(GMAC_SPD|GMAC_FD);
@@ -1386,6 +1435,12 @@ bool HW_EMAC_UpdateLink()
 						#elif defined(CPU_XMC48)
 							HW::ETH0->MAC_CONFIGURATION |= MAC_FES;
 						#endif
+
+						SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_WHITE "Ethernet Speed 100 Mbit ");
+					}
+					else
+					{
+						SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_WHITE "Ethernet Speed 10 Mbit ");
 					};
 
 					if (ResultPHY() & 4 /*ANLPAR_DUPLEX*/)	//  Full duplex is enabled.
@@ -1395,7 +1450,14 @@ bool HW_EMAC_UpdateLink()
 						#elif defined(CPU_XMC48)
 							HW::ETH0->MAC_CONFIGURATION |= MAC_DM;
 						#endif
+						
+						SEGGER_RTT_WriteString(0, "Full duplex mode\n");
+					}
+					else
+					{
+						SEGGER_RTT_WriteString(0, "Half duplex mode\n");
 					};
+
 
 					result = true;
 
@@ -1403,7 +1465,7 @@ bool HW_EMAC_UpdateLink()
 				}
 				else
 				{
-					linkState = 3;
+					ReqReadPHY(PHY_REG_PHYCON1);
 				};
 			};
 
@@ -1531,10 +1593,14 @@ static bool HW_EMAC_Init()
 
 	HW::GMAC->NCR = 0;
 
+	PIO_GMD->DIRCLR = GMDC|GMDIO;
+	HW::PIOA->DIRCLR = (0xF<<12)|(7<<17);
+	HW::PIOC->DIRCLR = (1UL<<20);
+
 	PIO_GMD->SetWRCONFIG(GMDC|GMDIO,	PORT_PMUX_L|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX);
 
 	HW::PIOA->SetWRCONFIG((0xF<<12)|(7<<17),	PORT_PMUX_L|PORT_DRVSTR|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX);
-	HW::PIOC->SetWRCONFIG((1<<20),				PORT_PMUX_L|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX);
+	HW::PIOC->SetWRCONFIG((1UL<<20),			PORT_PMUX_L|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX);
 
 	PIO_RESET_PHY->DIRSET = 1UL<<PIN_RESET_PHY;
 	PIO_RESET_PHY->BSET(PIN_RESET_PHY);
@@ -1578,9 +1644,9 @@ static bool HW_EMAC_Init()
 
 	WritePHY(PHY_REG_BMCR,		BMCR_ANENABLE|BMCR_FULLDPLX);
 	WritePHY(PHY_REG_ANAR,		ANAR_NPAGE|ANAR_100FULL|ANAR_100HALF|ANAR_10FULL|ANAR_10HALF|ANAR_CSMA);
-	WritePHY(PHY_REG_DRC,		DRC_PLL_OFF);
+	//WritePHY(PHY_REG_DRC,		DRC_PLL_OFF);
 	WritePHY(PHY_REG_OMSO,		OMSO_RMII_OVERRIDE);
-	WritePHY(PHY_REG_EXCON,		EXCON_EDPD_EN);
+	//WritePHY(PHY_REG_EXCON,		EXCON_EDPD_EN);
 	WritePHY(PHY_REG_PHYCON1,	0);
 	WritePHY(PHY_REG_PHYCON2,	PHYCON2_HP_MDIX|PHYCON2_JABBER_EN|PHYCON2_POWER_SAVING);
 
@@ -1606,7 +1672,7 @@ static bool HW_EMAC_Init()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#endif // EMAC_IMP_H__11_10_2022__18_02
+#endif // EMAC_IMP_V2_H__07_12_2022__10_23
 
 
 

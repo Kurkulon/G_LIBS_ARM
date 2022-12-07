@@ -656,6 +656,8 @@ static bool HandShake()
 
 	tm.Reset();
 
+	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_CYAN "Start Ethernet handshake ...\n");
+
 	while (!tm.Check(200) && !c)
 	{
 		HW::WDT->Update();
@@ -712,6 +714,8 @@ static bool HandShake()
 			{
 				runEmac = c = true;
 				timeOut.Reset();
+
+				SEGGER_RTT_printf(0, RTT_CTRL_TEXT_BRIGHT_GREEN "Emac connected - %u ms\n", GetMilliseconds());
 			};
 
 		#endif
@@ -939,9 +943,9 @@ static void WDT_Init()
 		HW::WDT->CONFIG = WDT_WINDOW_CYC512|WDT_PER_CYC1024;
 	
 		#ifndef _DEBUG
-		//HW::WDT->CTRLA = WDT_ENABLE|WDT_WEN|WDT_ALWAYSON;
+		HW::WDT->CTRLA = WDT_ENABLE;
 		#else
-		//HW::WDT->CTRLA = WDT_ENABLE|WDT_WEN|WDT_ALWAYSON;
+		HW::WDT->CTRLA = 0;
 		#endif
 
 		while(HW::WDT->SYNCBUSY);
@@ -969,7 +973,11 @@ extern "C" void _MainAppStart(u32 adr);
 
 int main()
 {
-	//__breakpoint(0);
+	__breakpoint(0);
+
+	SEGGER_RTT_Init();
+	SEGGER_RTT_WriteString(0, RTT_CTRL_CLEAR);
+	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_YELLOW "Bootloader Start ...\n");
 
 	#ifdef BOOT_EMAC
 		ResetPHY();
@@ -1012,10 +1020,10 @@ int main()
 				UpdateEMAC();
 				runEmac = TFTP_Idle();
 
-				if (!TFTP_Connected() && timeOut.Check(10000))
-				{
-					runEmac = false;
-				};
+				//if (!TFTP_Connected() && timeOut.Check(10000))
+				//{
+				//	runEmac = false;
+				//};
 			};
 
 		#else
@@ -1052,6 +1060,10 @@ int main()
 	HW::Peripheral_Disable(PID_USIC0);
 	HW::Peripheral_Disable(PID_USIC1);
 #endif
+
+	HW::WDT->Disable();
+
+	SEGGER_RTT_printf(0, RTT_CTRL_TEXT_BRIGHT_GREEN "Main App Start ... %u ms\n", GetMilliseconds());
 
 	_MainAppStart(FLASH_START);
 
