@@ -184,6 +184,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\DMA_CH.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\DMA_DSC.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\GetCRC16.cpp"
 				>
 			</File>

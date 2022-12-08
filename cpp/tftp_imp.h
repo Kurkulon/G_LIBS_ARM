@@ -12,8 +12,8 @@
 /**************************************************************/
 #define TFTP_DATA_CHUNK_SIZE	ISP_PAGESIZE // кратно 256 (странице памяти)
 /**************************************************************/
-#define TFTP_DATA_BUFFER_SIZE	TFTP_DATA_CHUNK_SIZE
-#define TFTP_TX_BUFFER_SIZE	TFTP_DATA_BUFFER_SIZE + 16
+//#define TFTP_DATA_BUFFER_SIZE	TFTP_DATA_CHUNK_SIZE
+//#define TFTP_TX_BUFFER_SIZE	TFTP_DATA_BUFFER_SIZE + 16
 /**************************************************************/
 #define TFTP_OPCODE_RRQ		0x1
 #define TFTP_OPCODE_WRQ		0x2
@@ -21,18 +21,18 @@
 #define TFTP_OPCODE_ACK		0x4
 #define TFTP_OPCODE_ERROR	0x5
 
-#define TFTP_ERRORCODE_NOT_DEFINED			0x0
-#define TFTP_ERRORCODE_FILE_NOT_FOUND		0x1
-#define TFTP_ERRORCODE_ACCESS_VIOLATION		0x2
-#define TFTP_ERRORCODE_DISK_FULL			0x3
-#define TFTP_ERRORCODE_ILLEGAL_OPERATION	0x4
-#define TFTP_ERRORCODE_UNKNOWN_ID			0x5
-#define TFTP_ERRORCODE_FILE_ALREADY_EXISTS	0x6
-#define TFTP_ERRORCODE_NO_SUCH_USER			0x7
+//#define TFTP_ERRORCODE_NOT_DEFINED			0x0
+#define TFTP_ERRORCODE_FILE_NOT_FOUND			0x1
+#define TFTP_ERRORCODE_ACCESS_VIOLATION			0x2
+#define TFTP_ERRORCODE_DISK_FULL				0x3
+#define TFTP_ERRORCODE_ILLEGAL_OPERATION		0x4
+#define TFTP_ERRORCODE_UNKNOWN_ID				0x5
+//#define TFTP_ERRORCODE_FILE_ALREADY_EXISTS	0x6
+//#define TFTP_ERRORCODE_NO_SUCH_USER			0x7
 
-#define TFTP_MODE_NETASCII	"netascii"
-#define TFTP_MODE_OCTET		"octet"
-#define TFTP_MODE_MAIL		"mail"
+//#define TFTP_MODE_NETASCII	"netascii"
+//#define TFTP_MODE_OCTET		"octet"
+//#define TFTP_MODE_MAIL		"mail"
 /******************************************************/
 enum 
 {
@@ -47,38 +47,39 @@ enum
 #define TFTP_FILE_MODE		"bootloader_mode"
 #define TFTP_FILE_PROGRAMM	"system.img"
 /******************************************************/
-typedef struct	__attribute__ ((packed))
-{
-	unsigned short opcode;
-} TFTP_PACKET_type;	
 
-typedef struct	__attribute__ ((packed))
+__packed struct	TFTP_PACKET_type
 {
-	unsigned short opcode;
-} TFTP_PACKET_PRQ_type;	
+	u16 opcode;
+};	
 
-typedef struct	__attribute__ ((packed))
+__packed struct	TFTP_PACKET_PRQ_type
 {
-	unsigned short opcode;
-} TFTP_PACKET_WRQ_type;	
+	u16 opcode;
+};	
 
-typedef struct	__attribute__ ((packed))
+__packed struct	TFTP_PACKET_WRQ_type
 {
-	unsigned short opcode;
-	unsigned short block;
-} TFTP_PACKET_DATA_type;	
+	u16 opcode;
+};	
 
-typedef struct	__attribute__ ((packed))
+__packed struct	TFTP_PACKET_DATA_type
 {
-	unsigned short opcode;
-	unsigned short block;
-} TFTP_PACKET_ACK_type;	
+	u16 opcode;
+	u16 block;
+};	
 
-typedef struct	__attribute__ ((packed))
+__packed struct	TFTP_PACKET_ACK_type
 {
-	unsigned short opcode;
-	unsigned short error;
-} TFTP_PACKET_ERROR_type;
+	u16 opcode;
+	u16 block;
+};	
+
+__packed struct	TFTP_PACKET_ERROR_type
+{
+	u16 opcode;
+	u16 error;
+};
 
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

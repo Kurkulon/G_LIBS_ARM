@@ -47,12 +47,6 @@ DWORD txThreadCount = 0;
 #define NUM_TX_DSC          16  
 #endif
 
-#ifndef ETH_RX_DRBS
-#define ETH_RX_DRBS			8
-#endif
-
-#define ETH_RX_BUF_SIZE     (ETH_RX_DRBS * 64)       
-
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #ifndef EMAC_HWADR
@@ -76,6 +70,11 @@ static const MAC hwAdr = EMAC_HWADR;
 #ifdef BOOTLOADER
 
 	#include <tftp.h>
+	#include <boot_isp.h>
+
+	#ifndef ETH_RX_DRBS
+	#define ETH_RX_DRBS		((ISP_PAGESIZE+46+64)/64)
+	#endif
 
 	#ifndef OUR_IP_ADDR
 	#define OUR_IP_ADDR   	IP32(192, 168, 3, 227)
@@ -88,6 +87,10 @@ static const MAC hwAdr = EMAC_HWADR;
 
 #else
 
+	#ifndef ETH_RX_DRBS
+	#define ETH_RX_DRBS			8
+	#endif
+
 	#ifndef OUR_IP_ADDR
 	#define OUR_IP_ADDR   	IP32(192, 168, 3, 234)
 	#endif
@@ -98,6 +101,9 @@ static const MAC hwAdr = EMAC_HWADR;
 	static const u16 udpOutPort = SWAP16(66);
 
 #endif
+
+
+#define ETH_RX_BUF_SIZE     (ETH_RX_DRBS * 64)       
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
