@@ -63,8 +63,12 @@ static const MAC hwAdr = EMAC_HWADR;
 #define OUR_IP_MASK   	IP32(255, 255, 255, 0)
 #endif
 
-#ifndef DHCP_IP_ADDR
-#define DHCP_IP_ADDR   	IP32(192, 168, 3, 254)
+#ifndef DHCP_IP_START
+#define DHCP_IP_START  	IP32(0, 0, 0, 240)
+#endif
+
+#ifndef DHCP_IP_END
+#define DHCP_IP_END  	IP32(0, 0, 0, 254)
 #endif
 
 #ifdef BOOTLOADER
@@ -116,6 +120,8 @@ static const MAC hwAdr = EMAC_HWADR;
 static const MAC hwBroadCast = {0xFFFFFFFF, 0xFFFF};
 static const u32 ipAdr = OUR_IP_ADDR;
 static const u32 ipMask = OUR_IP_MASK;
+
+static u32 dhcp_IP = (OUR_IP_ADDR & OUR_IP_MASK) | DHCP_IP_START;
 
 //static const u16 udpInPort = ReverseWord(HW_EMAC_GetUdpInPort());
 //static const u16 udpOutPort = ReverseWord(HW_EMAC_GetUdpOutPort());
@@ -592,28 +598,46 @@ static bool RequestDHCP(Ptr<MB> &mb)
 
 	i32 i = 0; 
 	bool c = false;
+	byte op = ~0;
+
+	__packed u32 *reqIP = 0;
 
 	while (i < optLen)
 	{
-		if (h->dhcp.options[i] == 53)
+		byte t = h->dhcp.options[i];
+
+		if (t == 53)
 		{
-			c = true; break;
+			op = h->dhcp.options[i+2];
+			c = true; 
+		}
+		else if (t == 50)
+		{
+			reqIP = (__packed u32*)(h->dhcp.options+i+2);
 		};
 		
-		i++;
-
-		i += h->dhcp.options[i];
+		i += h->dhcp.options[i+1]+2;
 	};
 
 	if (!c) return false;
-
-	byte op = h->dhcp.options[i+2];
 
 	if (op != DHCPDISCOVER && op != DHCPREQUEST) return false;
 
 	Ptr<MB> buf = AllocMemBuffer(sizeof(EthDhcp));
 
 	if (!buf.Valid()) return false;
+
+	u32 dhcp_ip_s = (ipAdr & ipMask) | DHCP_IP_START;
+	u32 dhcp_ip_e = (ipAdr & ipMask) | DHCP_IP_END;
+
+	if (reqIP == 0 || ((*reqIP & ipMask) != (ipAdr & ipMask)) || (*reqIP == ipAdr))
+	{
+		dhcp_IP += IP32(0,0,0,1);
+
+		if (dhcp_IP > dhcp_ip_e) dhcp_IP = dhcp_ip_s;
+
+		reqIP = &dhcp_IP;
+	};
 
 	EthDhcp *t = (EthDhcp*)buf->GetDataPtr();
 
@@ -623,12 +647,14 @@ static bool RequestDHCP(Ptr<MB> &mb)
 	t->dhcp.hops = 0;
 	t->dhcp.xid = h->dhcp.xid;
 	t->dhcp.secs = 0;
-	t->dhcp.flags = 0;
+	t->dhcp.flags = 0x80;
 	t->dhcp.ciaddr = 0;
-	t->dhcp.yiaddr = DHCP_IP_ADDR; // New client IP
-	t->dhcp.siaddr = ipAdr;
+	t->dhcp.yiaddr = *reqIP; // New client IP
+	t->dhcp.siaddr = 0;//ipAdr;
 	t->dhcp.giaddr = 0;
 	t->dhcp.chaddr = h->dhcp.chaddr; //h->eth.src;
+	t->dhcp.sname[0] = 0;
+	t->dhcp.file[0] = 0;
 	t->dhcp.magic = DHCPCOOKIE;
 
 	DataPointer p(t->dhcp.options);
@@ -637,17 +663,33 @@ static bool RequestDHCP(Ptr<MB> &mb)
 	*p.b++ = 1;
 	*p.b++ = (op == DHCPDISCOVER) ? DHCPOFFER : DHCPACK;
 
+	*p.b++ = 54; // Server IP
+	*p.b++ = 4;
+	*p.d++ = ipAdr;
+
+	*p.b++ = 51; // IP Address Lease Time
+	*p.b++ = 4;
+	*p.d++ = SWAP32(3600*6);
+
+	*p.b++ = 58; // Option: (t=58,l=4) Renewal Time Value = 3 hours, 30 minutes
+	*p.b++ = 4;
+	*p.d++ = SWAP32(3600*3);
+
+	*p.b++ = 59; // Option: (t=59,l=4) Rebinding Time Value = 6 hours, 7 minutes, 30 seconds
+	*p.b++ = 4;
+	*p.d++ = SWAP32(3600*5);
+
 	*p.b++ = 1; // Sub-net Mask
 	*p.b++ = 4;
 	*p.d++ = ipMask;
 
-	*p.b++ = 51; // IP Address Lease Time
-	*p.b++ = 4;
-	*p.d++ = SWAP32(3600*24);
+	//*p.b++ = 3; // Router
+	//*p.b++ = 4;
+	//*p.d++ = ipAdr;
 
-	*p.b++ = 54; // Server IP
-	*p.b++ = 4;
-	*p.d++ = ipAdr;
+	//*p.b++ = 6; // Option: (t=6,l=4) Domain Name Server
+	//*p.b++ = 4;
+	//*p.d++ = ipAdr;
 
 	*p.b++ = 33;	// Static Route
 	*p.b++ = 8;
@@ -1360,15 +1402,17 @@ bool HW_EMAC_UpdateLink()
 
 				if ((reg_LINKMDCS & LINKMDCS_CABLE_DIAG_EN) == 0)
 				{
-					emacCableNormal = (reg_LINKMDCS & LINKMDCS_CABLE_DIAG_MASK) == 0;
+					emacCableNormal = (reg_LINKMDCS & LINKMDCS_CABLE_DIAG_MASK) == 0 || (reg_LINKMDCS & LINKMDCS_CABLE_DIAG_MASK) == LINKMDCS_CABLE_DIAG_MASK;
 
 					const char * diagRes[4] = { RTT_CTRL_TEXT_BRIGHT_GREEN "NORMAL", RTT_CTRL_TEXT_BRIGHT_YELLOW "OPEN", RTT_CTRL_TEXT_BRIGHT_YELLOW "SHORT", RTT_CTRL_TEXT_BRIGHT_RED "FAILED" };
 
 					SEGGER_RTT_printf(0, RTT_CTRL_TEXT_WHITE "Ethernet cable diagnosic test ... %s - %u ms\n", diagRes[(reg_LINKMDCS>>13)&3], GetMilliseconds());
 
+					if (reg_LINKMDCS & LINKMDCS_CABLE_DIAG_MASK) SEGGER_RTT_printf(0, RTT_CTRL_TEXT_WHITE "Ethernet distance to cable fault - %u m\n", ((reg_LINKMDCS&0xFF)*24904)>>16);
+
 					if (reg_LINKMDCS & LINKMDCS_SHORT_CABLE) SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_WHITE "Ethernet Short cable (<10 meter) has been detected\n");
 
-					ReqReadPHY(PHY_REG_PHYCON1);
+					ReqWritePHY(PHY_REG_PHYCON2, PHYCON2_HP_MDIX|PHYCON2_JABBER_EN|PHYCON2_POWER_SAVING);
 
 					linkState++;
 				}
@@ -1380,7 +1424,18 @@ bool HW_EMAC_UpdateLink()
 
 			break;
 
-		case 3:
+		case 3:		
+
+			if (IsReadyPHY())
+			{
+				ReqReadPHY(PHY_REG_PHYCON1);
+
+				linkState++;
+			};
+
+			break;
+
+		case 4:
 
 			if (IsReadyPHY())
 			{
@@ -1409,7 +1464,7 @@ bool HW_EMAC_UpdateLink()
 				};
 			};
 
-		case 4:
+		case 5:
 
 			if (IsReadyPHY())
 			{
@@ -1420,7 +1475,7 @@ bool HW_EMAC_UpdateLink()
 
 			break;
 
-		case 5:
+		case 6:
 
 			if (IsReadyPHY())
 			{
@@ -1615,13 +1670,25 @@ static bool HW_EMAC_Init()
 
 #elif defined(CPU_XMC48)
 
-    //Enable ETH0 peripheral clock
+	PIO_GMDC ->ModePin(	PIN_GMDC,	MUX_GMDC	);	
+	PIO_GMDIO->ModePin(	PIN_GMDIO,	MUX_GMDIO	);
+	PIO_GCRS ->ModePin(	PIN_GCRS,	MUX_GCRS	);
+	PIO_GRXER->ModePin(	PIN_GRXER,	MUX_GRXER	);
+	PIO_GRX0 ->ModePin(	PIN_GRX0,	MUX_GRX0	);
+	PIO_GRX1 ->ModePin(	PIN_GRX1,	MUX_GRX1	);
+	PIO_GTXEN->ModePin(	PIN_GTXEN,	MUX_GTXEN	);
+	PIO_GTX0 ->ModePin(	PIN_GTX0,	MUX_GTX0	);
+	PIO_GTX1 ->ModePin(	PIN_GTX1,	MUX_GTX1	);
+	PIO_GRXCK->ModePin(	PIN_GRXCK,	MUX_GRXCK	);
+
+	PIO_RESET_PHY->ModePin(PIN_RESET_PHY, G_PP);
+	
+	//Enable ETH0 peripheral clock
 
 	HW::ETH_Enable();
 
-    HW::PORT15->PDISC &= ~(PORT15_PDISC_PDIS8_Msk | PORT15_PDISC_PDIS9_Msk);
+    //HW::PORT15->PDISC &= ~(PORT15_PDISC_PDIS8_Msk | PORT15_PDISC_PDIS9_Msk);
 
-	PIO_RESET_PHY->ModePin(PIN_RESET_PHY, G_PP);
 	EnablePHY();
 
 	HW::ETH0_CON->CON = EMAC_INIT_ETH0_CON;
@@ -1650,11 +1717,11 @@ static bool HW_EMAC_Init()
 
 	WritePHY(PHY_REG_BMCR,		BMCR_ANENABLE|BMCR_FULLDPLX);
 	WritePHY(PHY_REG_ANAR,		ANAR_NPAGE|ANAR_100FULL|ANAR_100HALF|ANAR_10FULL|ANAR_10HALF|ANAR_CSMA);
-	//WritePHY(PHY_REG_DRC,		DRC_PLL_OFF);
+	WritePHY(PHY_REG_DRC,		DRC_PLL_OFF);
 	WritePHY(PHY_REG_OMSO,		OMSO_RMII_OVERRIDE);
-	//WritePHY(PHY_REG_EXCON,		EXCON_EDPD_EN);
+	WritePHY(PHY_REG_EXCON,		EXCON_EDPD_EN);
 	WritePHY(PHY_REG_PHYCON1,	0);
-	WritePHY(PHY_REG_PHYCON2,	PHYCON2_HP_MDIX|PHYCON2_JABBER_EN|PHYCON2_POWER_SAVING);
+	WritePHY(PHY_REG_PHYCON2,	PHYCON2_HP_MDIX|PHYCON2_PAIR_SWAP_DIS|PHYCON2_JABBER_EN|PHYCON2_POWER_SAVING);
 
 #endif
 

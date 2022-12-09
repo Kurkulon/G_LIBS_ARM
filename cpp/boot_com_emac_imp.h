@@ -12,6 +12,7 @@
 
 #ifdef BOOT_EMAC
 #include <tftp.h>
+#define ISP_DATASIZE TFTP_DATA_CHUNK_SIZE
 #endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -28,6 +29,16 @@
 		const u64 slaveGUID = BOOT_SGUID;
 	#endif
 
+	#ifndef ISP_DATASIZE
+	#define ISP_DATASIZE ISP_PAGESIZE
+	#endif
+
+#endif
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#ifndef ISP_DATASIZE
+#define ISP_DATASIZE 512
 #endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -42,15 +53,15 @@
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #ifndef SMALL_BUF_LEN
-#define SMALL_BUF_LEN	((ISP_PAGESIZE+64*2) & (~64))
+#define SMALL_BUF_LEN	((ISP_DATASIZE+64*2) & (~64))
 #endif
 
 #ifndef MEDIUM_BUF_LEN
-#define MEDIUM_BUF_LEN	((ISP_PAGESIZE+64*4) & (~64))
+#define MEDIUM_BUF_LEN	((ISP_DATASIZE+64*4) & (~64))
 #endif
 
 #ifndef HUGE_BUF_LEN
-#define HUGE_BUF_LEN	((ISP_PAGESIZE+64*8) & (~64))    
+#define HUGE_BUF_LEN	((ISP_DATASIZE+64*8) & (~64))    
 #endif
 
 #ifndef NUM_SMALL_BUF
@@ -285,7 +296,7 @@ static bool CheckDataComplete()
 
 static u32 GetSectorAdrLen(u32 sadr, u32 *radr)
 {
-	//sadr += BOOTSIZE;
+	sadr += BOOTSIZE;
 
 	if (sadr >= PLANESIZE)
 	{
@@ -296,6 +307,7 @@ static u32 GetSectorAdrLen(u32 sadr, u32 *radr)
 #ifdef CPU_SAME53
 
 	u32 len = SECTORSIZE;
+	sadr -= BOOTSIZE;
 	sadr &= SECTORMASK;
 
 #elif defined(CPU_XMC48)
@@ -1018,10 +1030,7 @@ int main()
 	#endif
 
 	Init_time(MCK);
-	//RTT_Init();
 	WDT_Init();
-
-	//InitFlashBuffer();
 
 	#ifdef BOOT_EMAC
 		InitEMAC();
@@ -1054,10 +1063,10 @@ int main()
 				UpdateEMAC();
 				runEmac = TFTP_Idle();
 
-				//if (!TFTP_Connected() && timeOut.Check(10000))
-				//{
-				//	runEmac = false;
-				//};
+				if (!TFTP_Connected() && timeOut.Check(10000))
+				{
+					runEmac = false;
+				};
 			};
 
 		#else
@@ -1086,16 +1095,20 @@ int main()
 	HW::GMAC->NCFGR = 0x80000;
 	HW::DMAC->CTRL = DMAC_SWRST;
 	HW::GCLK->CTRLA = GCLK_SWRST;
+	HW::WDT->Disable();
+	HW::MCLK->APBAMASK &= ~APBA_WDT;
 
 #elif defined(CPU_XMC48)
+
 	HW::Peripheral_Disable(PID_DMA0);
 	HW::Peripheral_Disable(PID_DMA1);
 
 	HW::Peripheral_Disable(PID_USIC0);
 	HW::Peripheral_Disable(PID_USIC1);
-#endif
 
-	HW::WDT->Disable();
+	HW::WDT_Disable();
+
+#endif
 
 	SEGGER_RTT_printf(0, RTT_CTRL_TEXT_BRIGHT_GREEN "Main App Start ... %u ms\n", GetMilliseconds());
 
