@@ -1,13 +1,13 @@
 #ifndef TIME_H__04_08_2009__17_35
 #define TIME_H__04_08_2009__17_35
 
+#include "types.h"
+
 #ifdef WIN32
 #include <windows.h>
 #else
 #include "core.h"
 #endif
-
-#include "types.h"
 
 #define RTC_type RTC
 

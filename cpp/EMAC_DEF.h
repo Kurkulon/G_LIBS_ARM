@@ -8,11 +8,7 @@
 //#define ETH_RX_BUF_SIZE     (ETH_RX_DRBS * 64)       
 //#define NUM_TX_DSC          16        
 
-#ifndef WIN32
-#define IP_MTU				1480
-#else
-#define IP_MTU				0x4000
-#endif
+#define ETH_IP_MTU			1480
 
 //#define AT91C_PHY_ADDR      0
 

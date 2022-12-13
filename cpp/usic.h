@@ -1,13 +1,13 @@
 #ifndef USIC_H__05_05_2022__18_33
 #define USIC_H__05_05_2022__18_33
 
+#include "types.h"
+
 #ifdef WIN32
 #include <windows.h>
 #else
 #include "core.h"
 #endif
-
-#include "types.h"
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

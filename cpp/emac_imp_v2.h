@@ -1,6 +1,8 @@
 #ifndef EMAC_IMP_V2_H__07_12_2022__10_23
 #define EMAC_IMP_V2_H__07_12_2022__10_23
 
+#include <types.h>
+
 #ifdef WIN32
 
 #include <winsock2.h>
@@ -630,7 +632,7 @@ static bool RequestDHCP(Ptr<MB> &mb)
 	u32 dhcp_ip_s = (ipAdr & ipMask) | DHCP_IP_START;
 	u32 dhcp_ip_e = (ipAdr & ipMask) | DHCP_IP_END;
 
-	if (reqIP == 0 || ((*reqIP & ipMask) != (ipAdr & ipMask)) || (*reqIP == ipAdr))
+	if (op == DHCPDISCOVER || reqIP == 0 || ((*reqIP & ipMask) != (ipAdr & ipMask)) || (*reqIP == ipAdr))
 	{
 		dhcp_IP += IP32(0,0,0,1);
 
@@ -1645,7 +1647,7 @@ static bool HW_EMAC_Init()
 	using namespace HW;
 	
 	/* Initialize the GMAC ethernet controller. */
-	u32 id1,id2;
+	//u32 id1,id2;
 
 #ifdef CPU_SAME53	
 

@@ -8,9 +8,9 @@ version = Release
 ##################################################################################################
 
 curdir = $+ $(%cdrive):$(%cwd) $-
-#cppdir = .\cpp
+cppdir = .\cpp
 hdir = .\cpp
-libdir = $(curdir)\libs
+#libdir = $(curdir)\libs
 bindir = $(%ARMCC50BIN)
 
 !ifeq version Debug
@@ -90,10 +90,10 @@ libname = $(curdir)\$(targetcpu)_$(libsuffix).a
 ##################################################################################################
 
 .cpp:	$(cppdir)
-.o:	$(objdir)
-.h:	$(hdir)
-.s: $(cppdir)
-.d:	$(objdir)
+.o:		$(objdir)
+.h:		$(hdir)
+.s:		$(cppdir)
+.d:		$(objdir)
 
 
 ##################################################################################################
@@ -105,7 +105,7 @@ libname = $(curdir)\$(targetcpu)_$(libsuffix).a
 ##################################################################################################	  --diag_suppress=68,368,1165,1299,3017 &
 
 compiler_options = $(debug_compiler_options) $(cpu_compiler_options) --gnu --asm --interleave -g -c --diag_style=ide &
-	 -D__MICROLIB -DCPU_$(targetcpu) --no_depend_system_headers --reduce_paths -I$(libdir)\cpp
+	 -D__MICROLIB -DCPU_$(targetcpu) --no_depend_system_headers --reduce_paths
 
 ##################################################################################################
 
@@ -117,7 +117,7 @@ link_options = $(cpu_link_options) --bestdebug --strict --map --xref --callgraph
   
 ##################################################################################################-wd4996
 
-win32_compiler_options = -nologo -DWIN32 -D_TESTONPC_ -c -Z7 -Zp 
+win32_compiler_options = -nologo -DWIN32 -D_TESTONPC_ -c -Z7 -Zp
 
 ##################################################################################################
 

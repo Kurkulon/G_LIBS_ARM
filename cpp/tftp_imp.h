@@ -168,7 +168,7 @@ __packed struct	EthTftp
 
 //__packed struct HugeTx : public SmallTx
 //{
-//	byte exdata[IP_MTU - sizeof(UdpHdr) - sizeof(TFTPHdr) - sizeof(data)];
+//	byte exdata[ETH_IP_MTU - sizeof(UdpHdr) - sizeof(TFTPHdr) - sizeof(data)];
 //};
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

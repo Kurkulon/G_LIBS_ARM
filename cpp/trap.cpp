@@ -1,3 +1,5 @@
+//#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,10 +16,22 @@
 
 //#pragma diag_suppress 2548,546,550,177
 
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 #ifndef WIN32
-#pragma O3
-#pragma Otime
+	#pragma O3
+	#pragma Otime
 #endif
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#ifndef WIN32
+#define VECTOR_IP_MTU			ETH_IP_MTU
+#else
+#define VECTOR_IP_MTU			0x4000
+#endif
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 enum trap_status
 {
@@ -234,7 +248,7 @@ bool TRAP_TRACE_SendData(const char *pData, u32 size)
 
 bool TRAP_TRACE_PrintString(const char *data, ...)
 {
-	Ptr<MB> mb(AllocMemBuffer(IP_MTU));
+	Ptr<MB> mb(AllocMemBuffer(ETH_IP_MTU));
 
 	if (!mb.Valid()) return false;
 
@@ -821,8 +835,8 @@ static bool UpdateSendVector()
 
 	static FileDsc *si = 0;
 
-	__packed struct TRP { EthUdp eu; TrapVector tv; byte data[IP_MTU - sizeof(UdpHdr) - sizeof(TrapVector)]; };
-	__packed struct FR  { EthIp  ei; byte data[IP_MTU]; };
+	__packed struct TRP { EthUdp eu; TrapVector tv; byte data[VECTOR_IP_MTU - sizeof(UdpHdr) - sizeof(TrapVector)]; };
+	__packed struct FR  { EthIp  ei; byte data[VECTOR_IP_MTU]; };
 
 	switch (i)
 	{
@@ -1059,8 +1073,8 @@ static bool UpdateSendVector_Dlya_Vova()
 
 	//static FileDsc *si = 0;
 
-	__packed struct TRP { EthUdp eu; TrapVector tv; byte data[IP_MTU - sizeof(UdpHdr) - sizeof(TrapVector)]; };
-	//__packed struct FR  { EthIp  ei; byte data[IP_MTU]; };
+	__packed struct TRP { EthUdp eu; TrapVector tv; byte data[VECTOR_IP_MTU - sizeof(UdpHdr) - sizeof(TrapVector)]; };
+	//__packed struct FR  { EthIp  ei; byte data[ETH_IP_MTU]; };
 
 
 	switch (i)

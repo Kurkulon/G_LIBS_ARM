@@ -105,7 +105,8 @@ Purpose : Implementation of SEGGER real-time terminal (RTT) which allows
 // Description for a circular buffer (also called "ring buffer")
 // which is used as up- (T->H) or down-buffer (H->T)
 //
-typedef struct {
+struct RING_BUFFER
+{
   const char* sName;                     // Optional name. Standard names so far are: "Terminal", "VCom"
   char*  pBuffer;                        // Pointer to start of buffer
   int    SizeOfBuffer;                   // Buffer size in bytes. Note that one byte is lost, as this implementation does not fill up the buffer in order to avoid the problem of being unable to distinguish between full and empty.
@@ -115,20 +116,21 @@ typedef struct {
 
   void Init(const char* name, char* pb, int size, int fl) { sName = name; pBuffer = pb; SizeOfBuffer = size; WrOff = 0; RdOff = 0; Flags = fl; }
 
-} RING_BUFFER;
+};
 
 //
 // RTT control block which describes the number of buffers available
 // as well as the configuration for each buffer
 //
 //
-typedef struct {
+struct SEGGER_RTT_CB
+{
   char        acID[16];                                 // Initialized to "SEGGER RTT"
   int         MaxNumUpBuffers;                          // Initialized to SEGGER_RTT_MAX_NUM_UP_BUFFERS (type. 2)
   int         MaxNumDownBuffers;                        // Initialized to SEGGER_RTT_MAX_NUM_DOWN_BUFFERS (type. 2)
   RING_BUFFER aUp[SEGGER_RTT_MAX_NUM_UP_BUFFERS];       // Up buffers, transferring information up from target via debug probe to host
   RING_BUFFER aDown[SEGGER_RTT_MAX_NUM_DOWN_BUFFERS];   // Down buffers, transferring information down from host via debug probe to target
-} SEGGER_RTT_CB;
+};
 
 /*********************************************************************
 *

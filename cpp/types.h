@@ -9,22 +9,28 @@
 
 #ifndef __CC_ARM //WIN32
 
-#include <intrin.h>
+	#define WINDOWS_IGNORE_PACKING_MISMATCH
 
-#define __packed /*__declspec(align(1))*/
-#define __softfp /**/
-#define __irq __declspec(naked)
-#define __align(v)
-#define __attribute__(v)
-#define __func__ __FUNCTION__
+	#include <intrin.h>
 
-inline  void __breakpoint(int v) { __debugbreak(); }
-inline void __disable_irq() {}
-inline void __enable_irq() {}
-//inline void __nop() {}
+	#define __packed /*__declspec(align(1))*/
+	#define __softfp /**/
+	#define __irq __declspec(naked)
+	#define __align(v)
+	#define __attribute__(v)
+	#define __func__ __FUNCTION__
 
-#define __CC_ARM
-#define __TARGET_FPU_VFP
+	inline  void __breakpoint(int v) { __debugbreak(); }
+	inline void __disable_irq() {}
+	inline void __enable_irq() {}
+	//inline void __nop() {}
+
+	#define __CC_ARM
+	#define __TARGET_FPU_VFP
+
+	#if _MSC_VER > 1500
+		#pragma comment(lib, "legacy_stdio_definitions.lib")
+	#endif
 
 #endif 
 

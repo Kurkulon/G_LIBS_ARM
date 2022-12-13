@@ -53,7 +53,7 @@ DWORD txThreadCount = 0;
 //{
 //	IPheader	iph; // 20
 //	UdpHdr		udp; // 8
-//	byte		data[IP_MTU - sizeof(UdpHdr) + (sizeof(EthBuf::eth) & 3)];
+//	byte		data[ETH_IP_MTU - sizeof(UdpHdr) + (sizeof(EthBuf::eth) & 3)];
 //
 //	static List<HugeTx> freeList;
 //
@@ -116,7 +116,7 @@ u32 rxCount = 0;
 //u32 countRXOVR = 0;
 //u32 countHNO = 0;
 
-u32 trp[4] = {~0};
+u32 trp[4] = {(u32)~0};
 
 u16  txIpID = 0;
 
