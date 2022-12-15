@@ -1373,7 +1373,7 @@ void ManRcvUpdate()
 	{
 		u32 irq = Push_IRQ();
 
-		if (rcvManLen > 0 && manRcvTime.Timeout(US2CLK(200)))
+		if (rcvManLen > 0 && manRcvTime.Timeout(US2CLK(300)))
 		{
 			ManRcvEnd(true);
 		}
