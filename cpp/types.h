@@ -34,6 +34,12 @@
 
 #endif 
 
+#ifdef _DEBUG
+#define DEBUG_ASSERT(v) if (!(v)) __breakpoint(0)
+#else
+#define DEBUG_ASSERT(v)
+#endif
+
 typedef unsigned char byte, u8;
 typedef unsigned short int word, u16;
 typedef unsigned long int dword, u32;
@@ -70,10 +76,10 @@ __forceinline void delay(u32 cycles) { while(cycles--) __nop();}
 
 #ifdef WIN32
 
-inline void Read32(u32 v) {  }
-inline word ReverseWord(word v) { return ((v&0x00FF)<<8 | (v&0xFF00)>>8); }
-inline dword ReverseDword(dword v) { v = (v&0x00FF00FF)<<8 | (v&0xFF00FF00)>>8;	return (v&0x0000FFFF)<<16 | (v&0xFFFF0000)>>16; }
-inline dword SwapDword(dword v) { return (v&0x00FF00FF)<<8 | (v&0xFF00FF00)>>8; }
+__forceinline void Read32(u32 v) {  }
+__forceinline word ReverseWord(word v) { return ((v&0x00FF)<<8 | (v&0xFF00)>>8); }
+__forceinline dword ReverseDword(dword v) { v = (v&0x00FF00FF)<<8 | (v&0xFF00FF00)>>8;	return (v&0x0000FFFF)<<16 | (v&0xFFFF0000)>>16; }
+__forceinline dword SwapDword(dword v) { return (v&0x00FF00FF)<<8 | (v&0xFF00FF00)>>8; }
 
 //#elif defined(__TARGET_ARCH_ARM)
 //
@@ -84,10 +90,13 @@ inline dword SwapDword(dword v) { return (v&0x00FF00FF)<<8 | (v&0xFF00FF00)>>8; 
 
 #else
 
-inline void Read32(u32 v) { u32 t; __asm { add t, v }; }
-inline u16 ReverseWord(u16 v) { __asm	{ rev16 v, v };	return v; }
-inline u32 ReverseDword(u32 v) { return __rev(v); }
-inline dword SwapDword(dword v) { __asm { rev16 v, v }; return v; }
+__forceinline void Read32(u32 v) { u32 t; __asm { add t, v }; }
+__forceinline u16 ReverseWord(u16 v) { __asm	{ rev16 v, v };	return v; }
+__forceinline u32 ReverseDword(u32 v) { return __rev(v); }
+__forceinline dword SwapDword(dword v) { __asm { rev16 v, v }; return v; }
+
+__forceinline i32 _InterlockedIncrement(volatile i32 *v) { __disable_irq(); i32 r = *v += 1; __enable_irq(); return r; }
+__forceinline i32 _InterlockedDecrement(volatile i32 *v) { __disable_irq(); i32 r = *v -= 1; __enable_irq(); return r; }
 
 #endif
 

@@ -15,31 +15,8 @@
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-template <class T> struct List
+class LockBase
 {
-
-protected:
-
-	T *first;
-	T *last;
-
-	u32 count;
-
-	List* _selfPtr;
-
-  public:
-
-	void Init() { if (_selfPtr != this) first = 0, last = 0, count = 0, _selfPtr = this; }
-	
-	List() { Init(); }
-
-	T*		Get();
-	void	Add(T* r);
-
-	bool	Empty() { return first == 0; }
-
-	u32		Count() { return count; }
-
 
 #ifdef WIN32
 
@@ -58,11 +35,43 @@ protected:
 
 #else
 
+protected:
+
 	__forceinline void Lock()	{ __disable_irq(); }
 	__forceinline void Unlock()	{ __enable_irq();  }
 
 #endif
 
+};
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+template <class T> struct List : public LockBase
+{
+
+protected:
+
+	T *first;
+	T *last;
+
+	u32 count;
+
+	List* _selfPtr;
+
+	void Assert(T* r) { DEBUG_ASSERT(r->next == 0); }
+
+  public:
+
+	void Init() { if (_selfPtr != this) first = 0, last = 0, count = 0, _selfPtr = this; }
+	
+	List() { Init(); }
+
+	T*		Get();
+	void	Add(T* r);
+
+	bool	Empty() { return first == 0; }
+
+	u32		Count() { return count; }
 };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -82,6 +91,8 @@ template <class T> T* List<T>::Get()
 			last = 0;
 		};
 
+		r->next = 0;
+
 		count--;
 	};
 
@@ -98,6 +109,8 @@ template <class T> void List<T>::Add(T* r)
 	{
 		return;
 	};
+
+	Assert(r);
 
 	Lock();
 
@@ -152,45 +165,54 @@ protected:
 public:
 
 	Ptr() : ptr(0)					{}
-	Ptr(T* p) : ptr(p)				{ if (ptr != 0) ptr->count++; }
-	Ptr(const Ptr& p) : ptr(p.ptr)	{ if (ptr != 0) ptr->count++; }
+	Ptr(T* p) : ptr(p)				{ if (ptr != 0) ptr->IncCount(); }
+	Ptr(const Ptr& p) : ptr(p.ptr)	{ if (ptr != 0) ptr->IncCount(); }
 
-	Ptr& operator=(const Ptr& p)	{ if (ptr != p.ptr) { Free(); ptr = p.ptr; if (ptr != 0) ptr->count++; }; return *this; }
-	Ptr& operator=(T* p)			{ if (ptr != p) { Free(); ptr = p; if (ptr != 0) ptr->count++; }; return *this; }
+	Ptr& operator=(const Ptr& p)	{ if (ptr != p.ptr) { Free(); ptr = p.ptr; if (ptr != 0) ptr->IncCount(); }; return *this; }
+	Ptr& operator=(T* p)			{ if (ptr != p) { Free(); ptr = p; if (ptr != 0) ptr->IncCount(); }; return *this; }
 	~Ptr()							{ Free(); }
 	bool Valid() const				{ return ptr != 0; }
-	void Alloc()					{ Free(); ptr = T::Create(); if (ptr != 0) ptr->count = 1; }
-	void Free()						{ if (ptr != 0) { if (ptr->count != 0) { ptr->count--; if (ptr->count == 0) ptr->Destroy(); };	ptr = 0; }; }
+	void Alloc()					{ Free(); ptr = T::Create(); if (ptr != 0) ptr->SetCount(); }
+	void Free()						{ if (ptr != 0) { ptr->DecCount(); ptr = 0;}; }
 	T* operator->()					{ return ptr; }
 	T& operator*()					{ return *ptr; }
-	u32	 Count()					{ return (ptr != 0) ? ptr->count : 0; }
+	u32	 Count()					{ return (ptr != 0) ? ptr->Count() : 0; }
 };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-template <class T> struct PtrObj
+template <class T> struct PtrObj : public LockBase
 {
 	PTR_LIST_FRIENDS(T);
 
 protected:
 
 	PtrObj*	next;
-	u32		count;
 
-	//static	T*		Create();
+private:
+
+	volatile i32 _count;
+
+protected:
+
+	__forceinline void IncCount()	{ _InterlockedIncrement(&_count); }
+	__forceinline void DecCount()	{ Lock(); if (_count != 0) { _count--; if (_count == 0) Destroy(); }; Unlock(); }
+	__forceinline void SetCount()	{ _count = 1; }
 
 public:
 
 	virtual	void	Destroy() = 0;
 
-	u32		Count() { return count; }
+	u32		Count() { return _count; }
 
-	PtrObj() : next(0), count(0) { }
+	void Assert() { DEBUG_ASSERT(next == 0); }
+
+	PtrObj() : next(0), _count(0) { }
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-template <class T> struct ListPtr
+template <class T> struct ListPtr : public LockBase
 {
 
 protected:
@@ -198,11 +220,15 @@ protected:
 	T* first;
 	T* last;
 
+	u32 count;
+
 	ListPtr* _selfPtr;
+
+	void Assert(T* r) { DEBUG_ASSERT(r->next == 0); }
 
 public:
 
-	void Init() { if (_selfPtr != this) first = 0, last = 0, _selfPtr = this; }
+	void Init() { if (_selfPtr != this) first = 0, last = 0, count = 0, _selfPtr = this; }
 
 	ListPtr() { Init(); }
 
@@ -210,42 +236,52 @@ public:
 
 	void	Add(const Ptr<T> &r);
 
-	//bool	Empty() { return first == 0; }
+	bool	Empty() { return first == 0; }
 };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 template <class T> Ptr<T> ListPtr<T>::Get()
 {
-	T* r = first;
+	Lock();
 
-	if (r != 0)
+	Ptr<T> r(first);
+
+	if (r.ptr != 0)
 	{
-		first = (T*)r->next;
+		first = (T*)r.ptr->next;
 
-		//		r->next = 0;
+		r.ptr->next = 0;
 
 		if (first == 0)
 		{
 			last = 0;
 		};
 
-		//counter--;
+		count--;
 
-		r->count--;
+		r->DecCount();
 	};
 
-	return Ptr<T>(r);
+	Unlock();
+
+	return r;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 template <class T> void ListPtr<T>::Add(const Ptr<T>& r)
 {
-	if (r.ptr == 0)
+	if (!r.Valid())
 	{
 		return;
 	};
+
+	r.ptr->IncCount();
+
+	Assert(r.ptr);
+
+	Lock();
 
 	if (last == 0)
 	{
@@ -257,11 +293,11 @@ template <class T> void ListPtr<T>::Add(const Ptr<T>& r)
 		last = r.ptr;
 	};
 
-	r.ptr->count++;
-
-	//counter++;
+	count++;
 
 	r.ptr->next = 0;
+
+	Unlock();
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -306,7 +342,7 @@ template <class T> Ptr<T> ListRef<T>::Get()
 			last = 0;
 		};
 
-		if (r != 0) r->count--;
+		if (r != 0) r->DecCount();
 		
 		i->Free();
 	};
@@ -324,6 +360,8 @@ template <class T> bool ListRef<T>::Add(const Ptr<T>& r)
 
 	if (item == 0) return false;
 
+	r.ptr->IncCount();
+
 	item->item = r.ptr;
 
 	if (last == 0)
@@ -336,7 +374,6 @@ template <class T> bool ListRef<T>::Add(const Ptr<T>& r)
 		last = item;
 	};
 
-	r.ptr->count++;
 	item->next = 0;
 
 	return true;

@@ -117,7 +117,7 @@ link_options = $(cpu_link_options) --bestdebug --strict --map --xref --callgraph
   
 ##################################################################################################-wd4996
 
-win32_compiler_options = -nologo -DWIN32 -D_TESTONPC_ -c -Z7 -Zp
+win32_compiler_options = -nologo -DWIN32 -D_DEBUG -c -Z7 -Zp
 
 ##################################################################################################
 

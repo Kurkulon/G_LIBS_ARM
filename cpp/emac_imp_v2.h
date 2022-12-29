@@ -984,7 +984,11 @@ DWORD WINAPI TxThreadFunction(LPVOID lpParam)
 			srcip.S_un.S_addr = ep.eip->iph.src;
 			dstip.S_un.S_addr = ep.eip->iph.dst;
 
+			mb->Assert();
+
 			int len = sendto(lstnSocket, (char*)&ep.eip->iph, mb->len - sizeof(ep.eip->eth), 0, (SOCKADDR*)&srvc, sizeof(srvc)); 
+
+			mb->Assert();
 
 			mb->len = 0;
 
@@ -994,8 +998,6 @@ DWORD WINAPI TxThreadFunction(LPVOID lpParam)
 		}
 		else
 		{
-			//Sleep(0);
-
 			if (count == 0) SuspendThread(handleTxThread); else count--;
 		};
 
@@ -1633,7 +1635,7 @@ void UpdateEMAC()
 
 #else
 
-	RecieveFrame();
+	if (!txList.Empty()) ResumeThread(handleTxThread);
 
 #endif
 }
