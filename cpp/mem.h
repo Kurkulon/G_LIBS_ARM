@@ -39,8 +39,8 @@ protected:
 
 public:
 
-	static	MEMB*	Create()	{ MEMB *p = _freeList.Get(); if (p != 0) {p->dataOffset = 0; p->len = 0; }; return p; }
-	virtual void	Destroy()	{ if (this != 0) _freeList.Add(this); }
+	static	MEMB*	Create()	{ MEMB *p = _freeList.Get(); if (p != 0) {p->dataOffset = 0; p->len = 0; p->alcc = true;}; return p; }
+	virtual void	Destroy()	{ if (this != 0) this->alcc = false, _freeList.Add(this); }
 	virtual	u32		MaxLen()	{ return sizeof(_data)+sizeof(exData); }
 	virtual	u32		FreeCount() { return _freeList.Count(); }
 

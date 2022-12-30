@@ -191,7 +191,7 @@ u16  txIpID = 0;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static ListPtr<MB> txList;
+static ListPtr<MB> txEthList;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -374,7 +374,7 @@ bool TransmitEth(Ptr<MB> &mb)
 
 #else
 
-	txList.Add(mb);
+	txEthList.Add(mb);
 
 	ResumeThread(handleTxThread);
 
@@ -964,10 +964,12 @@ DWORD WINAPI TxThreadFunction(LPVOID lpParam)
 
 	while(1)
 	{
-		mb = txList.Get();
+		mb = txEthList.Get();
 
 		if (mb.Valid())
 		{
+			mb->Assert();
+
 			EthPtr ep;
 
 			ep.eth = (EthHdr*)mb->GetDataPtr();
@@ -984,7 +986,6 @@ DWORD WINAPI TxThreadFunction(LPVOID lpParam)
 			srcip.S_un.S_addr = ep.eip->iph.src;
 			dstip.S_un.S_addr = ep.eip->iph.dst;
 
-			mb->Assert();
 
 			int len = sendto(lstnSocket, (char*)&ep.eip->iph, mb->len - sizeof(ep.eip->eth), 0, (SOCKADDR*)&srvc, sizeof(srvc)); 
 
@@ -1635,7 +1636,7 @@ void UpdateEMAC()
 
 #else
 
-	if (!txList.Empty()) ResumeThread(handleTxThread);
+	if (!txEthList.Empty()) ResumeThread(handleTxThread);
 
 #endif
 }

@@ -124,7 +124,7 @@ template <class T> void List<T>::Add(T* r)
 		last = r;
 	};
 
-	r->next = 0;
+	//r->next = 0;
 
 	count++;
 
@@ -168,15 +168,15 @@ public:
 	Ptr(T* p) : ptr(p)				{ if (ptr != 0) ptr->IncCount(); }
 	Ptr(const Ptr& p) : ptr(p.ptr)	{ if (ptr != 0) ptr->IncCount(); }
 
-	Ptr& operator=(const Ptr& p)	{ if (ptr != p.ptr) { Free(); ptr = p.ptr; if (ptr != 0) ptr->IncCount(); }; return *this; }
-	Ptr& operator=(T* p)			{ if (ptr != p) { Free(); ptr = p; if (ptr != 0) ptr->IncCount(); }; return *this; }
+	Ptr& operator=(const Ptr& p)	{ if (ptr != p.ptr) { if (p.ptr != 0)	p.ptr->IncCount();	Free(); ptr = p.ptr;	}; return *this; }
+	Ptr& operator=(T* p)			{ if (ptr != p)		{ if (p != 0)		p->IncCount();		Free(); ptr = p;		}; return *this; }
 	~Ptr()							{ Free(); }
 	bool Valid() const				{ return ptr != 0; }
-	void Alloc()					{ Free(); ptr = T::Create(); if (ptr != 0) ptr->SetCount(); }
-	void Free()						{ if (ptr != 0) { ptr->DecCount(); ptr = 0;}; }
+	void Alloc()					{ Free(); ptr = T::Create(); if (ptr != 0) { DEBUG_ASSERT(ptr->_count == 0); ptr->SetCount(); }; }
+	void Free()						{ if (ptr != 0) { ptr->DecCount(this); ptr = 0;}; }
 	T* operator->()					{ return ptr; }
 	T& operator*()					{ return *ptr; }
-	u32	 Count()					{ return (ptr != 0) ? ptr->Count() : 0; }
+	u32	 Count() const				{ return (ptr != 0) ? ptr->Count() : 0; }
 };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -187,7 +187,9 @@ template <class T> struct PtrObj : public LockBase
 
 protected:
 
-	PtrObj*	next;
+	PtrObj* volatile next;
+	volatile bool alcc;
+	Ptr<T> *volatile last_ptr;
 
 private:
 
@@ -195,9 +197,9 @@ private:
 
 protected:
 
-	__forceinline void IncCount()	{ _InterlockedIncrement(&_count); }
-	__forceinline void DecCount()	{ Lock(); if (_count != 0) { _count--; if (_count == 0) Destroy(); }; Unlock(); }
-	__forceinline void SetCount()	{ _count = 1; }
+	__forceinline void IncCount()			{ Lock(); DEBUG_ASSERT(alcc); _count++; Unlock(); }
+	__forceinline void DecCount(Ptr<T> *p)	{ Lock(); if (_count != 0) { DEBUG_ASSERT(alcc); _count--; if (_count == 0) last_ptr = p, Destroy(); } else {DEBUG_ASSERT(!alcc); }; Unlock(); }
+	__forceinline void SetCount()			{ DEBUG_ASSERT(alcc); _count = 1; }
 
 public:
 
@@ -207,7 +209,7 @@ public:
 
 	void Assert() { DEBUG_ASSERT(next == 0); }
 
-	PtrObj() : next(0), _count(0) { }
+	PtrObj() : next(0), _count(0), alcc(false), last_ptr(0) { }
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -249,21 +251,23 @@ template <class T> Ptr<T> ListPtr<T>::Get()
 
 	if (r.ptr != 0)
 	{
+		DEBUG_ASSERT(r.ptr->alcc);
+		DEBUG_ASSERT(r.ptr->_count >= 2);
+
 		first = (T*)r.ptr->next;
 
 		r.ptr->next = 0;
 
-		if (first == 0)
-		{
-			last = 0;
-		};
+		if (first == 0)	last = 0;
 
 		count--;
 
-		r->DecCount();
+		r->DecCount(&r);
 	};
 
 	Unlock();
+
+	if (r.Valid()) DEBUG_ASSERT(r.ptr->alcc);
 
 	return r;
 }
@@ -272,14 +276,14 @@ template <class T> Ptr<T> ListPtr<T>::Get()
 
 template <class T> void ListPtr<T>::Add(const Ptr<T>& r)
 {
-	if (!r.Valid())
-	{
-		return;
-	};
+	if (!r.Valid())	return;
+
+	DEBUG_ASSERT(r.ptr->alcc);
+	DEBUG_ASSERT(r.ptr->_count != 0);
 
 	r.ptr->IncCount();
 
-	Assert(r.ptr);
+	DEBUG_ASSERT(r.ptr->next == 0);
 
 	Lock();
 
@@ -295,14 +299,16 @@ template <class T> void ListPtr<T>::Add(const Ptr<T>& r)
 
 	count++;
 
-	r.ptr->next = 0;
+	//r.ptr->next = 0;
 
 	Unlock();
+
+	DEBUG_ASSERT(r.ptr->alcc);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-template <class T> struct ListRef
+template <class T> struct ListRef : public LockBase
 {
 
 protected:
@@ -321,13 +327,17 @@ public:
 	Ptr<T> Get();
 
 	bool Add(const Ptr<T> &r);
+
+	bool Empty() { return first == 0; }
 };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 template <class T> Ptr<T> ListRef<T>::Get()
 {
-	T* r = 0;
+	Lock();
+
+	Ptr<T> r;
 
 	ListItem* i = first;
 
@@ -337,17 +347,18 @@ template <class T> Ptr<T> ListRef<T>::Get()
 
 		first = i->next;
 
-		if (first == 0)
-		{
-			last = 0;
-		};
+		i->next = 0;
 
-		if (r != 0) r->DecCount();
+		if (first == 0) last = 0;
+
+		if (r.Valid()) r->DecCount((Ptr<T>*)~0);
 		
 		i->Free();
 	};
 
-	return Ptr<T>(r);
+	Unlock();
+
+	return r;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -364,6 +375,8 @@ template <class T> bool ListRef<T>::Add(const Ptr<T>& r)
 
 	item->item = r.ptr;
 
+	Lock();
+
 	if (last == 0)
 	{
 		first = last = item;
@@ -373,6 +386,8 @@ template <class T> bool ListRef<T>::Add(const Ptr<T>& r)
 		last->next = item;
 		last = item;
 	};
+
+	Unlock();
 
 	item->next = 0;
 
@@ -391,10 +406,10 @@ protected:
 
 	static List<PtrItem> _freeList;
 
-	static	T*		Create()	{ return (T*)_freeList.Get(); };
+	static	T*		Create()	{ T* p = (T*)_freeList.Get(); if (p != 0) p->alcc = true; return p; };
 
 	virtual	void	_FreeCallBack() {}
-	virtual	void	Destroy() { _FreeCallBack(); _freeList.Add(this); }
+	virtual	void	Destroy() { _FreeCallBack(); this->alcc = false; _freeList.Add(this); }
 
 public:
 

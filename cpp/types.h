@@ -13,16 +13,16 @@
 
 	#include <intrin.h>
 
-	#define __packed /*__declspec(align(1))*/
+	#define __packed __declspec(align(1))
 	#define __softfp /**/
 	#define __irq __declspec(naked)
 	#define __align(v)
 	#define __attribute__(v)
 	#define __func__ __FUNCTION__
 
-	inline  void __breakpoint(int v) { __debugbreak(); }
-	inline void __disable_irq() {}
-	inline void __enable_irq() {}
+	__forceinline void __breakpoint(int v) { __debugbreak(); }
+	__forceinline void __disable_irq() {}
+	__forceinline void __enable_irq() {}
 	//inline void __nop() {}
 
 	#define __CC_ARM
@@ -61,9 +61,9 @@ inline float ABS(float v) { *((u32*)&v) &= 0x7FFFFFFF; return v; }
 //inline bool fIsValid(float v) { return (((u16*)&v)[1] & 0x7F80) != 0x7F80; }
 //inline bool dIsValid(double v) { return (((u32*)&v)[1] & 0x7FF0) != 0x7FF0; }
 
-inline u32 LIM(u32 v, u32 min, u32 max) { return (v < min) ? min : ((v > max) ? max : v); }
-inline u32 MIN(u32 a, u32 b) { return (a < b) ? a : b; }
-inline u32 MAX(u32 a, u32 b) { return (a >= b) ? a : b; }
+__forceinline u32 LIM(u32 v, u32 min, u32 max) { return (v < min) ? min : ((v > max) ? max : v); }
+__forceinline u32 MIN(u32 a, u32 b) { return (a < b) ? a : b; }
+__forceinline u32 MAX(u32 a, u32 b) { return (a >= b) ? a : b; }
 
 #define GD(adr, t, i) (*(((t*)adr)+i))
 #define GB(adr,i) (*(((byte*)adr)+i))

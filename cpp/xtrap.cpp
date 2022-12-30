@@ -35,7 +35,7 @@ static TrapReq  traps[10];
 //static List<TrapReq> freeTrapList;
 static ListPtr<MB> reqTrapList;
 
-static ListPtr<MB> txList;
+static ListPtr<MB> txTrapList;
 //static List<SmallTx> txFree;
 
 static MAC ComputerEmacAddr = {0,0};	// Our Ethernet MAC address and IP address
@@ -131,7 +131,7 @@ void SendTrap(Ptr<MB> &mb)
 
 	((EthIp*)mb->GetDataPtr())->iph.off = 0;
 
-	txList.Add(mb);
+	txTrapList.Add(mb);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -140,7 +140,7 @@ void SendFragTrap(Ptr<MB> &mb)
 {
 	if (!EmacIsConnected())	return;
 
-	txList.Add(mb);
+	txTrapList.Add(mb);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -229,7 +229,7 @@ static void UpdateSendTraps()
 {
 	static TM32 tm;
 
-	Ptr<MB> mb = txList.Get();
+	Ptr<MB> mb = txTrapList.Get();
 
 	if (!EmacIsConnected())	return;
 
