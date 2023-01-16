@@ -188,8 +188,8 @@ template <class T> struct PtrObj : public LockBase
 protected:
 
 	PtrObj* volatile next;
-	volatile bool alcc;
-	Ptr<T> *volatile last_ptr;
+	//volatile bool alcc;
+	//Ptr<T> *volatile last_ptr;
 
 private:
 
@@ -197,9 +197,9 @@ private:
 
 protected:
 
-	__forceinline void IncCount()			{ Lock(); DEBUG_ASSERT(alcc); _count++; Unlock(); }
-	__forceinline void DecCount(Ptr<T> *p)	{ Lock(); if (_count != 0) { DEBUG_ASSERT(alcc); _count--; if (_count == 0) last_ptr = p, Destroy(); } else {DEBUG_ASSERT(!alcc); }; Unlock(); }
-	__forceinline void SetCount()			{ DEBUG_ASSERT(alcc); _count = 1; }
+	__forceinline void IncCount()			{ Lock(); /*DEBUG_ASSERT(alcc);*/ _count++; Unlock(); }
+	__forceinline void DecCount(Ptr<T> *p)	{ Lock(); if (_count != 0) { /*DEBUG_ASSERT(alcc);*/ _count--; if (_count == 0) /*last_ptr = p,*/ Destroy(); } else { /*DEBUG_ASSERT(!alcc);*/ }; Unlock(); }
+	__forceinline void SetCount()			{ /*DEBUG_ASSERT(alcc);*/ _count = 1; }
 
 public:
 
@@ -209,7 +209,7 @@ public:
 
 	void Assert() { DEBUG_ASSERT(next == 0); }
 
-	PtrObj() : next(0), _count(0), alcc(false), last_ptr(0) { }
+	PtrObj() : next(0), _count(0)/*, alcc(false), last_ptr(0)*/ { }
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -251,7 +251,7 @@ template <class T> Ptr<T> ListPtr<T>::Get()
 
 	if (r.ptr != 0)
 	{
-		DEBUG_ASSERT(r.ptr->alcc);
+		//DEBUG_ASSERT(r.ptr->alcc);
 		DEBUG_ASSERT(r.ptr->_count >= 2);
 
 		first = (T*)r.ptr->next;
@@ -267,7 +267,7 @@ template <class T> Ptr<T> ListPtr<T>::Get()
 
 	Unlock();
 
-	if (r.Valid()) DEBUG_ASSERT(r.ptr->alcc);
+	//if (r.Valid()) DEBUG_ASSERT(r.ptr->alcc);
 
 	return r;
 }
@@ -278,7 +278,7 @@ template <class T> void ListPtr<T>::Add(const Ptr<T>& r)
 {
 	if (!r.Valid())	return;
 
-	DEBUG_ASSERT(r.ptr->alcc);
+	//DEBUG_ASSERT(r.ptr->alcc);
 	DEBUG_ASSERT(r.ptr->_count != 0);
 
 	r.ptr->IncCount();
@@ -303,7 +303,7 @@ template <class T> void ListPtr<T>::Add(const Ptr<T>& r)
 
 	Unlock();
 
-	DEBUG_ASSERT(r.ptr->alcc);
+	//DEBUG_ASSERT(r.ptr->alcc);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -406,10 +406,10 @@ protected:
 
 	static List<PtrItem> _freeList;
 
-	static	T*		Create()	{ T* p = (T*)_freeList.Get(); if (p != 0) p->alcc = true; return p; };
+	static	T*		Create()	{ T* p = (T*)_freeList.Get(); return p; };
 
 	virtual	void	_FreeCallBack() {}
-	virtual	void	Destroy() { _FreeCallBack(); this->alcc = false; _freeList.Add(this); }
+	virtual	void	Destroy() { _FreeCallBack(); _freeList.Add(this); }
 
 public:
 

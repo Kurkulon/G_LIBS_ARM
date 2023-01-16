@@ -370,7 +370,7 @@ bool TransmitEth(Ptr<MB> &mb)
 
 	((EthHdr*)mb->GetDataPtr())->src = hwAdr;
 
-	txList.Add(mb);
+	txEthList.Add(mb);
 
 #else
 
@@ -883,7 +883,7 @@ static void UpdateTransmit()
 	{
 		case 0:
 
-			buf = txList.Get();
+			buf = txEthList.Get();
 
 			if (buf.Valid())
 			{

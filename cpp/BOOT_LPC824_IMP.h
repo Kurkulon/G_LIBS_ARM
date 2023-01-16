@@ -567,9 +567,7 @@ int main()
 	//__breakpoint(0);
 
 	SEGGER_RTT_Init();
-
 	SEGGER_RTT_WriteString(0, RTT_CTRL_CLEAR);
-
 	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_YELLOW "Bootloader Start ...\n");
 
 	Pin_MainLoop_Clr();
@@ -598,6 +596,8 @@ int main()
 	//__breakpoint(0);
 
 	__disable_irq();
+
+	SEGGER_RTT_printf(0, RTT_CTRL_TEXT_BRIGHT_GREEN "Main App Start ... %u ms\n", GetMilliseconds());
 
 	_MainAppStart(FLASH0+BOOTSIZE);
 
