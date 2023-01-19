@@ -211,38 +211,41 @@ namespace T_HW
 			} B;
 		};
 
-		S_PIO 	PIO0_17;                    /*!< (@ 0x40044000) I/O configuration for pin PIO0_17 */
-		S_PIO 	PIO0_13;                    /*!< (@ 0x40044004) I/O configuration for pin PIO0_13 */
-		S_PIO 	PIO0_12;                    /*!< (@ 0x40044008) I/O configuration for pin PIO0_12 */
-		S_PIO 	PIO0_5;                     /*!< (@ 0x4004400C) I/O configuration for pin PIO0_5 */
-		S_PIO 	PIO0_4;                     /*!< (@ 0x40044010) I/O configuration for pin PIO0_4 */
-		S_PIO 	PIO0_3;                     /*!< (@ 0x40044014) I/O configuration for pin PIO0_3 */
-		S_PIO 	PIO0_2;                     /*!< (@ 0x40044018) I/O configuration for pin PIO0_2 */
-		S_PIO 	PIO0_11;                    /*!< (@ 0x4004401C) I/O configuration for pin PIO0_11 */
-		S_PIO 	PIO0_10;                    /*!< (@ 0x40044020) I/O configuration for pin PIO0_10 */
-		S_PIO 	PIO0_16;                    /*!< (@ 0x40044024) I/O configuration for pin PIO0_16 */
-		S_PIO 	PIO0_15;                    /*!< (@ 0x40044028) I/O configuration for pin PIO0_15 */
-		S_PIO 	PIO0_1;                     /*!< (@ 0x4004402C) I/O configuration for pin PIO0_1 */
-		LPC_REG z_Reserved;                 /*!< (@ 0x40044030) I/O configuration for pin (Reserved) */
-		S_PIO 	PIO0_9;                     /*!< (@ 0x40044034) I/O configuration for pin PIO0_9 */
-		S_PIO 	PIO0_8;                     /*!< (@ 0x40044038) I/O configuration for pin PIO0_8 */
-		S_PIO 	PIO0_7;                     /*!< (@ 0x4004403C) I/O configuration for pin PIO0_7 */
-		S_PIO 	PIO0_6;                     /*!< (@ 0x40044040) I/O configuration for pin PIO0_6 */
-		S_PIO 	PIO0_0;                     /*!< (@ 0x40044044) I/O configuration for pin PIO0_0 */
-		S_PIO 	PIO0_14;                    /*!< (@ 0x40044048) I/O configuration for pin PIO0_14 */
-		LPC_REG z_Reserved1;
-		S_PIO 	PIO0_28;                   /*!< (@ 0x40044050) I/O configuration for pin PIO0_28                      */
-		S_PIO 	PIO0_27;                   /*!< (@ 0x40044054) I/O configuration for pin PIO0_27                      */
-		S_PIO 	PIO0_26;                   /*!< (@ 0x40044058) I/O configuration for pin PIO0_26                      */
-		S_PIO 	PIO0_25;                   /*!< (@ 0x4004405C) I/O configuration for pin PIO0_25                      */
-		S_PIO 	PIO0_24;                   /*!< (@ 0x40044060) I/O configuration for pin PIO0_24                      */
-		S_PIO 	PIO0_23;                   /*!< (@ 0x40044064) I/O configuration for pin PIO0_23/ADC_3                */
-		S_PIO	PIO0_22;                   /*!< (@ 0x40044068) I/O configuration for pin PIO0_22/ADC_4                */
-		S_PIO	PIO0_21;                   /*!< (@ 0x4004406C) I/O configuration for pin PIO0_21/ACMP_I4/ADC_5        */
-		S_PIO	PIO0_20;                   /*!< (@ 0x40044070) I/O configuration for pin PIO0_20/ADC_6                */
-		S_PIO	PIO0_19;                   /*!< (@ 0x40044074) I/O configuration for pin PIO0_19/ADC_7                */
-		S_PIO	PIO0_18;                   /*!< (@ 0x40044078) I/O configuration for pin PIO0_18/ADC_8                */
+		S_PIO 	PIO0_17;		//0         /*!< (@ 0x40044000) I/O configuration for pin PIO0_17 */
+		S_PIO 	PIO0_13;    	//1    		/*!< (@ 0x40044004) I/O configuration for pin PIO0_13 */
+		S_PIO 	PIO0_12;    	//2    		/*!< (@ 0x40044008) I/O configuration for pin PIO0_12 */
+		S_PIO 	PIO0_5;     	//3    		/*!< (@ 0x4004400C) I/O configuration for pin PIO0_5 */
+		S_PIO 	PIO0_4;     	//4    		/*!< (@ 0x40044010) I/O configuration for pin PIO0_4 */
+		S_PIO 	PIO0_3;     	//5    		/*!< (@ 0x40044014) I/O configuration for pin PIO0_3 */
+		S_PIO 	PIO0_2;     	//6    		/*!< (@ 0x40044018) I/O configuration for pin PIO0_2 */
+		S_PIO 	PIO0_11;    	//7    		/*!< (@ 0x4004401C) I/O configuration for pin PIO0_11 */
+		S_PIO 	PIO0_10;    	//8    		/*!< (@ 0x40044020) I/O configuration for pin PIO0_10 */
+		S_PIO 	PIO0_16;    	//9    		/*!< (@ 0x40044024) I/O configuration for pin PIO0_16 */
+		S_PIO 	PIO0_15;    	//10    	/*!< (@ 0x40044028) I/O configuration for pin PIO0_15 */
+		S_PIO 	PIO0_1;     	//11    	/*!< (@ 0x4004402C) I/O configuration for pin PIO0_1 */
+		LPC_REG z_Reserved; 	//12    	/*!< (@ 0x40044030) I/O configuration for pin (Reserved) */
+		S_PIO 	PIO0_9;     	//13    	/*!< (@ 0x40044034) I/O configuration for pin PIO0_9 */
+		S_PIO 	PIO0_8;     	//14    	/*!< (@ 0x40044038) I/O configuration for pin PIO0_8 */
+		S_PIO 	PIO0_7;     	//15    	/*!< (@ 0x4004403C) I/O configuration for pin PIO0_7 */
+		S_PIO 	PIO0_6;     	//16    	/*!< (@ 0x40044040) I/O configuration for pin PIO0_6 */
+		S_PIO 	PIO0_0;     	//17    	/*!< (@ 0x40044044) I/O configuration for pin PIO0_0 */
+		S_PIO 	PIO0_14;    	//18    	/*!< (@ 0x40044048) I/O configuration for pin PIO0_14 */
+		LPC_REG z_Reserved1;	//19
+		S_PIO 	PIO0_28;    	//20   		/*!< (@ 0x40044050) I/O configuration for pin PIO0_28                      */
+		S_PIO 	PIO0_27;    	//21   		/*!< (@ 0x40044054) I/O configuration for pin PIO0_27                      */
+		S_PIO 	PIO0_26;    	//22   		/*!< (@ 0x40044058) I/O configuration for pin PIO0_26                      */
+		S_PIO 	PIO0_25;    	//23   		/*!< (@ 0x4004405C) I/O configuration for pin PIO0_25                      */
+		S_PIO 	PIO0_24;    	//24   		/*!< (@ 0x40044060) I/O configuration for pin PIO0_24                      */
+		S_PIO 	PIO0_23;    	//25   		/*!< (@ 0x40044064) I/O configuration for pin PIO0_23/ADC_3                */
+		S_PIO	PIO0_22;    	//26   		/*!< (@ 0x40044068) I/O configuration for pin PIO0_22/ADC_4                */
+		S_PIO	PIO0_21;    	//27   		/*!< (@ 0x4004406C) I/O configuration for pin PIO0_21/ACMP_I4/ADC_5        */
+		S_PIO	PIO0_20;    	//28   		/*!< (@ 0x40044070) I/O configuration for pin PIO0_20/ADC_6                */
+		S_PIO	PIO0_19;    	//29   		/*!< (@ 0x40044074) I/O configuration for pin PIO0_19/ADC_7                */
+		S_PIO	PIO0_18;    	//30   		/*!< (@ 0x40044078) I/O configuration for pin PIO0_18/ADC_8                */
 	};
+
+	#define IOCON_PIN_INDEX_TABLE_DEF	const byte iocon_Pin_Index[] = { 17,11,6,5,4,3,16,15,14,13,8,7,2,1,18,10,9,0,30,29,28,27,26,25,24,23,22,21,20 };
+	#define IOCON_PIN_INDEX_TABLE_DECL  extern const byte iocon_Pin_Index[];
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

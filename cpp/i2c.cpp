@@ -4,6 +4,22 @@
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+#ifdef CPU_LPC824	
+
+	static S_I2C::S_I2C *_i2c0 = 0;
+	static S_I2C::S_I2C *_i2c1 = 0;
+	static S_I2C::S_I2C *_i2c2 = 0;
+	static S_I2C::S_I2C *_i2c3 = 0;
+
+	__irq void S_I2C::I2C0_Handler() { if (_i2c0 != 0) _i2c0->IRQ_Handler(); }
+	__irq void S_I2C::I2C1_Handler() { if (_i2c1 != 0) _i2c1->IRQ_Handler(); }
+	__irq void S_I2C::I2C2_Handler() { if (_i2c2 != 0) _i2c2->IRQ_Handler(); }
+	__irq void S_I2C::I2C3_Handler() { if (_i2c3 != 0) _i2c3->IRQ_Handler(); }
+
+#endif
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 void S_I2C::InitHW()
 {
 #ifdef CPU_SAME53	
@@ -73,6 +89,71 @@ void S_I2C::InitHW()
 		//CM4::NVIC->CLR_PR(I2C_IRQ);
 		//CM4::NVIC->SET_ER(I2C_IRQ);
 
+#elif defined(CPU_LPC824)
+
+	HW::SYSCON->SYSAHBCLKCTRL |= 1UL<<_upid;
+
+	if(_usic_num == 5)
+	{
+		HW::IOCON->PIO0_10.B.I2CMODE = 0;
+		HW::IOCON->PIO0_11.B.I2CMODE = 0;
+
+		_i2c0 = this;
+
+		VectorTableExt[I2C0_IRQ] = I2C0_Handler;
+		CM0::NVIC->CLR_PR(I2C0_IRQ);
+		CM0::NVIC->SET_ER(I2C0_IRQ);
+	}
+	else
+	{
+		IOCON_PIN_INDEX_TABLE_DEF;
+
+		T_HW::S_IOCON::S_PIO *iocon = &(HW::IOCON->PIO0_17);
+
+		(iocon+iocon_Pin_Index[_PIN_SCL])->B.OD = 1;
+		(iocon+iocon_Pin_Index[_PIN_SDA])->B.OD = 1;
+
+		if(_usic_num == 6)
+		{
+			HW::SWM->I2C1_SCL	= _PIN_SCL;
+			HW::SWM->I2C1_SDA	= _PIN_SDA;
+
+			_i2c1 = this;
+
+			VectorTableExt[I2C1_IRQ] = I2C1_Handler;
+			CM0::NVIC->CLR_PR(I2C1_IRQ);
+			CM0::NVIC->SET_ER(I2C1_IRQ);
+		}
+		else if(_usic_num == 7)
+		{
+			HW::SWM->I2C2_SCL	= _PIN_SCL;
+			HW::SWM->I2C2_SDA	= _PIN_SDA;
+
+			_i2c2 = this;
+
+			VectorTableExt[I2C2_IRQ] = I2C2_Handler;
+			CM0::NVIC->CLR_PR(I2C2_IRQ);
+			CM0::NVIC->SET_ER(I2C2_IRQ);
+		}
+		else if(_usic_num == 8)
+		{
+			HW::SWM->I2C3_SCL	= _PIN_SCL;
+			HW::SWM->I2C3_SDA	= _PIN_SDA;
+
+			_i2c3 = this;
+
+			VectorTableExt[I2C3_IRQ] = I2C3_Handler;
+			CM0::NVIC->CLR_PR(I2C3_IRQ);
+			CM0::NVIC->SET_ER(I2C3_IRQ);
+		};
+	};
+
+	T_HW::S_TWI* &uhw = _uhw.i2c;
+
+	uhw->CFG = _CFG;
+	//uhw->BRG = _BRG;
+	//uhw->OSR = _OSR;
+
 #endif
 }
 
@@ -112,6 +193,12 @@ bool S_I2C::Connect(u32 baudrate)
 	#elif defined(CPU_XMC48)
 
 		_FDR = (1024 - (((_GEN_CLK + baudrate/2) / baudrate + 8) / 16)) | USIC_DM(1);
+
+		InitHW();
+
+	#elif defined(CPU_LPC824)
+
+		//_FDR = (1024 - (((_GEN_CLK + baudrate/2) / baudrate + 8) / 16)) | USIC_DM(1);
 
 		InitHW();
 

@@ -123,7 +123,7 @@ void ComPort::InitHW()
 
 	#elif defined(CPU_LPC824)
 
-		HW::SYSCON->SYSAHBCLKCTRL |= HW::CLK::UART0_M << _usic_num;
+		HW::SYSCON->SYSAHBCLKCTRL |= 1UL<<_upid;
 
 		if(_usic_num == 0)
 		{

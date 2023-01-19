@@ -80,13 +80,17 @@ static bool run = true;
 struct ReqMes
 {
 	u32 len;
-	u32 func;
+	//u32 func;
 
 	union
 	{
-		struct { u32 flashLen;  u16 align; u16 crc; } F01; // Get Flash CRC
-		struct { u32 padr; u32 page[PAGEDWORDS]; u16 align; u16 crc; } F02; // Write page
-		struct { u16 align; u16 crc; } F03; // Exit boot loader
+		struct { u32 func; u32 len;										u16 align; u16 crc; }	F1; // Get CRC
+		struct { u32 func;												u16 align; u16 crc; }	F2; // Exit boot loader
+		struct { u32 func; u32 padr; u32 plen; u32 pdata[PAGEDWORDS];	u16 align; u16 crc; }	F3; // Programm page
+
+		//struct { u32 flashLen;  u16 align; u16 crc; } F01; // Get Flash CRC
+		//struct { u32 padr; u32 page[PAGEDWORDS]; u16 align; u16 crc; } F02; // Write page
+		//struct { u16 align; u16 crc; } F03; // Exit boot loader
 	};
 };
 
@@ -95,13 +99,17 @@ struct ReqMes
 struct RspMes
 {
 	u32 len;
-	u32 func;
+	//u32 func;
 
 	union
 	{
-		struct { u32 flashLen; u16 flashCRC; u16 crc; } F01;
-		struct { u32 padr; u32 status; u16 align; u16 crc; } F02;
-		struct { u16 align; u16 crc; } F03;							// Exit boot loader
+		struct { u32 func; u32 pageLen;	u32 len;	u16 sCRC;	u16 crc; }	F1; // Get CRC
+		struct { u32 func;							u16 align;	u16 crc; } 	F2; // Exit boot loader
+		struct { u32 func; u32 padr;	u32 status; u16 align;	u16 crc; } 	F3; // Programm page
+
+		//struct { u32 flashLen; u16 flashCRC; u16 crc; } F01;
+		//struct { u32 padr; u32 status; u16 align; u16 crc; } F02;
+		//struct { u16 align; u16 crc; } F03;							// Exit boot loader
 	};
 };
 
@@ -401,61 +409,62 @@ static bool Request_01_GetFlashCRC(ReqMes &req, RspMes &rsp)
 
 	//if (req.F01.flashLen > FLASH_SIZE) { req.F01.flashLen = FLASH_SIZE; };
 
-	u32 len = MIN(req.F01.flashLen, FLASH_SIZE);
+	u32 len = MIN(req.F1.len, FLASH_SIZE);
 
-	rsp.func = req.func;
-	rsp.F01.flashLen = len;
-	rsp.F01.flashCRC = GetCRC16((void*)FLASH_START, len);
-	rsp.F01.crc = GetCRC16(&rsp.func, sizeof(rsp.F01) - 2 + sizeof(rsp.func));
-	rsp.len = sizeof(rsp.F01) + sizeof(rsp.func);
+	rsp.F1.func		= req.F1.func;
+	rsp.F1.pageLen	= PAGESIZE;
+	rsp.F1.len		= len;
+	rsp.F1.sCRC		= GetCRC16((void*)FLASH_START, len);
+	rsp.F1.crc		= GetCRC16(&rsp.F1, sizeof(rsp.F1) - 2);
+	rsp.len			= sizeof(rsp.F1);
 
 	return true;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool Request_02_WritePage(ReqMes &req, RspMes &rsp)
+static bool Request_03_WritePage(ReqMes &req, RspMes &rsp)
 {
 	bool c = false;
 
-	if (req.len == (sizeof(req.F02) + sizeof(req.func)))
+	if (req.len == sizeof(req.F3))
 	{
-		c = WritePage(req.F02.padr/PAGESIZE, req.F02.page);
+		c = WritePage(req.F3.padr/PAGESIZE, req.F3.pdata);
 	};
 
-	rsp.func = req.func;
-	rsp.F02.padr = req.F02.padr;
-	rsp.F02.status = (c) ? 1 : 0;
-	rsp.F02.align = ~req.F02.padr;
-	rsp.F02.crc = GetCRC16(&rsp.func, sizeof(rsp.F02) - 2 + sizeof(rsp.func));
-	rsp.len = sizeof(rsp.F02) + sizeof(rsp.func);
+	rsp.F3.func		= req.F3.func;
+	rsp.F3.padr		= req.F3.padr;
+	rsp.F3.status	= (c) ? 1 : 0;
+	rsp.F3.align	= ~req.F3.padr;
+	rsp.F3.crc		= GetCRC16(&rsp.F3, sizeof(rsp.F3) - 2);
+	rsp.len			= sizeof(rsp.F3);
 
 	return true;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool Request_03_ExitBootLoader(ReqMes &req, RspMes &rsp)
+static bool Request_02_ExitBootLoader(ReqMes &req, RspMes &rsp)
 {
-	rsp.func = req.func;
-	rsp.F03.align = 0x5555;
-	rsp.F03.crc = GetCRC16(&rsp.func, sizeof(rsp.F03) - sizeof(rsp.F03.crc) + sizeof(rsp.func));
-	rsp.len = sizeof(rsp.F03) + sizeof(rsp.func);
+	rsp.F2.func		= req.F2.func;
+	rsp.F2.align	= 0x5555;
+	rsp.F2.crc		= GetCRC16(&rsp.F2, sizeof(rsp.F2) - sizeof(rsp.F2.crc));
+	rsp.len			= sizeof(rsp.F2);
 
 	return false;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool Request_Default(ReqMes &req, RspMes &rsp)
-{
-	rsp.func = req.func;
-	rsp.F03.align = 0xAAAA;
-	rsp.F03.crc = GetCRC16(&rsp.func, sizeof(rsp.F03) - sizeof(rsp.F03.crc) + sizeof(rsp.func));
-	rsp.len = sizeof(rsp.F03) + sizeof(rsp.func);
-
-	return true;
-}
+//static bool Request_Default(ReqMes &req, RspMes &rsp)
+//{
+//	rsp.func = req.func;
+//	rsp.F03.align = 0xAAAA;
+//	rsp.F03.crc = GetCRC16(&rsp.func, sizeof(rsp.F03) - sizeof(rsp.F03.crc) + sizeof(rsp.func));
+//	rsp.len = sizeof(rsp.F03) + sizeof(rsp.func);
+//
+//	return true;
+//}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -463,12 +472,12 @@ static bool Request_Handler(ReqMes &req, RspMes &rsp)
 {
 	bool c = false;
 
-	switch (req.func)
+	switch (req.F1.func)
 	{
 		case 1:		c = Request_01_GetFlashCRC(req, rsp);		break;
-		case 2:  	c = Request_02_WritePage(req, rsp);			break;
-		case 3:  	c = Request_03_ExitBootLoader(req, rsp);	break;
-		default: 	c = Request_Default(req, rsp);				break;
+		case 2:  	c = Request_02_ExitBootLoader(req, rsp);	break;
+		case 3:  	c = Request_03_WritePage(req, rsp);			break;
+		//default: 	c = Request_Default(req, rsp);				break;
 	};
 
 	return c;
@@ -495,7 +504,7 @@ static void UpdateCom()
 	{
 		case 0:
 
-			rb.data = &req.func;
+			rb.data = &req.F1.func;
 			rb.maxLen = sizeof(req)-sizeof(req.len);
 			
 			com.Read(&rb, BOOT_COM_PRETIMEOUT, BOOT_COM_POSTTIMEOUT);
@@ -534,7 +543,7 @@ static void UpdateCom()
 
 			//while(!tm.Check(2)) ;
 
-			wb.data = &rsp.func;
+			wb.data = &rsp.F1.func;
 			wb.len = rsp.len;
 
 			com.Write(&wb);
