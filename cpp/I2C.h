@@ -105,10 +105,11 @@ protected:
 
 	const byte	_PIN_SCL;
 	const byte	_PIN_SDA;
+	const u32	_GEN_CLK;
 
 	u32			_CFG;  
-	u32			_BRG; 
-	u32			_OSR; 
+	u32			_CLKDIV; 
+	u32			_MSTTIME; 
 
 	static __irq void I2C0_Handler();
 	static __irq void I2C1_Handler();
@@ -121,6 +122,15 @@ protected:
 	static S_I2C *_i2c3;
 
 	void IRQ_Handler();
+
+	byte	*wrPtr;
+	byte	*wrPtr2;
+	byte	*rdPtr;
+	u16 	wlen;
+	u16		wlen2;
+	u16 	rlen;
+
+	void	Write(DSCI2C *d);
 
 #elif defined(WIN32)
 
@@ -156,8 +166,8 @@ public:
 
 #elif defined (CPU_LPC824)
 
-	S_I2C(byte num, byte pinscl, byte pinsda)
-		: USIC(num), _PIN_SCL(pinscl), _PIN_SDA(pinsda), _dsc(0), _state(I2C_WAIT) {}
+	S_I2C(byte num, byte pinscl, byte pinsda, u32 genclk)
+		: USIC(num), _PIN_SCL(pinscl), _PIN_SDA(pinsda), _GEN_CLK(genclk), _dsc(0), _state(I2C_WAIT) {}
 
 #endif
 

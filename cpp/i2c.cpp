@@ -6,15 +6,120 @@
 
 #ifdef CPU_LPC824	
 
-	static S_I2C::S_I2C *_i2c0 = 0;
-	static S_I2C::S_I2C *_i2c1 = 0;
-	static S_I2C::S_I2C *_i2c2 = 0;
-	static S_I2C::S_I2C *_i2c3 = 0;
+S_I2C *S_I2C::_i2c0 = 0;
+S_I2C *S_I2C::_i2c1 = 0;
+S_I2C *S_I2C::_i2c2 = 0;
+S_I2C *S_I2C::_i2c3 = 0;
 
-	__irq void S_I2C::I2C0_Handler() { if (_i2c0 != 0) _i2c0->IRQ_Handler(); }
-	__irq void S_I2C::I2C1_Handler() { if (_i2c1 != 0) _i2c1->IRQ_Handler(); }
-	__irq void S_I2C::I2C2_Handler() { if (_i2c2 != 0) _i2c2->IRQ_Handler(); }
-	__irq void S_I2C::I2C3_Handler() { if (_i2c3 != 0) _i2c3->IRQ_Handler(); }
+__irq void S_I2C::I2C0_Handler() { if (_i2c0 != 0) _i2c0->IRQ_Handler(); }
+__irq void S_I2C::I2C1_Handler() { if (_i2c1 != 0) _i2c1->IRQ_Handler(); }
+__irq void S_I2C::I2C2_Handler() { if (_i2c2 != 0) _i2c2->IRQ_Handler(); }
+__irq void S_I2C::I2C3_Handler() { if (_i2c3 != 0) _i2c3->IRQ_Handler(); }
+
+void S_I2C::IRQ_Handler()
+{
+	using namespace HW;
+
+	T_HW::S_TWI* uhw = _uhw.i2c;
+
+	if(uhw->INTSTAT & MSTPENDING)
+	{
+		uhw->STAT = MSTPENDING;
+
+		u32 state = uhw->STAT & MSTSTATE;
+
+		if(state == MSTST_IDLE) // Address plus R/W received
+		{
+			if (rlen == 0 && wlen == 0)
+			{
+				_dsc->readedLen = rdPtr - (byte*)_dsc->rdata;
+				_dsc->ready = true;
+
+				_dsc = _reqList.Get();
+
+				if (_dsc != 0) 
+				{
+					Write(_dsc);
+				}
+				else
+				{
+					uhw->INTENCLR = MSTPENDING;
+					uhw->CFG = 0;
+				};
+			};
+		}
+		else if(state == MSTST_RX) // Received data is available
+		{
+			*rdPtr++ = uhw->MSTDAT; // receive data
+
+			rlen--;
+
+			uhw->MSTCTL = (rlen > 0) ? MSTCONTINUE : MSTSTOP; 
+		}
+		else if(state == MSTST_TX) // Data can be transmitted 
+		{
+			_dsc->ack = true;
+
+			if (wlen > 0)
+			{
+				I2C1->MSTDAT = *wrPtr++;
+				I2C1->MSTCTL = MSTCONTINUE;
+				wlen--;
+
+				if(wlen == 0 && wlen2 != 0)
+				{
+					wrPtr = wrPtr2;
+					wlen = wlen2;
+					wlen2 = 0;
+				};
+			}
+			else if (rlen > 0)
+			{
+				uhw->MSTDAT = (_dsc->adr << 1) | 1;
+				uhw->MSTCTL = MSTSTART;
+			}
+			else
+			{
+				uhw->MSTCTL = MSTSTOP;
+			};
+		}
+		else
+		{
+			rlen = 0;
+			wlen = 0;
+
+			uhw->MSTCTL = MSTSTOP;
+		};
+	};
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void S_I2C::Write(DSCI2C *d)
+{
+	using namespace HW;
+
+	_dsc = d;
+
+	d->ready = false;
+
+	wrPtr	= (byte*)d->wdata;	
+	rdPtr	= (byte*)d->rdata;	
+	wrPtr2	= (byte*)d->wdata2;	
+	wlen	= d->wlen;
+	wlen2	= d->wlen2;
+	rlen	= d->rlen;
+
+	T_HW::S_TWI* uhw = _uhw.i2c;
+
+	uhw->INTENSET = MSTPENDING;
+	uhw->CFG = _CFG|MSTEN;
+
+	uhw->MSTDAT = (d->adr << 1) | ((wlen == 0) ? 1 : 0);
+	uhw->MSTCTL = MSTSTART;
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #endif
 
@@ -150,9 +255,9 @@ void S_I2C::InitHW()
 
 	T_HW::S_TWI* &uhw = _uhw.i2c;
 
+	uhw->CLKDIV = _CLKDIV;
+	uhw->MSTTIME = _MSTTIME;
 	uhw->CFG = _CFG;
-	//uhw->BRG = _BRG;
-	//uhw->OSR = _OSR;
 
 #endif
 }
@@ -198,7 +303,12 @@ bool S_I2C::Connect(u32 baudrate)
 
 	#elif defined(CPU_LPC824)
 
-		//_FDR = (1024 - (((_GEN_CLK + baudrate/2) / baudrate + 8) / 16)) | USIC_DM(1);
+		baudrate *= 4;
+
+		_CLKDIV = (_GEN_CLK + baudrate/2) / baudrate;
+		if (_CLKDIV > 0) _CLKDIV -= 1;
+		_MSTTIME = 0;
+		_CFG = 0;
 
 		InitHW();
 
@@ -241,7 +351,11 @@ bool S_I2C::AddRequest(DSCI2C *d)
 
 	if (d->wdata2 == 0 || d->wlen2 == 0) d->wdata2 = 0, d->wlen2 = 0;
 
-	_reqList.Add(d);
+	#ifdef CPU_LPC824
+		__disable_irq(); if (_dsc == 0)	Write(d); else _reqList.Add(d); __enable_irq();
+	#else
+		_reqList.Add(d);
+	#endif
 
 #endif
 

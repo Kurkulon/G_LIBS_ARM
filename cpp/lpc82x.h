@@ -1105,6 +1105,29 @@ namespace T_HW
 
 	} S_I2C0, S_I2C1, S_I2C2, S_I2C3;
 
+	#define MSTEN			(0x1)
+	#define SLVEN			(0x2)
+	#define MSTPENDING		(0x1)
+	#define MSTSTATE		(0xe)
+	#define MSTST_IDLE		(0x0)
+	#define MSTST_RX 		(0x2)
+	#define MSTST_TX 		(0x4)
+	#define MSTST_NACK_ADDR (0x6)
+	#define MSTST_NACK_TX	(0x8)
+	#define SLVPENDING		(0x100)
+	#define SLVSTATE		(0x600)
+	#define SLVST_ADDR		(0x000)
+	#define SLVST_RX 		(0x200)
+	#define SLVST_TX 		(0x400)
+	#define MSTCONTINUE		(0x1)
+	#define MSTSTART		(0x2)
+	#define MSTSTOP			(0x4)
+	#define SLVCONTINUE		(0x1)
+	#define SLVNACK			(0x2)
+	#define SLVDMA			8
+	#define SLVPENDINGEN	(0x100)
+	#define SLVDESELEN		(1UL<<15)
+
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	union USIC
