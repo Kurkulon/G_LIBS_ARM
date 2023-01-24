@@ -706,6 +706,8 @@ static bool HandShake()
 
 	while (!tm.Check(200) && !c)
 	{
+		Pin_MainLoop_Tgl();
+
 		HW::WDT->Update();
 
 		#ifdef BOOT_COM
@@ -1044,10 +1046,10 @@ int main()
 		HandShake();
 	#endif
 
+	CTM32	tm;
+
 	while(runCom || runEmac)
 	{
-		Pin_MainLoop_Set();
-
 		UpdateWriteFlash();
 
 		#ifdef BOOT_COM
@@ -1075,7 +1077,7 @@ int main()
 
 		HW::WDT->Update();
 
-		Pin_MainLoop_Clr();
+		if(tm.Check(MS2CTM(50))) Pin_MainLoop_Tgl();
 	};
 
 	//__breakpoint(0);
