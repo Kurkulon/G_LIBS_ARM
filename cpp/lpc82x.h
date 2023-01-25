@@ -1003,6 +1003,49 @@ namespace T_HW
 		LPC_REG MODULECONTENT;        /* 0x7FC Module Content */
 
 	};
+
+	#define SCT_DOWN			(1UL<<0)	
+	#define SCT_STOP			(1UL<<1)	
+	#define SCT_HALT			(1UL<<2)	
+	#define SCT_CLRCTR			(1UL<<3)	
+	#define SCT_BIDIR			(1UL<<4)	
+	#define SCT_PRE(v)			(((v)&255)<<5)	
+
+	#define SCT_DOWN_L			(1UL<<0)	
+	#define SCT_STOP_L			(1UL<<1)	
+	#define SCT_HALT_L			(1UL<<2)	
+	#define SCT_CLRCTR_L		(1UL<<3)	
+	#define SCT_BIDIR_L			(1UL<<4)	
+	#define SCT_PRE_L(v)		(((v)&255)<<5)	
+	#define SCT_DOWN_H			(1UL<<16)	
+	#define SCT_STOP_H			(1UL<<17)	
+	#define SCT_HALT_H			(1UL<<18)	
+	#define SCT_CLRCTR_H		(1UL<<19)	
+	#define SCT_BIDIR_H			(1UL<<20)	
+	#define SCT_PRE_H(v)		(((v)&255)<<21)	
+
+
+	#define SCT_MATCHSEL(v)		((v)&15)	
+	#define SCT_LEVENT			(0UL<<4)	
+	#define SCT_HEVENT			(1UL<<4)	
+	#define SCT_OUTSEL			(1UL<<5)	
+	#define SCT_IOSEL(v)		(((v)&15)<<6)	
+	#define SCT_IOCOND_LOW		(0UL<<10)	
+	#define SCT_IOCOND_RISE		(1UL<<10)	
+	#define SCT_IOCOND_FALL		(2UL<<10)	
+	#define SCT_IOCOND_HIGH		(3UL<<10)	
+	#define SCT_COMBMODE_OR		(0UL<<12)	
+	#define SCT_COMBMODE_MATCH	(1UL<<12)	
+	#define SCT_COMBMODE_IO		(2UL<<12)	
+	#define SCT_COMBMODE_AND	(3UL<<12)	
+	#define SCT_STATEV_ADD		(0UL<<14)	
+	#define SCT_STATEV_LD		(1UL<<14)	
+	#define SCT_STATEV(v)		(((v)&31)<<15)	
+	#define SCT_MATCHMEM		(1UL<<20)	
+	#define SCT_DIRECTION_ANY	(0UL<<21)	
+	#define SCT_DIRECTION_UP	(1UL<<21)	
+	#define SCT_DIRECTION_DOWN	(2UL<<21)	
+
 	
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	
