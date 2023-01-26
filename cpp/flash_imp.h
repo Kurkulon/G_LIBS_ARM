@@ -2820,6 +2820,10 @@ void NAND_Idle()
 			else if (read.Start())
 			{
 				nandState = NAND_STATE_READ_START;
+			}
+			else if (read.statePage != 0)
+			{
+				read.UpdatePage();
 			};
 
 			FLASH_UpdateStatus();
