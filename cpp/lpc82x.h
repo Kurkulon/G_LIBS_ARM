@@ -443,15 +443,15 @@ namespace T_HW
 		LPC_REG  TRM;                               /*!< (@ 0x4001C06C) ADC trim register.                                     */
 	};
 
-	#define ADC_CTRL_CLKDIV_MASK                     (0xFFU)
-	#define ADC_CTRL_CLKDIV_SHIFT                    (0U)
-	#define ADC_CTRL_CLKDIV(x)                       (((u32)(((u32)(x)) << ADC_CTRL_CLKDIV_SHIFT)) & ADC_CTRL_CLKDIV_MASK)
-	#define ADC_CTRL_LPWRMODE_MASK                   (0x400U)
-	#define ADC_CTRL_LPWRMODE_SHIFT                  (10U)
-	#define ADC_CTRL_LPWRMODE(x)                     (((u32)(((u32)(x)) << ADC_CTRL_LPWRMODE_SHIFT)) & ADC_CTRL_LPWRMODE_MASK)
-	#define ADC_CTRL_CALMODE_MASK                    (0x40000000U)
-	#define ADC_CTRL_CALMODE_SHIFT                   (30U)
-	#define ADC_CTRL_CALMODE(x)                      (((u32)(((u32)(x)) << ADC_CTRL_CALMODE_SHIFT)) & ADC_CTRL_CALMODE_MASK) 
+	#define ADC_CTRL_CLKDIV_MASK                 	(0xFFU)
+	#define ADC_CTRL_CLKDIV_SHIFT                	(0U)
+	#define ADC_CTRL_CLKDIV(x)                   	(((u32)(((u32)(x)) << ADC_CTRL_CLKDIV_SHIFT)) & ADC_CTRL_CLKDIV_MASK)
+	#define ADC_CTRL_LPWRMODE_MASK               	(0x400U)
+	#define ADC_CTRL_LPWRMODE_SHIFT              	(10U)
+	#define ADC_CTRL_LPWRMODE(x)                 	(((u32)(((u32)(x)) << ADC_CTRL_LPWRMODE_SHIFT)) & ADC_CTRL_LPWRMODE_MASK)
+	#define ADC_CTRL_CALMODE_MASK                	(0x40000000U)
+	#define ADC_CTRL_CALMODE_SHIFT               	(30U)
+	#define ADC_CTRL_CALMODE						ADC_CTRL_CALMODE_MASK 
 
 	#define ADC_SEQ_CTRL_CHANNELS_MASK               (0xFFFU)
 	#define ADC_SEQ_CTRL_CHANNELS_SHIFT              (0U)
