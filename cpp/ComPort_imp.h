@@ -773,7 +773,7 @@ bool ComPort::Read(ComPort::ReadBuffer *readBuffer, dword preTimeout, dword post
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-bool ComPort::Write(ComPort::WriteBuffer *writeBuffer)
+bool ComPort::Write(ComPort::WriteBuffer *writeBuffer, dword timeout)
 {
 	if (_status485 != READ_END || writeBuffer == 0)
 	{
@@ -782,6 +782,8 @@ bool ComPort::Write(ComPort::WriteBuffer *writeBuffer)
 
 	_pWriteBuffer = writeBuffer;
 	_pWriteBuffer->transmited = false;
+
+	if (timeout >= US2COM(20)) _writeTimeout = timeout;
 
 	EnableTransmit(_pWriteBuffer->data, _pWriteBuffer->len);
 

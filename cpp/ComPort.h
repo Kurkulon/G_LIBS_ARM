@@ -243,7 +243,7 @@ class ComPort : public USIC
 	virtual		void	InitHW();
 
 				bool	Read(ComPort::ReadBuffer *readBuffer, dword preTimeout, dword postTimeout);
-				bool	Write(ComPort::WriteBuffer *writeBuffer);
+				bool	Write(ComPort::WriteBuffer *writeBuffer, dword timeout = 0);
 
 				void	TransmitByte(byte v);
 
