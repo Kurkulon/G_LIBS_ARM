@@ -179,15 +179,26 @@ namespace T_HW
 
 	};
 
-	#define PDRUNCFG_IRCOUT_PD           (0x1U)
-	#define PDRUNCFG_IRC_PD              (0x2U)
-	#define PDRUNCFG_FLASH_PD            (0x4U)
-	#define PDRUNCFG_BOD_PD              (0x8U)
-	#define PDRUNCFG_ADC_PD              (0x10U)
-	#define PDRUNCFG_SYSOSC_PD           (0x20U)
-	#define PDRUNCFG_WDTOSC_PD           (0x40U)
-	#define PDRUNCFG_SYSPLL_PD           (0x80U)
-	#define PDRUNCFG_ACMP                (0x8000U)
+	#define PDRUNCFG_IRCOUT_PD   		(0x1U)
+	#define PDRUNCFG_IRC_PD      		(0x2U)
+	#define PDRUNCFG_FLASH_PD    		(0x4U)
+	#define PDRUNCFG_BOD_PD      		(0x8U)
+	#define PDRUNCFG_ADC_PD      		(0x10U)
+	#define PDRUNCFG_SYSOSC_PD   		(0x20U)
+	#define PDRUNCFG_WDTOSC_PD   		(0x40U)
+	#define PDRUNCFG_SYSPLL_PD   		(0x80U)
+	#define PDRUNCFG_ACMP        		(0x8000U)
+
+	#define SYSPLLCTRL_MSEL(x)			((x)&31)
+	#define SYSPLLCTRL_PSEL(x)          (((x)&3)<<5)
+
+	#define SYSPLLSTAT_LOCK				(0x1U)
+
+	#define MAINCLKSEL_IRC_OSC			(0x0U) 
+	#define MAINCLKSEL_PLL_IN			(0x1U) 
+	#define MAINCLKSEL_WDT_OSC			(0x2U) 
+	#define MAINCLKSEL_PLL_OUT			(0x3U) 
+
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

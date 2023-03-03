@@ -255,7 +255,11 @@ extern "C" void SystemInit()
 
 		SWM->PINENABLE0.B.CLKIN = 0;
 
-		for (i = 0; i < 200; i++) __nop();
+		for (i = 0; i < 200; i++) __nop(); 
+
+		#ifdef PLL_MHz
+			SYSCON->PDRUNCFG &= ~PDRUNCFG_SYSPLL_PD;
+		#endif
 
 		SYSCON->SYSPLLCLKSEL  = 3;					/* Select PLL Input         */
 		SYSCON->SYSPLLCLKUEN  = 0;					/* Update Clock Source      */
@@ -264,16 +268,45 @@ extern "C" void SystemInit()
 
 		HW::GPIO->NOT0 = 1<<12;
 
-		SYSCON->MAINCLKSEL    = 1;					/* Select PLL Clock Output  */
+		#ifdef PLL_MHz
+
+			#if (PLL_MSEL < 1) || (PLL_MSEL > 32)
+			#error PLL_MSEL must be 1...32
+			#endif
+
+			#if (PLL_PSEL > 3)
+			#error PLL_PSEL must be 0...3
+			#endif
+			
+			SYSCON->SYSPLLCTRL = SYSPLLCTRL_MSEL(PLL_MSEL-1)|SYSPLLCTRL_PSEL(PLL_PSEL);
+			while (!(SYSCON->SYSPLLSTAT & SYSPLLSTAT_LOCK));
+			HW::GPIO->NOT0 = 1<<12;
+
+			SYSCON->MAINCLKSEL = MAINCLKSEL_PLL_OUT;	
+
+		#else
+		
+			SYSCON->MAINCLKSEL = MAINCLKSEL_PLL_IN;				
+
+		#endif
+
 		SYSCON->MAINCLKUEN    = 0;					/* Update MCLK Clock Source */
 		SYSCON->MAINCLKUEN    = 1;					/* Update MCLK Clock Source */
 		while (!(SYSCON->MAINCLKUEN & 1));			/* Wait Until Updated       */
 
 		HW::GPIO->NOT0 = 1<<12;
 
-	//	SYSCON->SYSAHBCLKDIV  = SYSAHBCLKDIV_Val;
+		#ifdef MCK_DIV
+		SYSCON->SYSAHBCLKDIV  = MCK_DIV;
+		#endif
 
-		SYSCON->UARTCLKDIV = 1;
+
+		#ifdef UARTCLK_DIV
+			SYSCON->UARTCLKDIV = UARTCLK_DIV;
+		#else
+			SYSCON->UARTCLKDIV = 1;
+		#endif
+
 		//SWM->U0_RXD = 26;
 		//SWM->U0_TXD = 16;
 
