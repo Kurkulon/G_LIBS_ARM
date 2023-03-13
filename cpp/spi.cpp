@@ -1,3 +1,5 @@
+#ifndef CPU_LPC8XX
+
 #include "spi.h"
 #include "core.h"
 #include "SEGGER_RTT.h"
@@ -675,3 +677,5 @@ bool S_SPIM::Update()
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#endif // #ifndef CPU_LPC8XX

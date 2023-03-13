@@ -133,7 +133,7 @@ class ComPort : public USIC
 //		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _prevDmaCounter; }
 		u16	GetRecievedLen() { return GetDmaCounter(); }
 
-	#elif defined (CPU_LPC824)
+	#elif defined (CPU_LPC824) || defined(CPU_LPC8XX)
 
 		const byte	_PIN_SCK;
 		const byte	_PIN_TX;
@@ -142,16 +142,30 @@ class ComPort : public USIC
 
 		const u32	_MASK_RTS;
 
-		DMA_CH		_DMARX;
-		DMA_CH		_DMATX;
+		#ifdef CPU_LPC824
+
+			DMA_CH		_DMARX;
+			DMA_CH		_DMATX;
+
+		#endif
 
 		u32			_CFG;  
 		u32			_BRG; 
 		u32			_OSR; 
 
-		bool IsTransmited() { return (_uhw.usart->STAT & 8) && _DMATX.CheckComplete(); }
-		bool IsRecieved() {  u32 s = _uhw.usart->STAT & (1<<12); _uhw.usart->STAT = (1<<12); return s; }
-		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _DMARX.GetBytesLeft(); }
+		#ifdef CPU_LPC824
+
+			bool IsTransmited() { return (_uhw.usart->STAT & 8) && _DMATX.CheckComplete(); }
+			bool IsRecieved() {  u32 s = _uhw.usart->STAT & (1<<12); _uhw.usart->STAT = (1<<12); return s; }
+			u16	GetRecievedLen() { return _pReadBuffer->maxLen - _DMARX.GetBytesLeft(); }
+
+		#elif defined(CPU_LPC8XX)
+
+			bool IsTransmited() { return (_uhw.usart->STAT & 8); }
+			bool IsRecieved() {  u32 s = _uhw.usart->STAT & (1<<12); _uhw.usart->STAT = (1<<12); return s; }
+			u16	GetRecievedLen() { return _pReadBuffer->maxLen; }
+
+		#endif
 
 	#elif defined(WIN32)
 
@@ -204,7 +218,7 @@ class ComPort : public USIC
 	void		Set_RTS() { if (_PIO_RTS != 0) _PIO_RTS->SET(_MASK_RTS); }
 	void		Clr_RTS() { if (_PIO_RTS != 0) _PIO_RTS->CLR(_MASK_RTS); }
 
-#elif defined (CPU_LPC824)
+#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
 
 	void		Set_RTS() { HW::GPIO->SET(_MASK_RTS); }
 	void		Clr_RTS() { HW::GPIO->CLR(_MASK_RTS); }
@@ -229,6 +243,11 @@ class ComPort : public USIC
 
 	ComPort(byte num, byte pinsck, byte pintx, byte pinrx, byte pinrts)
 		: USIC(num), _PIN_SCK(pinsck), _PIN_TX(pintx), _PIN_RX(pinrx), _PIN_RTS(pinrts), _MASK_RTS(1UL<<pinrts), _DMARX(num*2), _DMATX(num*2+1), _status485(READ_END) {}
+
+#elif defined (CPU_LPC8XX)
+
+	ComPort(byte num, byte pinsck, byte pintx, byte pinrx, byte pinrts)
+		: USIC(num), _PIN_SCK(pinsck), _PIN_TX(pintx), _PIN_RX(pinrx), _PIN_RTS(pinrts), _MASK_RTS(1UL<<pinrts), _status485(READ_END) {}
 
 #else
 

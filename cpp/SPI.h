@@ -1,6 +1,8 @@
 #ifndef SPI_H__21_04_2022__11_18
 #define SPI_H__21_04_2022__11_18
 
+#if !defined(CPU_LPC8XX)
+
 #include "types.h"
 #include "usic.h"
 #include "list.h"
@@ -179,5 +181,7 @@ extern bool SPI_Update();
 //extern i32	Get_FRAM_SPI_SessionsAdr();
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#endif // #if !defined(CPU_LPC8XX)
 
 #endif // SPI_H__21_04_2022__11_18

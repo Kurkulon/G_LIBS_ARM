@@ -238,7 +238,7 @@ void InitTimer(u32 cpuclk)
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#ifdef CPU_LPC824
+#if defined(CPU_LPC824) || defined(CPU_LPC8XX)
 
 static __irq void WKT_Handler()
 {
@@ -271,7 +271,7 @@ static void InitCycleCountTimer()
 		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_RED "!!! ERROR !!! Cycle counter not supported\n");
 	};
 
-#elif defined (CPU_LPC824)
+#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
 
 	using namespace HW;
 

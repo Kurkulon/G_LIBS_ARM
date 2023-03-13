@@ -1,3 +1,5 @@
+#if !defined(CPU_LPC824) && !defined(CPU_LPC8XX)
+
 //#define _CRT_SECURE_NO_WARNINGS
 
 #include <stdarg.h>
@@ -1242,3 +1244,5 @@ void TRAP_Idle()
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#endif // #if !defined(CPU_LPC824) && !defined(CPU_LPC8XX)

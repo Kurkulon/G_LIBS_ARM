@@ -24,6 +24,15 @@
 
 #include "lpc82x.h"
 
+#elif defined(CPU_LPC8XX)
+
+#define	CORETYPE_LPC82X
+
+#define	CORETYPE_LPC82X
+#define CORTEX_M0
+
+#include "lpc82x.h"
+
 #endif
 
 #endif // CORE_H__23_09_13__11_39

@@ -234,7 +234,7 @@ extern "C" void SystemInit()
 
 		HW::DLR->LNEN = 0;
 
-	#elif defined(CPU_LPC824)
+	#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
 
 		u32 i;
 		using namespace CM0;
@@ -310,8 +310,10 @@ extern "C" void SystemInit()
 		//SWM->U0_RXD = 26;
 		//SWM->U0_TXD = 16;
 
-		DMA->SRAMBASE = _DmaTable;
-		DMA->CTRL = 1;
+		#ifdef CPU_LPC824
+			DMA->SRAMBASE = _DmaTable;
+			DMA->CTRL = 1;
+		#endif
 
 		HW::GPIO->NOT0 = 1<<12;
 

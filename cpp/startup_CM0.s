@@ -28,7 +28,12 @@
 ;   <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 ; </h>
 
-Stack_Size      	EQU     0x00000200
+				IF      :DEF:CPU_LPC8XX	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Stack_Size      EQU     0x00000100
+				ELSE
+Stack_Size      EQU     0x00000200
+				ENDIF
+
 Heap_Size       	EQU     0x00000000
 VecTableIntSize		EQU		16*4	
 VecTableExtSize		EQU		32*4	
@@ -51,8 +56,11 @@ __heap_limit
                 EXPORT  Stack_Mem
                 EXPORT  VectorTableInt
                 EXPORT  VectorTableExt
+                
+                IF      :LNOT::DEF:CPU_LPC8XX
                 EXPORT  SeggerRttCB
                 EXPORT  __segger_rttcb_end
+                ENDIF
 
                 IF      :DEF:CPU_LPC824	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                 
@@ -86,10 +94,25 @@ VectorTableExt	SPACE	VecTableExtSize
 SeggerRttCB		SPACE	SeggerRttCB_size - (SeggerRttCB-VectorTableInt)	
 __segger_rttcb_end	
 				
+				ELIF	:DEF:CPU_LPC8XX	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+				
+				AREA	||.ARM.__AT_0x10000000||, DATA, NOINIT, ALIGN=7
+Stack_Mem       SPACE   Stack_Size
+                
+                ALIGN	128
+__initial_sp	
+
+VectorTableInt	SPACE	VecTableIntSize				
+VectorTableExt	SPACE	VecTableExtSize	
+
+
+;SeggerRttCB		SPACE	SeggerRttCB_size - (SeggerRttCB-VectorTableInt)	
+;__segger_rttcb_end	
+
                 ENDIF
 
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++			
-                IF      :DEF:CPU_LPC824	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                IF      :DEF:CPU_LPC824 || :DEF:CPU_LPC8XX	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ; <h> Code Read Protection
 ;   <o> Code Read Protection  <0xFFFFFFFF=>CRP Disabled

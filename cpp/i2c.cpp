@@ -4,17 +4,22 @@
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#ifdef CPU_LPC824	
+#if defined(CPU_LPC824) || defined(CPU_LPC8XX)
 
-S_I2C *S_I2C::_i2c0 = 0;
-S_I2C *S_I2C::_i2c1 = 0;
-S_I2C *S_I2C::_i2c2 = 0;
-S_I2C *S_I2C::_i2c3 = 0;
+	S_I2C *S_I2C::_i2c0 = 0;
+	__irq void S_I2C::I2C0_Handler() { if (_i2c0 != 0) _i2c0->IRQ_Handler(); }
 
-__irq void S_I2C::I2C0_Handler() { if (_i2c0 != 0) _i2c0->IRQ_Handler(); }
-__irq void S_I2C::I2C1_Handler() { if (_i2c1 != 0) _i2c1->IRQ_Handler(); }
-__irq void S_I2C::I2C2_Handler() { if (_i2c2 != 0) _i2c2->IRQ_Handler(); }
-__irq void S_I2C::I2C3_Handler() { if (_i2c3 != 0) _i2c3->IRQ_Handler(); }
+	#ifdef CPU_LPC824
+
+		S_I2C *S_I2C::_i2c1 = 0;
+		S_I2C *S_I2C::_i2c2 = 0;
+		S_I2C *S_I2C::_i2c3 = 0;
+
+		__irq void S_I2C::I2C1_Handler() { if (_i2c1 != 0) _i2c1->IRQ_Handler(); }
+		__irq void S_I2C::I2C2_Handler() { if (_i2c2 != 0) _i2c2->IRQ_Handler(); }
+		__irq void S_I2C::I2C3_Handler() { if (_i2c3 != 0) _i2c3->IRQ_Handler(); }
+
+	#endif
 
 void S_I2C::IRQ_Handler()
 {
@@ -121,7 +126,7 @@ void S_I2C::Write(DSCI2C *d)
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#endif
+#endif // #if defined(CPU_LPC824) || defined(CPU_LPC8XX)
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -301,7 +306,7 @@ bool S_I2C::Connect(u32 baudrate)
 
 		InitHW();
 
-	#elif defined(CPU_LPC824)
+	#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
 
 		baudrate *= 4;
 
@@ -351,7 +356,7 @@ bool S_I2C::AddRequest(DSCI2C *d)
 
 	if (d->wdata2 == 0 || d->wlen2 == 0) d->wdata2 = 0, d->wlen2 = 0;
 
-	#ifdef CPU_LPC824
+	#if defined(CPU_LPC824) || defined(CPU_LPC8XX)
 		__disable_irq(); if (_dsc == 0)	Write(d); else _reqList.Add(d); __enable_irq();
 	#else
 		_reqList.Add(d);

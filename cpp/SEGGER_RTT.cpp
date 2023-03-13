@@ -1,3 +1,5 @@
+#if !defined(CPU_LPC8XX)
+
 #include "types.h"
 
 #ifndef WIN32
@@ -673,3 +675,5 @@ void SEGGER_RTT_Init (void) {
 //}
 
 /*************************** End of file ****************************/
+
+#endif // #if !defined(CPU_LPC8XX)

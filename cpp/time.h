@@ -76,7 +76,7 @@ inline u32 GetCYCCNT() { return CM4::DWT->CYCCNT; }
 #define US2CTM(x) US2CLK(x)
 #define MS2CTM(x) MS2CLK(x)
 
-#elif defined(CPU_LPC824)
+#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
 
 inline u32 GetCYCCNT() { return ~HW::WKT->COUNT; }
 

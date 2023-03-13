@@ -1,3 +1,5 @@
+#if !defined(CPU_LPC8XX)
+
 /*********************************************************************
 *              SEGGER MICROCONTROLLER GmbH & Co. KG                  *
 *        Solutions for real time microcontroller applications        *
@@ -446,3 +448,5 @@ int SEGGER_RTT_printf(unsigned BufferIndex, const char * sFormat, ...) {
   return res;
 }
 /*************************** End of file ****************************/
+
+#endif // #if !defined(CPU_LPC8XX)

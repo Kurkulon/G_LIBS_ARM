@@ -1,9 +1,10 @@
 #ifndef DMA_H__26_05_2022__18_11
 #define DMA_H__26_05_2022__18_11
 
+#if !defined(CPU_LPC8XX)
+
 #include "types.h"
 #include "core.h"
-
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -147,6 +148,10 @@ public:
 	void WritePeripheralByte(const volatile void *src, volatile void *dst, u16 len)	{ WritePeripheral(src, dst, len, PERIPHREQEN | TRIGBURST_SNGL | CHPRIORITY(3), CFGVALID | SETINTA | SWTRIG | WIDTH_8 | SRCINC_1 | DSTINC_0); }
 	void ReadPeripheralByte(const volatile void *src, volatile void *dst, u16 len)	{ ReadPeripheral(src, dst, len, PERIPHREQEN | TRIGBURST_SNGL | CHPRIORITY(3), CFGVALID | SWTRIG | WIDTH_8 | SRCINC_0 | DSTINC_1); }
 
+#else
+
+	DMA_CH() : _chnum(0) {}
+
 #endif
 
 };
@@ -206,5 +211,7 @@ extern DMA_CH		DMA_CH11;
 #endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#endif // #if !defined(CPU_LPC8XX)
 
 #endif // DMA_H__26_05_2022__18_11

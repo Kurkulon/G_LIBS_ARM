@@ -1,3 +1,8 @@
+#ifndef SEGGER_RTT_H__13_03_2023__17_37
+#define SEGGER_RTT_H__13_03_2023__17_37
+
+#if !defined(CPU_LPC8XX)
+
 /*********************************************************************
 *              SEGGER MICROCONTROLLER SYSTEME GmbH                   *
 *        Solutions for real time microcontroller applications        *
@@ -108,3 +113,16 @@ int     SEGGER_RTT_TerminalOut        (char TerminalId, const char* s);
 int SEGGER_RTT_printf(unsigned BufferIndex, const char * sFormat, ...);
 
 /*************************** End of file ****************************/
+
+#else // #if !defined(CPU_LPC8XX)
+
+#define SEGGER_RTT_Init()
+#define SEGGER_RTT_Read(v1,v2,v3)
+#define SEGGER_RTT_Write(v1,v2,v3)
+#define SEGGER_RTT_printf(v1,v2,v3)
+#define SEGGER_RTT_WriteString(v1,v2)
+
+#endif // #if !defined(CPU_LPC8XX)
+
+#endif // SEGGER_RTT_H__13_03_2023__17_37
+

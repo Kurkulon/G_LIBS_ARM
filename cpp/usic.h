@@ -13,39 +13,45 @@
 
 #ifdef CPU_SAME53
 
-#define USIC_NUM 8
+	#define USIC_NUM 8
 
-typedef T_HW::SERCOM USICHWT;
+	typedef T_HW::SERCOM USICHWT;
 
 #elif defined(CPU_XMC48)
 
-#define USIC_NUM 6
+	#define USIC_NUM 6
 
-typedef T_HW::USIC_CH_Type *USICHWT;
+	typedef T_HW::USIC_CH_Type *USICHWT;
 
 #elif defined(CPU_LPC824)
 
-#define USIC_NUM 9
+	#define USIC_NUM 9
 
-typedef T_HW::USIC USICHWT;
+	typedef T_HW::USIC USICHWT;
+
+#elif defined(CPU_LPC8XX)
+
+	#define USIC_NUM 6
+
+	typedef T_HW::USIC USICHWT;
 
 #elif defined(WIN32)
 
-#define USIC_NUM 8
+	#define USIC_NUM 8
 
-struct SERCOM
-{
-	u32			*usart;
-	//S_SPI		*spi;
-	//S_I2C		*i2c;
+	struct SERCOM
+	{
+		u32			*usart;
+		//S_SPI		*spi;
+		//S_I2C		*i2c;
 
-	//SERCOM()			: usart(0)	{}
-	//SERCOM(S_USART *p)	: usart(p)	{}
-	//SERCOM(S_SPI *p)	: spi(p)	{}
-	//SERCOM(S_I2C *p)	: i2c(p)	{}
-};
+		//SERCOM()			: usart(0)	{}
+		//SERCOM(S_USART *p)	: usart(p)	{}
+		//SERCOM(S_SPI *p)	: spi(p)	{}
+		//SERCOM(S_I2C *p)	: i2c(p)	{}
+	};
 
-typedef SERCOM* USICHWT;
+	typedef SERCOM* USICHWT;
 
 #endif 
 

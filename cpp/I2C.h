@@ -101,7 +101,7 @@ protected:
 	u16		wlen2;
 	u16 	rlen;
 
-#elif defined (CPU_LPC824)
+#elif defined (CPU_LPC824) || defined(CPU_LPC8XX)
 
 	const byte	_PIN_SCL;
 	const byte	_PIN_SDA;
@@ -111,15 +111,20 @@ protected:
 	u32			_CLKDIV; 
 	u32			_MSTTIME; 
 
-	static __irq void I2C0_Handler();
-	static __irq void I2C1_Handler();
-	static __irq void I2C2_Handler();
-	static __irq void I2C3_Handler();
-
 	static S_I2C *_i2c0;
-	static S_I2C *_i2c1;
-	static S_I2C *_i2c2;
-	static S_I2C *_i2c3;
+	static __irq void I2C0_Handler();
+
+	#ifndef CPU_LPC824
+
+		static __irq void I2C1_Handler();
+		static __irq void I2C2_Handler();
+		static __irq void I2C3_Handler();
+
+		static S_I2C *_i2c1;
+		static S_I2C *_i2c2;
+		static S_I2C *_i2c3;
+
+	#endif
 
 	void IRQ_Handler();
 
@@ -164,7 +169,7 @@ public:
 		: USIC(num), _PIO_SCL(pio_scl), _PIO_SDA(pio_sda), _PIN_SCL(pin_scl), _PIN_SDA(pin_sda), _MUX_SCL(mux_scl), _MUX_SDA(mux_sda), _DMA(dma),
 		_DX0CR(dx0cr), _DX1CR(dx1cr), _GEN_CLK(genclk), _dsc(0), _state(I2C_WAIT) {}
 
-#elif defined (CPU_LPC824)
+#elif defined (CPU_LPC824) || defined(CPU_LPC8XX)
 
 	S_I2C(byte num, byte pinscl, byte pinsda, u32 genclk)
 		: USIC(num), _PIN_SCL(pinscl), _PIN_SDA(pinsda), _GEN_CLK(genclk), _dsc(0), _state(I2C_WAIT) {}
