@@ -253,7 +253,15 @@ extern "C" void SystemInit()
 
 		HW::GPIO->NOT0 = 1<<12;
 
-		SWM->PINENABLE0.B.CLKIN = 0;
+		#ifdef CPU_LPC824
+
+			SWM->PINENABLE0.B.CLKIN = 0;
+
+		#elif defined(CPU_LPC8XX)
+
+			SWM->PINENABLE0.D &= ((SYSCON->DEVICE_ID & 0xFF00) == 0x8100) ? (~(1<<7)) : (~(1<<9)); // CLKIN
+
+		#endif
 
 		for (i = 0; i < 200; i++) __nop(); 
 

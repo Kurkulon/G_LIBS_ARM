@@ -127,54 +127,53 @@ namespace T_HW
 		LPC_REG PRESETCTRL;             /*!< Offset: 0x004 Peripheral reset control (R/W) */
 		LPC_REG SYSPLLCTRL;             /*!< Offset: 0x008 System PLL control (R/W) */
 		LPC_REG SYSPLLSTAT;             /*!< Offset: 0x00C System PLL status (R/W ) */
-		LPC_REG z_RESERVED0[4];
-
+								LPC_REG z_RESERVED0[4];
 		LPC_REG SYSOSCCTRL;             /*!< Offset: 0x020 System oscillator control (R/W) */
 		LPC_REG WDTOSCCTRL;             /*!< Offset: 0x024 Watchdog oscillator control (R/W) */
 		LPC_REG IRCCTRL;
-		LPC_REG z_RESERVED1;
+								LPC_REG z_RESERVED1;
 		LPC_REG SYSRSTSTAT;             /*!< Offset: 0x030 System reset status Register (R/W ) */
-		LPC_REG z_RESERVED2[3];
+								LPC_REG z_RESERVED2[3];
 		LPC_REG SYSPLLCLKSEL;           /*!< Offset: 0x040 System PLL clock source select (R/W) */
 		LPC_REG SYSPLLCLKUEN;           /*!< Offset: 0x044 System PLL clock source update enable (R/W) */
-		LPC_REG z_RESERVED3[10];
+								LPC_REG z_RESERVED3[10];
 
 		LPC_REG MAINCLKSEL;             /*!< Offset: 0x070 Main clock source select (R/W) */
 		LPC_REG MAINCLKUEN;             /*!< Offset: 0x074 Main clock source update enable (R/W) */
 		LPC_REG SYSAHBCLKDIV;           /*!< Offset: 0x078 System AHB clock divider (R/W) */
-		LPC_REG z_RESERVED4[1];
+								LPC_REG z_RESERVED4[1];
 
 		LPC_REG SYSAHBCLKCTRL;          /*!< Offset: 0x080 System AHB clock control (R/W) */
-		LPC_REG z_RESERVED5[4];
+								LPC_REG z_RESERVED5[4];
 		LPC_REG UARTCLKDIV;             /*!< Offset: 0x094 UART clock divider (R/W) */
-		LPC_REG z_RESERVED6[18];
+								LPC_REG z_RESERVED6[18];
 
 		LPC_REG CLKOUTSEL;              /*!< Offset: 0x0E0 CLKOUT clock source select (R/W) */
 		LPC_REG CLKOUTUEN;              /*!< Offset: 0x0E4 CLKOUT clock source update enable (R/W) */
 		LPC_REG CLKOUTDIV;              /*!< Offset: 0x0E8 CLKOUT clock divider (R/W) */
-		LPC_REG z_RESERVED7;
+								LPC_REG z_RESERVED7;
 		LPC_REG UARTFRGDIV;             /*!< Offset: 0x0F0 UART fractional divider SUB(R/W) */
 		LPC_REG UARTFRGMULT;             /*!< Offset: 0x0F4 UART fractional divider ADD(R/W) */
-		LPC_REG z_RESERVED8[1];
+								LPC_REG z_RESERVED8;
 		LPC_REG EXTTRACECMD;            /*!< (@ 0x400480FC) External trace buffer command register  */
 		LPC_REG PIOPORCAP0;             /*!< Offset: 0x100 POR captured PIO status 0 (R/ ) */
-		LPC_REG z_RESERVED9[12];
+								LPC_REG z_RESERVED9[12];
 		LPC_REG IOCONCLKDIV[7];			/*!< (@0x40048134-14C) Peripheral clock x to the IOCON block for programmable glitch filter */
 		LPC_REG BODCTRL;                /*!< Offset: 0x150 BOD control (R/W) */
 		LPC_REG SYSTCKCAL;              /*!< Offset: 0x154 System tick counter calibration (R/W) */
-		LPC_REG z_RESERVED10[6];
+								LPC_REG z_RESERVED10[6];
 		LPC_REG IRQLATENCY;             /*!< (@ 0x40048170) IRQ delay */
 		LPC_REG NMISRC;                 /*!< (@ 0x40048174) NMI Source Control     */
 		LPC_REG PINTSEL[8];             /*!< (@ 0x40048178) GPIO Pin Interrupt Select register 0 */
-		LPC_REG z_RESERVED11[27];
+								LPC_REG z_RESERVED11[27];
 		LPC_REG STARTERP0;              /*!< Offset: 0x204 Start logic signal enable Register 0 (R/W) */
-		LPC_REG z_RESERVED12[3];
+								LPC_REG z_RESERVED12[3];
 		LPC_REG STARTERP1;              /*!< Offset: 0x214 Start logic signal enable Register 0 (R/W) */
-		LPC_REG z_RESERVED13[6];
+								LPC_REG z_RESERVED13[6];
 		LPC_REG PDSLEEPCFG;             /*!< Offset: 0x230 Power-down states in Deep-sleep mode (R/W) */
 		LPC_REG PDAWAKECFG;             /*!< Offset: 0x234 Power-down states after wake-up (R/W) */
 		LPC_REG PDRUNCFG;               /*!< Offset: 0x238 Power-down configuration Register (R/W) */
-		LPC_REG z_RESERVED14[110];
+								LPC_REG z_RESERVED14[111];
 		LPC_REG DEVICE_ID;              /*!< Offset: 0x3F4 Device ID (R/ ) */
 
 	};

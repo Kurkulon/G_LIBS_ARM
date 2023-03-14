@@ -573,7 +573,9 @@ extern "C" void _MainAppStart(u32 adr);
 
 int main()
 {
-	//__breakpoint(0);
+	#ifdef BOOT_START_BREAKPOINT
+		__breakpoint(0);
+	#endif
 
 	SEGGER_RTT_Init();
 	SEGGER_RTT_WriteString(0, RTT_CTRL_CLEAR);
@@ -602,7 +604,9 @@ int main()
 		if(tm.Check(MS2CTM(50))) Pin_MainLoop_Tgl();
 	};
 
-	//__breakpoint(0);
+	#ifdef BOOT_EXIT_BREAKPOINT
+		__breakpoint(0);
+	#endif
 
 	__disable_irq();
 
