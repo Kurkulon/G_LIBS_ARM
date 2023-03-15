@@ -304,10 +304,11 @@ extern "C" void SystemInit()
 
 		HW::GPIO->NOT0 = 1<<12;
 
+		if ((u32)MCK_MHz <= 30) HW::FLASHCTRL->FLASHCFG &= ~3;
+
 		#ifdef MCK_DIV
 		SYSCON->SYSAHBCLKDIV  = MCK_DIV;
 		#endif
-
 
 		#ifdef UARTCLK_DIV
 			SYSCON->UARTCLKDIV = UARTCLK_DIV;
