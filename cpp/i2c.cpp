@@ -199,7 +199,7 @@ void S_I2C::InitHW()
 		//CM4::NVIC->CLR_PR(I2C_IRQ);
 		//CM4::NVIC->SET_ER(I2C_IRQ);
 
-#elif defined(CPU_LPC824)
+#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
 
 	HW::SYSCON->SYSAHBCLKCTRL |= 1UL<<_upid;
 
@@ -216,6 +216,7 @@ void S_I2C::InitHW()
 	}
 	else
 	{
+	#ifdef CPU_LPC824
 		IOCON_PIN_INDEX_TABLE_DEF;
 
 		T_HW::S_IOCON::S_PIO *iocon = &(HW::IOCON->PIO0_17);
@@ -256,6 +257,7 @@ void S_I2C::InitHW()
 			CM0::NVIC->CLR_PR(I2C3_IRQ);
 			CM0::NVIC->SET_ER(I2C3_IRQ);
 		};
+	#endif
 	};
 
 	T_HW::S_TWI* &uhw = _uhw.i2c;

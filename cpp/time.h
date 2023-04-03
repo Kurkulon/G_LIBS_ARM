@@ -9,6 +9,8 @@
 #include "core.h"
 #endif
 
+#if defined(CPU_SAME53) || defined(CPU_XMC48)
+
 #define RTC_type RTC
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -44,13 +46,16 @@ __packed struct RTC
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-extern void Init_time(u32 mck);
-extern void RTT_Init();
-
 extern bool SetTime(const RTC &t);
 extern void GetTime(RTC *t);
 
 extern RTC timeBDC;
+
+#endif // #if defined(CPU_SAME53) || defined(CPU_XMC48)
+
+extern void Init_time(u32 mck);
+extern void RTT_Init();
+
 
 #ifdef WIN32	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

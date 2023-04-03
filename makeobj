@@ -27,7 +27,16 @@ libsuffix=Win32
 
 !else 
 
+!ifeq targetcpu LPC8XX
+
+debug_compiler_options = -O3 -Ospace --debug
+
+#else
+
 debug_compiler_options = -O3 -Otime --debug
+
+!endif
+
 debug_linker_options = 
 libsuffix = r
 

@@ -56,6 +56,15 @@ extern dword millisecondsCount;
 	//#define READ_PIN_SET()	HW::P1->BSET(0)
 	//#define READ_PIN_CLR()	HW::P1->BCLR(0)
 
+#elif defined(CPU_LPC8XX)
+
+	ComPort *ComPort::_objCom0 = 0;
+	ComPort *ComPort::_objCom1 = 0;
+	ComPort *ComPort::_objCom2 = 0;
+
+	const byte ComPort::_UART_IRQ[3] = { UART0_IRQ, UART1_IRQ, UART2_IRQ };
+	const ComPort::T_IRQ_Handler ComPort::_IRQ_W_Handler[3] = { ComPort::WriteHandler_0,	ComPort::WriteHandler_1,	ComPort::WriteHandler_2	};
+	const ComPort::T_IRQ_Handler ComPort::_IRQ_R_Handler[3] = { ComPort::ReadHandler_0,		ComPort::ReadHandler_1,		ComPort::ReadHandler_2	};
 
 #endif	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -121,7 +130,7 @@ void ComPort::InitHW()
 
 		_DMA->SetDlrLineNum(_DRL);
 
-	#elif defined(CPU_LPC824)
+	#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
 
 		HW::SYSCON->SYSAHBCLKCTRL |= 1UL<<_upid;
 
@@ -130,22 +139,37 @@ void ComPort::InitHW()
 			HW::SWM->U0_SCLK	= _PIN_SCK;
 			HW::SWM->U0_RXD		= _PIN_RX;
 			HW::SWM->U0_TXD		= _PIN_TX;
+
+			#ifdef CPU_LPC8XX
+				_objCom0 = this;
+			#endif
 		}
 		else if(_usic_num == 1)
 		{
 			HW::SWM->U1_SCLK	= _PIN_SCK;
 			HW::SWM->U1_RXD		= _PIN_RX;
 			HW::SWM->U1_TXD		= _PIN_TX;
+
+			#ifdef CPU_LPC8XX
+				_objCom1 = this;
+			#endif
 		}
 		else if(_usic_num == 2)
 		{
 			HW::SWM->U2_SCLK	= _PIN_SCK;
 			HW::SWM->U2_RXD		= _PIN_RX;
 			HW::SWM->U2_TXD		= _PIN_TX;
+
+			#ifdef CPU_LPC8XX
+				_objCom2 = this;
+			#endif
 		};
 
-		HW::GPIO->DIRSET0 = _MASK_RTS;
+		#ifdef CPU_LPC8XX
+			CM0::NVIC->SET_ER(UART0_IRQ+_usic_num);
+		#endif
 
+		HW::GPIO->DIRSET0 = _MASK_RTS;
 
 		T_HW::S_USART* &uhw = _uhw.usart;
 
@@ -254,7 +278,7 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 
 		};
 
-	#elif defined(CPU_LPC824)
+	#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
 
 		switch (ct)
 		{
@@ -365,7 +389,7 @@ word ComPort::BoudToPresc(dword speed)
 
 		return 1024 - presc;
 
-	#elif defined(CPU_LPC824)
+	#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
 
 		return (MCK/16+speed/2) / speed - 1;
 
@@ -497,6 +521,19 @@ void ComPort::EnableTransmit(void* src, word count)
 
 		_uhw.usart->CFG |= 1;
 
+	#elif defined(CPU_LPC8XX)
+
+		_uhw.usart->CFG &= ~1;	// Disable transmit and receive
+
+		wdata = (byte*)src;
+		wlen = count;
+
+		VectorTableExt[_UART_IRQ[_usic_num]] = _IRQ_W_Handler[_usic_num];
+
+		_uhw.usart->INTENSET = 4;
+
+		_uhw.usart->CFG |= 1;
+
 	#endif
 
 	_status485 = WRITEING;
@@ -541,6 +578,11 @@ void ComPort::DisableTransmit()
 		_uhw.usart->INTENCLR = 4;
 
 		_DMATX.Disable();
+
+	#elif defined(CPU_LPC8XX)
+
+		_uhw.usart->CFG &= ~1;	// Disable transmit and receive
+		_uhw.usart->INTENCLR = ~0;
 
 	#endif
 
@@ -618,6 +660,18 @@ void ComPort::EnableReceive(void* dst, word count)
 
 		_uhw.usart->CFG |= 1;
 
+	#elif defined(CPU_LPC8XX)
+
+		_uhw.usart->CFG &= ~1;	// Disable transmit and receive
+
+		rdata = (byte*)dst;
+		rlen = count;
+
+		VectorTableExt[_UART_IRQ[_usic_num]] = _IRQ_R_Handler[_usic_num];
+
+		_uhw.usart->INTENSET = 1;
+		_uhw.usart->CFG |= 1;
+
 	#endif
 
 #endif
@@ -665,6 +719,11 @@ void ComPort::DisableReceive()
 
 		_DMARX.Disable();
 
+	#elif defined(CPU_LPC8XX)
+
+		_uhw.usart->CFG &= ~1;	// Disable transmit and receive
+		_uhw.usart->INTENCLR = ~0;
+
 	#endif
 
 	Usic_Unlock();
@@ -673,9 +732,72 @@ void ComPort::DisableReceive()
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	#ifdef CPU_SAME53	
-	#elif defined(CPU_XMC48)
-	#endif
+#ifdef CPU_LPC8XX
+
+__irq void ComPort::ReadHandler_0()
+{
+	_objCom0->IRQ_ReadHandler();
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+__irq void ComPort::WriteHandler_0()
+{
+	_objCom0->IRQ_WriteHandler();
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+__irq void ComPort::ReadHandler_1()
+{
+	_objCom1->IRQ_ReadHandler();
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+__irq void ComPort::ReadHandler_2()
+{
+	_objCom2->IRQ_ReadHandler();
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+__irq void ComPort::WriteHandler_1()
+{
+	_objCom1->IRQ_WriteHandler();
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+__irq void ComPort::WriteHandler_2()
+{
+	_objCom2->IRQ_WriteHandler();
+}
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void ComPort::IRQ_ReadHandler()
+{
+	*(rdata++) = _uhw.usart->RXDATA;
+	rlen--;
+	
+	if (rlen == 0) _uhw.usart->INTENCLR = 1;
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void ComPort::IRQ_WriteHandler()
+{
+	_uhw.usart->TXDATA = *(wdata++);
+	wlen--;
+	
+	if (wlen == 0) _uhw.usart->INTENCLR = 4;
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#endif
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 bool ComPort::Update()
 {

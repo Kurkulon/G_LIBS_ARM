@@ -161,9 +161,35 @@ class ComPort : public USIC
 
 		#elif defined(CPU_LPC8XX)
 
-			bool IsTransmited() { return (_uhw.usart->STAT & 8); }
-			bool IsRecieved() {  u32 s = _uhw.usart->STAT & (1<<12); _uhw.usart->STAT = (1<<12); return s; }
-			u16	GetRecievedLen() { return _pReadBuffer->maxLen; }
+			typedef __irq void (*T_IRQ_Handler)();
+
+			static const byte _UART_IRQ[3];
+			static const T_IRQ_Handler _IRQ_W_Handler[3];
+			static const T_IRQ_Handler _IRQ_R_Handler[3];
+
+			bool IsTransmited()		{ return (_uhw.usart->STAT & 8) && (wlen == 0); }
+			bool IsRecieved()		{ u32 s = _uhw.usart->STAT & (1<<12); _uhw.usart->STAT = (1<<12); return s; }
+			u16	GetRecievedLen()	{ return _pReadBuffer->maxLen - rlen; }
+
+			static __irq void ReadHandler_0();
+			static __irq void ReadHandler_1();
+			static __irq void ReadHandler_2();
+
+			static __irq void WriteHandler_0();
+			static __irq void WriteHandler_1();
+			static __irq void WriteHandler_2();
+
+			static ComPort *_objCom0;
+			static ComPort *_objCom1;
+			static ComPort *_objCom2;
+
+			void IRQ_WriteHandler();
+			void IRQ_ReadHandler();
+
+			byte	*wdata;
+			byte	*rdata;
+			u16		wlen;
+			u16		rlen;
 
 		#endif
 

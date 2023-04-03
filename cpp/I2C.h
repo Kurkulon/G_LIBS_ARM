@@ -114,7 +114,7 @@ protected:
 	static S_I2C *_i2c0;
 	static __irq void I2C0_Handler();
 
-	#ifndef CPU_LPC824
+	#ifdef CPU_LPC824
 
 		static __irq void I2C1_Handler();
 		static __irq void I2C2_Handler();

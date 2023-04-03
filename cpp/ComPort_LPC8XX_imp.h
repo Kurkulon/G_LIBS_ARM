@@ -1,7 +1,7 @@
 #ifndef COMPORT_LPC8XX_IMP_H__10_03_2023__18_46
 #define COMPORT_LPC8XX_IMP_H__10_03_2023__18_46
 
-#ifdef CPU_LPC8XX
+#ifdef CPU_LPC8XX_
 
 //#pragma O3
 //#pragma Otime

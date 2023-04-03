@@ -1,7 +1,7 @@
 #ifndef COMPORT_LPC8XX_H__10_03_2023__18_56
 #define COMPORT_LPC8XX_H__10_03_2023__18_56
 
-#ifdef CPU_LPC8XX
+#ifdef CPU_LPC8XX_
 
 #include "types.h"
 #include "core.h"

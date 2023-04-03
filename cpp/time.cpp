@@ -16,6 +16,10 @@ static LARGE_INTEGER queryPerformanceFrequency = { 0, 0 };
 
 volatile u32 msec = 0;
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#if defined(CPU_SAME53) || defined(CPU_XMC48)
+
 RTC timeBDC;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -123,6 +127,8 @@ bool SetTime(const RTC &t)
 #endif
 }
 
+#endif // #if defined(CPU_SAME53) || defined(CPU_XMC48)
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #ifndef WIN32
@@ -200,7 +206,7 @@ static __irq void Timer_Handler (void)
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void InitTimer(u32 cpuclk)
+static void InitTimer(u32 cpuclk)
 {
 #ifndef WIN32
 
@@ -208,10 +214,12 @@ void InitTimer(u32 cpuclk)
 
 	enum { freq = 1000 };
 
+#if defined(CPU_SAME53) || defined(CPU_XMC48)
 	timeBDC.day = 1;
 	timeBDC.mon = 1;
 	timeBDC.year = 2000;
 	timeBDC.time = 0;
+#endif
 
 	VectorTableInt[15] = Timer_Handler;
 
