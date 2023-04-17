@@ -1,7 +1,7 @@
 #ifndef SPI_H__21_04_2022__11_18
 #define SPI_H__21_04_2022__11_18
 
-#if !defined(CPU_LPC8XX)
+#if !defined(CPU_LPC812)
 
 #include "types.h"
 #include "usic.h"
@@ -182,6 +182,6 @@ extern bool SPI_Update();
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#endif // #if !defined(CPU_LPC8XX)
+#endif // #if !defined(CPU_LPC812)
 
 #endif // SPI_H__21_04_2022__11_18

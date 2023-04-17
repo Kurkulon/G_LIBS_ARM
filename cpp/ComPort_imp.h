@@ -56,7 +56,7 @@ extern dword millisecondsCount;
 	//#define READ_PIN_SET()	HW::P1->BSET(0)
 	//#define READ_PIN_CLR()	HW::P1->BCLR(0)
 
-#elif defined(CPU_LPC8XX)
+#elif defined(CPU_LPC812)
 
 	ComPort *ComPort::_objCom0 = 0;
 	ComPort *ComPort::_objCom1 = 0;
@@ -130,7 +130,7 @@ void ComPort::InitHW()
 
 		_DMA->SetDlrLineNum(_DRL);
 
-	#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
+	#elif defined(CPU_LPC824) || defined(CPU_LPC812)
 
 		HW::SYSCON->SYSAHBCLKCTRL |= 1UL<<_upid;
 
@@ -140,7 +140,7 @@ void ComPort::InitHW()
 			HW::SWM->U0_RXD		= _PIN_RX;
 			HW::SWM->U0_TXD		= _PIN_TX;
 
-			#ifdef CPU_LPC8XX
+			#ifdef CPU_LPC812
 				_objCom0 = this;
 			#endif
 		}
@@ -150,7 +150,7 @@ void ComPort::InitHW()
 			HW::SWM->U1_RXD		= _PIN_RX;
 			HW::SWM->U1_TXD		= _PIN_TX;
 
-			#ifdef CPU_LPC8XX
+			#ifdef CPU_LPC812
 				_objCom1 = this;
 			#endif
 		}
@@ -160,22 +160,21 @@ void ComPort::InitHW()
 			HW::SWM->U2_RXD		= _PIN_RX;
 			HW::SWM->U2_TXD		= _PIN_TX;
 
-			#ifdef CPU_LPC8XX
+			#ifdef CPU_LPC812
 				_objCom2 = this;
 			#endif
 		};
 
-		#ifdef CPU_LPC8XX
+		#ifdef CPU_LPC812
 			CM0::NVIC->SET_ER(UART0_IRQ+_usic_num);
 		#endif
 
-		HW::GPIO->DIRSET0 = _MASK_RTS;
+		HW::GPIO->DirSet(_MASK_RTS);
 
 		T_HW::S_USART* &uhw = _uhw.usart;
 
 		uhw->CFG = _CFG;
 		uhw->BRG = _BRG;
-		uhw->OSR = _OSR;
 
 	#endif
 }
@@ -278,7 +277,7 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 
 		};
 
-	#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
+	#elif defined(CPU_LPC824) || defined(CPU_LPC812)
 
 		switch (ct)
 		{
@@ -321,8 +320,6 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 				_CFG |= 2<<4;
 				break;
 		};
-
-		_OSR = 15;
 
 	#endif
 
@@ -389,7 +386,7 @@ word ComPort::BoudToPresc(dword speed)
 
 		return 1024 - presc;
 
-	#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
+	#elif defined(CPU_LPC824) || defined(CPU_LPC812)
 
 		return (MCK/16+speed/2) / speed - 1;
 
@@ -521,7 +518,7 @@ void ComPort::EnableTransmit(void* src, word count)
 
 		_uhw.usart->CFG |= 1;
 
-	#elif defined(CPU_LPC8XX)
+	#elif defined(CPU_LPC812)
 
 		_uhw.usart->CFG &= ~1;	// Disable transmit and receive
 
@@ -579,7 +576,7 @@ void ComPort::DisableTransmit()
 
 		_DMATX.Disable();
 
-	#elif defined(CPU_LPC8XX)
+	#elif defined(CPU_LPC812)
 
 		_uhw.usart->CFG &= ~1;	// Disable transmit and receive
 		_uhw.usart->INTENCLR = ~0;
@@ -660,7 +657,7 @@ void ComPort::EnableReceive(void* dst, word count)
 
 		_uhw.usart->CFG |= 1;
 
-	#elif defined(CPU_LPC8XX)
+	#elif defined(CPU_LPC812)
 
 		_uhw.usart->CFG &= ~1;	// Disable transmit and receive
 
@@ -719,7 +716,7 @@ void ComPort::DisableReceive()
 
 		_DMARX.Disable();
 
-	#elif defined(CPU_LPC8XX)
+	#elif defined(CPU_LPC812)
 
 		_uhw.usart->CFG &= ~1;	// Disable transmit and receive
 		_uhw.usart->INTENCLR = ~0;
@@ -732,7 +729,7 @@ void ComPort::DisableReceive()
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#ifdef CPU_LPC8XX
+#ifdef CPU_LPC812
 
 __irq void ComPort::ReadHandler_0()
 {

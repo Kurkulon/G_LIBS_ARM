@@ -529,6 +529,8 @@ namespace T_HW
 		void BSET(byte b) { SET0 = 1 << b; }
 		void BCLR(byte b) { CLR0 = 1 << b; }
 		void BTGL(byte b) { NOT0 = 1 << b; }
+		void DirSet(u32 m) {DIR0 |= m; }
+		void DirClr(u32 m) {DIR0 &= ~m; }
 	};
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

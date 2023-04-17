@@ -1,4 +1,4 @@
-#if !defined(CPU_LPC8XX)
+#if !defined(CPU_LPC812)
 
 #include "DMA.h"
 
@@ -325,4 +325,4 @@ void DMA_CH::_InitLLI(const volatile void *src, volatile void *dst, u16 len, u32
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#endif // #if !defined(CPU_LPC8XX)
+#endif // #if !defined(CPU_LPC812)

@@ -112,5 +112,5 @@ class ComPort
 	static __irq void WriteHandler_2();
 };
 
-#endif // CPU_LPC8XX
+#endif // CPU_LPC812
 #endif // COMPORT_LPC8XX_H__10_03_2023__18_56

@@ -1,5 +1,7 @@
 #ifndef BOOT_LPC824_IMP_H__01_12_2022__10_57
 #define BOOT_LPC824_IMP_H__01_12_2022__10_57
+
+#if defined(CPU_LPC824) || defined(CPU_LPC812)
   
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -21,10 +23,15 @@
 #define PAGES_IN_SECTOR 16
 #define SECTORSIZE (PAGESIZE*PAGES_IN_SECTOR)
 #define SECTORDWORDS (SECTORSIZE>>2)
-#define PLANESIZE 0x8000
+
+u32 PLANESIZE = 0x1000;
 
 #ifndef BOOT_START_SECTOR
-#define BOOT_START_SECTOR 8
+	#ifdef CPU_LPC824
+		#define BOOT_START_SECTOR 8
+	#elif defined(CPU_LPC812)
+		#define BOOT_START_SECTOR 4
+	#endif
 #endif
 
 #define START_PAGE (BOOT_START_SECTOR*PAGES_IN_SECTOR)
@@ -115,6 +122,25 @@ struct RspMes
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+static void InitPlaneSize()
+{
+	byte id = (HW::SYSCON->DEVICE_ID >> 4) & 0xF;
+
+	u32 planesize = 0x1000;
+
+	switch (id)
+	{
+		case 0:	planesize = 0x1000; break;
+		case 1:	planesize = 0x2000; break;
+		case 2:	planesize = 0x4000; break;
+		case 4:	planesize = 0x8000; break;
+	};
+
+	PLANESIZE = planesize;
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 static bool IAP_PrepareSector(u32 sector)
 {
 	sector += BOOT_START_SECTOR;
@@ -124,7 +150,7 @@ static bool IAP_PrepareSector(u32 sector)
 	command_param[2] = sector;
 	command_param[3] = 0;
 
-	iap_entry(command_param, status_result);
+	__disable_irq(); iap_entry(command_param, status_result); __enable_irq();
 
 	return status_result[0] == 0;
 }
@@ -137,9 +163,9 @@ static bool IAP_WritePage(u32 pagenum, u32 *pbuf)
 	command_param[1] = FLASH_START + pagenum*PAGESIZE;
 	command_param[2] = (u32)pbuf;
 	command_param[3] = PAGESIZE;
-	command_param[4] = 0;
+	command_param[4] = MCK/1000;
 
-	iap_entry(command_param, status_result);
+	__disable_irq(); iap_entry(command_param, status_result); __enable_irq();
 
 	return status_result[0] == 0;
 }
@@ -168,9 +194,9 @@ static bool IAP_EraseSector(u32 sector)
 	command_param[0] = 52;
 	command_param[1] = sector;
 	command_param[2] = sector;
-	command_param[3] = 0;
+	command_param[3] = MCK/1000;
 
-	iap_entry(command_param, status_result);
+	__disable_irq(); iap_entry(command_param, status_result); __enable_irq();
 
 	return status_result[0] == 0;
 }
@@ -583,6 +609,8 @@ int main()
 
 	Pin_MainLoop_Clr();
 
+	InitPlaneSize();
+
 	InitHardware();
 
 	com.Connect(BOOT_COM_MODE, BOOT_COM_SPEED, BOOT_COM_PARITY, BOOT_COM_STOPBITS);
@@ -622,5 +650,6 @@ int main()
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+#endif // #if defined(CPU_LPC824) || defined(CPU_LPC812)
 
 #endif // BOOT_LPC824_IMP_H__01_12_2022__10_57

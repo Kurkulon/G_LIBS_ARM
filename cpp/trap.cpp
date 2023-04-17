@@ -1,4 +1,4 @@
-#if !defined(CPU_LPC824) && !defined(CPU_LPC8XX)
+#if !defined(CPU_LPC824) && !defined(CPU_LPC812)
 
 //#define _CRT_SECURE_NO_WARNINGS
 
@@ -1245,4 +1245,4 @@ void TRAP_Idle()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#endif // #if !defined(CPU_LPC824) && !defined(CPU_LPC8XX)
+#endif // #if !defined(CPU_LPC824) && !defined(CPU_LPC812)

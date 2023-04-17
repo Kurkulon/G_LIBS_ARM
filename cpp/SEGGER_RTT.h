@@ -1,7 +1,7 @@
 #ifndef SEGGER_RTT_H__13_03_2023__17_37
 #define SEGGER_RTT_H__13_03_2023__17_37
 
-#if !defined(CPU_LPC8XX)
+#if !defined(CPU_LPC812)
 
 /*********************************************************************
 *              SEGGER MICROCONTROLLER SYSTEME GmbH                   *
@@ -114,7 +114,7 @@ int SEGGER_RTT_printf(unsigned BufferIndex, const char * sFormat, ...);
 
 /*************************** End of file ****************************/
 
-#else // #if !defined(CPU_LPC8XX)
+#else // #if !defined(CPU_LPC812)
 
 #define SEGGER_RTT_Init()
 #define SEGGER_RTT_Read(v1,v2,v3)
@@ -122,7 +122,7 @@ int SEGGER_RTT_printf(unsigned BufferIndex, const char * sFormat, ...);
 #define SEGGER_RTT_printf(v1,v2,v3)
 #define SEGGER_RTT_WriteString(v1,v2)
 
-#endif // #if !defined(CPU_LPC8XX)
+#endif // #if !defined(CPU_LPC812)
 
 #endif // SEGGER_RTT_H__13_03_2023__17_37
 

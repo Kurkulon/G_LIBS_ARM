@@ -357,5 +357,5 @@ bool ComPort::Write(ComPort::WriteBuffer *writeBuffer)
 
 
 
-#endif // CPU_LPC8XX
+#endif // CPU_LPC812
 #endif // COMPORT_LPC8XX_IMP_H__10_03_2023__18_46

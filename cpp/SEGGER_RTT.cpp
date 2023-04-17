@@ -1,4 +1,4 @@
-#if !defined(CPU_LPC8XX)
+#if !defined(CPU_LPC812)
 
 #include "types.h"
 
@@ -676,4 +676,4 @@ void SEGGER_RTT_Init (void) {
 
 /*************************** End of file ****************************/
 
-#endif // #if !defined(CPU_LPC8XX)
+#endif // #if !defined(CPU_LPC812)

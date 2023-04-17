@@ -1,4 +1,4 @@
-#ifndef CPU_LPC8XX
+#ifndef CPU_LPC812
 
 #include "spi.h"
 #include "core.h"
@@ -678,4 +678,4 @@ bool S_SPIM::Update()
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#endif // #ifndef CPU_LPC8XX
+#endif // #ifndef CPU_LPC812

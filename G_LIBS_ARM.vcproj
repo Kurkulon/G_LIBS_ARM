@@ -155,18 +155,18 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="LPC8XX_Debug|Win32"
+			Name="LPC812_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="0"
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="wmake -h version=Debug targetcpu=LPC8XX"
-				ReBuildCommandLine="wmake -h -a version=Debug targetcpu=LPC8XX"
+				BuildCommandLine="wmake -h version=Debug targetcpu=LPC812"
+				ReBuildCommandLine="wmake -h -a version=Debug targetcpu=LPC812"
 				CleanCommandLine="@del /Q $(OutDir)\*.*"
-				Output="$(ProjectDir)\LPC8XX_d.a"
-				PreprocessorDefinitions="_DEBUG,__softfp=,CPU_LPC8XX"
+				Output="$(ProjectDir)\LPC812_d.a"
+				PreprocessorDefinitions="_DEBUG,__softfp=,CPU_LPC812"
 				IncludeSearchPath="$(ARMCC50INC);"
 				ForcedIncludes=""
 				AssemblySearchPath=""
@@ -175,18 +175,18 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="LPC8XX_Release|Win32"
+			Name="LPC812_Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="0"
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="wmake -h version=Release targetcpu=LPC8XX"
-				ReBuildCommandLine="wmake -h -a version=Release targetcpu=LPC8XX"
+				BuildCommandLine="wmake -h version=Release targetcpu=LPC812"
+				ReBuildCommandLine="wmake -h -a version=Release targetcpu=LPC812"
 				CleanCommandLine="@del /Q $(OutDir)\*.*"
-				Output="$(ProjectDir)\LPC8XX_r.a"
-				PreprocessorDefinitions="__softfp=,CPU_LPC8XX"
+				Output="$(ProjectDir)\LPC812_r.a"
+				PreprocessorDefinitions="__softfp=,CPU_LPC812"
 				IncludeSearchPath="$(ARMCC50INC);"
 				ForcedIncludes=""
 				AssemblySearchPath=""
@@ -403,6 +403,10 @@
 			</File>
 			<File
 				RelativePath=".\cpp\list.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\lpc81x.h"
 				>
 			</File>
 			<File

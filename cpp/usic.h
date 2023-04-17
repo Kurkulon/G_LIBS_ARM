@@ -29,7 +29,7 @@
 
 	typedef T_HW::USIC USICHWT;
 
-#elif defined(CPU_LPC8XX)
+#elif defined(CPU_LPC812)
 
 	#define USIC_NUM 6
 

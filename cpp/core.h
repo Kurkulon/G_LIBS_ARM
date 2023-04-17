@@ -24,14 +24,14 @@
 
 #include "lpc82x.h"
 
-#elif defined(CPU_LPC8XX)
+#elif defined(CPU_LPC812)
 
-#define	CORETYPE_LPC82X
+#define	CORETYPE_LPC81X
 
-#define	CORETYPE_LPC82X
+#define	CORETYPE_LPC81X
 #define CORTEX_M0
 
-#include "lpc82x.h"
+#include "lpc81x.h"
 
 #endif
 

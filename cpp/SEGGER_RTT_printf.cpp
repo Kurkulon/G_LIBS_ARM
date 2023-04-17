@@ -1,4 +1,4 @@
-#if !defined(CPU_LPC8XX)
+#if !defined(CPU_LPC812)
 
 /*********************************************************************
 *              SEGGER MICROCONTROLLER GmbH & Co. KG                  *
@@ -449,4 +449,4 @@ int SEGGER_RTT_printf(unsigned BufferIndex, const char * sFormat, ...) {
 }
 /*************************** End of file ****************************/
 
-#endif // #if !defined(CPU_LPC8XX)
+#endif // #if !defined(CPU_LPC812)

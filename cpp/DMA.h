@@ -1,7 +1,7 @@
 #ifndef DMA_H__26_05_2022__18_11
 #define DMA_H__26_05_2022__18_11
 
-#if !defined(CPU_LPC8XX)
+#if !defined(CPU_LPC812)
 
 #include "types.h"
 #include "core.h"
@@ -212,6 +212,6 @@ extern DMA_CH		DMA_CH11;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#endif // #if !defined(CPU_LPC8XX)
+#endif // #if !defined(CPU_LPC812)
 
 #endif // DMA_H__26_05_2022__18_11

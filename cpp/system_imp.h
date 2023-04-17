@@ -234,13 +234,17 @@ extern "C" void SystemInit()
 
 		HW::DLR->LNEN = 0;
 
-	#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
+	#elif defined(CPU_LPC824) || defined(CPU_LPC812)
 
 		u32 i;
 		using namespace CM0;
 		using namespace HW;
 
-		SYSCON->SYSAHBCLKCTRL |= CLK::SWM_M | CLK::IOCON_M | CLK::GPIO_M | HW::CLK::MRT_M | HW::CLK::UART0_M | HW::CLK::CRC_M | HW::CLK::DMA_M;
+		#if defined(CPU_LPC824)
+			SYSCON->SYSAHBCLKCTRL |= CLK::SWM_M | CLK::IOCON_M | CLK::GPIO_M | HW::CLK::MRT_M | HW::CLK::UART0_M | HW::CLK::CRC_M | HW::CLK::DMA_M;
+		#elif defined(CPU_LPC812)
+			SYSCON->SYSAHBCLKCTRL |= CLK::SWM_M | CLK::IOCON_M | CLK::GPIO_M | HW::CLK::MRT_M | HW::CLK::UART0_M | HW::CLK::CRC_M;
+		#endif
 
 		GPIO->DIR0	= GPIO_INIT_DIR0; //(1<<27)|(1<<14)|(1<<17)|(1<<18)|(1<<19)|(1<<20)|(1<<21)|(1<<22)|(1<<12)|(1<<15);
 		GPIO->PIN0	= GPIO_INIT_PIN0;
@@ -253,15 +257,7 @@ extern "C" void SystemInit()
 
 		HW::GPIO->NOT0 = 1<<12;
 
-		#ifdef CPU_LPC824
-
-			SWM->PINENABLE0.B.CLKIN = 0;
-
-		#elif defined(CPU_LPC8XX)
-
-			SWM->PINENABLE0.D &= ((SYSCON->DEVICE_ID & 0xFF00) == 0x8100) ? (~(1<<7)) : (~(1<<9)); // CLKIN
-
-		#endif
+		SWM->PINENABLE0.B.CLKIN = 0;
 
 		for (i = 0; i < 200; i++) __nop(); 
 

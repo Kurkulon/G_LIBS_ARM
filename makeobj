@@ -68,7 +68,7 @@ cpu_compiler_options = --cpu=Cortex-M0plus --thumb
 cpu_asm_options = --cpu Cortex-M0plus --apcs /interwork
 cpu_link_options = --cpu Cortex-M0plus
 
-!else ifeq targetcpu LPC8XX
+!else ifeq targetcpu LPC812
 
 cpu_compiler_options = --cpu=Cortex-M0plus --thumb
 cpu_asm_options = --cpu Cortex-M0plus --apcs /interwork

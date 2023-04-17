@@ -133,7 +133,7 @@ class ComPort : public USIC
 //		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _prevDmaCounter; }
 		u16	GetRecievedLen() { return GetDmaCounter(); }
 
-	#elif defined (CPU_LPC824) || defined(CPU_LPC8XX)
+	#elif defined (CPU_LPC824) || defined(CPU_LPC812)
 
 		const byte	_PIN_SCK;
 		const byte	_PIN_TX;
@@ -151,7 +151,7 @@ class ComPort : public USIC
 
 		u32			_CFG;  
 		u32			_BRG; 
-		u32			_OSR; 
+		//u32			_OSR; 
 
 		#ifdef CPU_LPC824
 
@@ -159,7 +159,7 @@ class ComPort : public USIC
 			bool IsRecieved() {  u32 s = _uhw.usart->STAT & (1<<12); _uhw.usart->STAT = (1<<12); return s; }
 			u16	GetRecievedLen() { return _pReadBuffer->maxLen - _DMARX.GetBytesLeft(); }
 
-		#elif defined(CPU_LPC8XX)
+		#elif defined(CPU_LPC812)
 
 			typedef __irq void (*T_IRQ_Handler)();
 
@@ -244,7 +244,7 @@ class ComPort : public USIC
 	void		Set_RTS() { if (_PIO_RTS != 0) _PIO_RTS->SET(_MASK_RTS); }
 	void		Clr_RTS() { if (_PIO_RTS != 0) _PIO_RTS->CLR(_MASK_RTS); }
 
-#elif defined(CPU_LPC824) || defined(CPU_LPC8XX)
+#elif defined(CPU_LPC824) || defined(CPU_LPC812)
 
 	void		Set_RTS() { HW::GPIO->SET(_MASK_RTS); }
 	void		Clr_RTS() { HW::GPIO->CLR(_MASK_RTS); }
@@ -270,7 +270,7 @@ class ComPort : public USIC
 	ComPort(byte num, byte pinsck, byte pintx, byte pinrx, byte pinrts)
 		: USIC(num), _PIN_SCK(pinsck), _PIN_TX(pintx), _PIN_RX(pinrx), _PIN_RTS(pinrts), _MASK_RTS(1UL<<pinrts), _DMARX(num*2), _DMATX(num*2+1), _status485(READ_END) {}
 
-#elif defined (CPU_LPC8XX)
+#elif defined (CPU_LPC812)
 
 	ComPort(byte num, byte pinsck, byte pintx, byte pinrx, byte pinrts)
 		: USIC(num), _PIN_SCK(pinsck), _PIN_TX(pintx), _PIN_RX(pinrx), _PIN_RTS(pinrts), _MASK_RTS(1UL<<pinrts), _status485(READ_END) {}
