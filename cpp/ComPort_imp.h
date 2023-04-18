@@ -772,6 +772,10 @@ __irq void ComPort::WriteHandler_2()
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+//#pragma push
+//#pragma O3
+//#pragma Otime
+
 void ComPort::IRQ_ReadHandler()
 {
 	*(rdata++) = _uhw.usart->RXDATA;
@@ -784,13 +788,18 @@ void ComPort::IRQ_ReadHandler()
 
 void ComPort::IRQ_WriteHandler()
 {
-	_uhw.usart->TXDATA = *(wdata++);
+	register T_HW::S_USART *usart = _uhw.usart;
+
+	usart->TXDATA = *(wdata++);
+
 	wlen--;
 	
-	if (wlen == 0) _uhw.usart->INTENCLR = 4;
+	if (wlen == 0) usart->INTENCLR = 4;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+//#pragma pop
 
 #endif
 

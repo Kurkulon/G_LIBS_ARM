@@ -188,8 +188,8 @@ class ComPort : public USIC
 
 			byte	*wdata;
 			byte	*rdata;
-			u16		wlen;
-			u16		rlen;
+			u32		wlen;
+			u32		rlen;
 
 		#endif
 
@@ -280,7 +280,7 @@ class ComPort : public USIC
 	ComPort() : USIC(0), _connected(false), _status485(READ_END) {}
 
 #endif
-				bool	Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits);
+				bool	Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits = 1);
 				//bool	ConnectAsyn(byte port, dword speed, byte parity, byte stopBits);
 				//bool	ConnectSync(byte port, dword speed, byte parity, byte stopBits);
 				bool	Disconnect();
