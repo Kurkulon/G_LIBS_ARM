@@ -33,6 +33,14 @@
 	#define ISP_DATASIZE ISP_PAGESIZE
 	#endif
 
+	#ifndef BOOT_COM_PRETIMEOUT
+	#define BOOT_COM_PRETIMEOUT		MS2COM(200)
+	#endif
+
+	#ifndef BOOT_COM_POSTTIMEOUT
+	#define BOOT_COM_POSTTIMEOUT	MS2COM(2)
+	#endif
+
 #endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -358,8 +366,18 @@ static u32 GetSectorAdrLen(u32 sadr, u32 *radr)
 //static FL flDscr;
 
 //static bool run = false;
+
+#ifdef BOOT_COM
+static bool runCom = true;
+#else
 static bool runCom = false;
+#endif
+
+#ifdef BOOT_EMAC
+static bool runEmac = true;
+#else
 static bool runEmac = false;
+#endif
 
 //static u32 crcErrors = 0;
 //static u32 lenErrors = 0;
@@ -702,7 +720,10 @@ static bool HandShake()
 
 	tm.Reset();
 
-	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_CYAN "Start Ethernet handshake ...\n");
+	runCom = false;
+	runEmac = false;
+
+	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_CYAN "Start handshake ...\n");
 
 	while (!tm.Check(200) && !c)
 	{
@@ -711,6 +732,7 @@ static bool HandShake()
 		HW::WDT->Update();
 
 		#ifdef BOOT_COM
+
 
 			switch (i)
 			{
@@ -755,6 +777,8 @@ static bool HandShake()
 		#endif
 
 		#ifdef BOOT_EMAC
+
+			runEmac = c;
 
 			UpdateEMAC();
 
@@ -920,7 +944,7 @@ static void UpdateCom()
 			rb.data = &req->F1;
 			rb.maxLen = sizeof(*req);
 			
-			com.Read(&rb, MS2COM(200), MS2COM(2));
+			com.Read(&rb, BOOT_COM_PRETIMEOUT, BOOT_COM_POSTTIMEOUT);
 
 			i++;
 
@@ -1021,7 +1045,9 @@ extern "C" void _MainAppStart(u32 adr);
 
 int main()
 {
-	//__breakpoint(0);
+	#ifdef BOOT_START_BREAKPOINT
+		__breakpoint(0);
+	#endif
 
 	SEGGER_RTT_Init();
 	SEGGER_RTT_WriteString(0, RTT_CTRL_CLEAR);
@@ -1080,7 +1106,9 @@ int main()
 		if(tm.Check(MS2CTM(50))) Pin_MainLoop_Tgl();
 	};
 
-	//__breakpoint(0);
+	#ifdef BOOT_EXIT_BREAKPOINT
+		__breakpoint(0);
+	#endif
 
 	__disable_irq();
 
