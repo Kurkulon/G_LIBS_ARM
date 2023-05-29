@@ -638,6 +638,9 @@ int main()
 
 	__disable_irq();
 
+	HW::WKT->CTRL = WKT_CLEARCTR; 
+	CM0::SysTick->CTRL = 0;
+
 	SEGGER_RTT_printf(0, RTT_CTRL_TEXT_BRIGHT_GREEN "Main App Start ... %u ms\n", GetMilliseconds());
 
 	_MainAppStart(FLASH0+BOOTSIZE);
