@@ -282,6 +282,8 @@ extern "C" void SystemInit()
 			#error PLL_PSEL must be 0...3
 			#endif
 			
+			HW::FLASHCTRL->FLASHCFG = (HW::FLASHCTRL->FLASHCFG & ~3) | 1;
+
 			SYSCON->SYSPLLCTRL = SYSPLLCTRL_MSEL(PLL_MSEL-1)|SYSPLLCTRL_PSEL(PLL_PSEL);
 			while (!(SYSCON->SYSPLLSTAT & SYSPLLSTAT_LOCK));
 			HW::GPIO->NOT0 = 1<<12;
