@@ -450,6 +450,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\SPIS.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\SPIS_imp.h"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\system_imp.h"
 				>
 			</File>

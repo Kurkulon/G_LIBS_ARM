@@ -96,6 +96,8 @@ class USIC // Universal Serial Interface Channel
 		void RequestReset() { _req_reset_mask |= _usic_mask; }
 		bool CheckReset()	{ return _req_reset_mask & _usic_mask; }
 
+		bool CheckConnected() { return _alloc_mask & _usic_mask; }
+
 		virtual void InitHW() {}
 
 #ifdef CPU_SAME53
