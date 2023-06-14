@@ -168,9 +168,11 @@ bool S_SPIS::Update()
 		{
 			u32 t = GetDmaCounter();
 
-			if (_prevCounter != t)
+			if (spi->INTFLAG & SPI_DRE)
 			{
-				_prevCounter = t;
+				spi->DATA = 0x55;
+				//spi->INTFLAG = SPI_DRE|SPI_TXC;
+
 				_rtm.Reset();
 				_readTimeout = _postReadTimeout;
 			}
@@ -238,6 +240,8 @@ bool S_SPIS::Read(S_SPIS::RBUF *rbuf, u32 preTimeout, u32 postTimeout)
 		_uhw.spi->CTRLB |= SPI_RXEN; while(_uhw.spi->SYNCBUSY);
 
 		do t = _uhw.spi->DATA; while(_uhw.spi->INTFLAG & SPI_RXC); 
+
+		while(_uhw.spi->INTFLAG & SPI_DRE) _uhw.spi->DATA = 0xAA;
 
 		_prevCounter = _prbuf->maxLen;
 
