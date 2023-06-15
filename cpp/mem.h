@@ -21,6 +21,7 @@ public:
 	virtual	u32		FreeCount() = 0;
 
 	void*	GetDataPtr() { return (byte*)_data+dataOffset; }
+	u32		GetDataMaxLen() { return MaxLen()-dataOffset; }
 
 	MB() : len(0), dataOffset(0) {}
 };
