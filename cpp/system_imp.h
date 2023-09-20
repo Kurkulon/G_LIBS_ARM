@@ -12,6 +12,119 @@
  *----------------------------------------------------------------------------*/
 #ifndef WIN32
 
+#ifndef TEST_PIN_DELAY
+#define TEST_PIN_DELAY MCK_MHz
+#endif
+
+static void Test_PIO_Pins()
+{
+	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_WHITE "Test PIO Pins start ...\n" RTT_CTRL_BG_BRIGHT_WHITE);
+
+	#if defined(CPU_SAME53) && defined(PIOA_TEST_MASK) && defined(PIOB_TEST_MASK) && defined(PIOC_TEST_MASK)
+
+		HW::PIOA->SetWRCONFIG(PIOA_TEST_MASK, PORT_WRPINCFG|PORT_WRPMUX|PORT_INEN);
+		HW::PIOB->SetWRCONFIG(PIOB_TEST_MASK, PORT_WRPINCFG|PORT_WRPMUX|PORT_INEN);
+		HW::PIOC->SetWRCONFIG(PIOC_TEST_MASK, PORT_WRPINCFG|PORT_WRPMUX|PORT_INEN);
+
+		HW::PIOA->CTRL = PIOA_TEST_MASK;
+		HW::PIOB->CTRL = PIOB_TEST_MASK;
+		HW::PIOC->CTRL = PIOC_TEST_MASK;
+
+		for (u32 i = 0; i < 96; i++)
+		{
+			HW::PIOA->DIRCLR = PIOA_TEST_MASK;
+			HW::PIOB->DIRCLR = PIOB_TEST_MASK;
+			HW::PIOC->DIRCLR = PIOC_TEST_MASK;
+
+			u32 pinMask[3] = {0,0,0};
+
+			pinMask[i>>5] = 1UL<<(i&31);
+
+			u32 &pinMaskA = pinMask[0];
+			u32 &pinMaskB = pinMask[1];
+			u32 &pinMaskC = pinMask[2];
+
+			if ((pinMaskA & PIOA_TEST_MASK) || (pinMaskB & PIOB_TEST_MASK) || (pinMaskC & PIOC_TEST_MASK))
+			{
+				HW::PIOA->DIRSET = pinMaskA; HW::PIOA->OUTSET = pinMaskA;
+				HW::PIOB->DIRSET = pinMaskB; HW::PIOB->OUTSET = pinMaskB;
+				HW::PIOC->DIRSET = pinMaskC; HW::PIOC->OUTSET = pinMaskC;
+
+				delay(TEST_PIN_DELAY); 
+
+				u32 a1 = HW::PIOA->IN;
+				u32 b1 = HW::PIOB->IN;
+				u32 c1 = HW::PIOB->IN;
+
+				if ((pinMaskA && ((a1 & pinMaskA) == 0)) || (pinMaskB && ((b1 & pinMaskB) == 0)) || (pinMaskC && ((c1 & pinMaskC) == 0)))
+				{
+					SEGGER_RTT_printf(0, RTT_CTRL_TEXT_BRIGHT_RED "ERROR: PIN P%c%02u LOW\n", 'A'+(i>>5), i&31); // Error_PIO_pin(ERROR_PIO_PIN_LOW, i>>5, i&31);
+				};
+
+				HW::PIOA->DIRSET = pinMaskA; HW::PIOA->OUTCLR = pinMaskA;
+				HW::PIOB->DIRSET = pinMaskB; HW::PIOB->OUTCLR = pinMaskB;
+				HW::PIOC->DIRSET = pinMaskC; HW::PIOC->OUTCLR = pinMaskC;
+
+				delay(TEST_PIN_DELAY); 
+
+				u32 a2 = HW::PIOA->IN;
+				u32 b2 = HW::PIOB->IN;
+				u32 c2 = HW::PIOB->IN;
+
+				if ((a2 & pinMaskA) || (b2 & pinMaskB) || (c2 & pinMaskC))
+				{
+					SEGGER_RTT_printf(0, RTT_CTRL_TEXT_BRIGHT_RED "ERROR: PIN P%c%02u HI\n", 'A'+(i>>5), i&31); // Error_PIO_pin(ERROR_PIO_PIN_HI, i>>5, i&31);
+				};
+
+				HW::PIOA->DIRSET = pinMaskA; HW::PIOA->OUTSET = pinMaskA;
+				HW::PIOB->DIRSET = pinMaskB; HW::PIOB->OUTSET = pinMaskB;
+				HW::PIOC->DIRSET = pinMaskC; HW::PIOC->OUTSET = pinMaskC;
+				
+				delay(TEST_PIN_DELAY); 
+
+				u32 a3 = HW::PIOA->IN;
+				u32 b3 = HW::PIOB->IN;
+				u32 c3 = HW::PIOB->IN;
+
+				HW::PIOA->OUTCLR = pinMaskA;
+				HW::PIOB->OUTCLR = pinMaskB;
+				HW::PIOC->OUTCLR = pinMaskC;
+
+				bool ca1 = (a1 ^ a2) & PIOA_TEST_MASK & ~pinMaskA;
+				bool ca2 = (a2 ^ a3) & PIOA_TEST_MASK & ~pinMaskA;
+
+				bool cb1 = (b1 ^ b2) & PIOB_TEST_MASK & ~pinMaskB;
+				bool cb2 = (b2 ^ b3) & PIOB_TEST_MASK & ~pinMaskB;
+
+				bool cc1 = (c1 ^ c2) & PIOC_TEST_MASK & ~pinMaskC;
+				bool cc2 = (c2 ^ c3) & PIOC_TEST_MASK & ~pinMaskC;
+
+				if (ca1 || ca2 || cb1 || cb2 || cc1 || cc2) 
+				{
+					SEGGER_RTT_printf(0, RTT_CTRL_TEXT_BRIGHT_RED "ERROR: PIN P%c%02u SHORT\n", 'A'+(i>>5), i&31); // Error_PIO_pin(ERROR_PIO_PIN_SHORT, i>>5, i&31);
+				};
+			};
+		};
+
+		HW::PIOA->DIRCLR = PIOA_TEST_MASK;
+		HW::PIOB->DIRCLR = PIOB_TEST_MASK;
+		HW::PIOC->DIRCLR = PIOC_TEST_MASK;
+
+		HW::PIOA->CTRL = 0;
+		HW::PIOB->CTRL = 0;
+		HW::PIOC->CTRL = 0;
+
+		HW::PIOA->SetWRCONFIG(PIOA_TEST_MASK, PORT_WRPINCFG|PORT_WRPMUX);
+		HW::PIOB->SetWRCONFIG(PIOB_TEST_MASK, PORT_WRPINCFG|PORT_WRPMUX);
+		HW::PIOC->SetWRCONFIG(PIOC_TEST_MASK, PORT_WRPINCFG|PORT_WRPMUX);
+
+	#endif
+
+	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_WHITE RTT_CTRL_BG_BLACK "Test PIO Pins Finish\n");
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 extern "C" void SystemInit()
 {
 	//u32 i;
@@ -22,13 +135,17 @@ extern "C" void SystemInit()
 	#ifndef BOOTLOADER
 
 		SEGGER_RTT_Init();
-		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_YELLOW "SystemInit ... ");
+		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_YELLOW "SystemInit start ...\n");
 
 	#endif
 
 	#ifdef CPU_SAME53	
 
 		using namespace CM4;
+
+		#if defined(_DEBUG) && !defined(BOOTLOADER)
+			Test_PIO_Pins();
+		#endif
 
 		HW::PIOA->DIR =	PIOA_INIT_DIR;
 		HW::PIOA->CLR(	PIOA_INIT_CLR);
@@ -342,7 +459,7 @@ extern "C" void SystemInit()
 	#endif
 
 	#ifndef BOOTLOADER
-		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_GREEN "OK\n");
+		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_GREEN "SystemInit OK\n");
 	#endif
 }
 
