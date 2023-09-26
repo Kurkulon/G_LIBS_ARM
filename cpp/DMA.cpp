@@ -94,7 +94,7 @@ void DMA_CH::WritePeripheral(const volatile void *src, volatile void *dst, u16 l
 
 	_dmach->CTRLA = 0;
 
-	_dmadsc->SRCADDR = (byte*)src+len;
+	_dmadsc->SRCADDR = (byte*)src+(len<<((ctrl2>>8)&3));
 	_dmadsc->DSTADDR = dst;
 	_dmadsc->DESCADDR = 0;
 	_dmadsc->BTCNT = len;
