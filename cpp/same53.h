@@ -2370,33 +2370,186 @@ namespace T_HW
 
 	struct S_ADC
 	{
+		RW16	CTRLA;          /**< Offset: 0x00 (R/W  16) Control A */
+		RW8 	EVCTRL;         /**< Offset: 0x02 (R/W  8) Event Control */
+		RW8 	DBGCTRL;        /**< Offset: 0x03 (R/W  8) Debug Control */
+		RW16	INPUTCTRL;      /**< Offset: 0x04 (R/W  16) Input Control */
+		RW16	CTRLB;          /**< Offset: 0x06 (R/W  16) Control B */
+		RW8 	REFCTRL;        /**< Offset: 0x08 (R/W  8) Reference Control */
+		RO8					z__Reserved1[0x01];
+		RW8 	AVGCTRL;        /**< Offset: 0x0A (R/W  8) Average Control */
+		RW8 	SAMPCTRL;       /**< Offset: 0x0B (R/W  8) Sample Time Control */
+		RW16	WINLT;          /**< Offset: 0x0C (R/W  16) Window Monitor Lower Threshold */
+		RW16	WINUT;          /**< Offset: 0x0E (R/W  16) Window Monitor Upper Threshold */
+		RW16	GAINCORR;       /**< Offset: 0x10 (R/W  16) Gain Correction */
+		RW16	OFFSETCORR;     /**< Offset: 0x12 (R/W  16) Offset Correction */
+		RW8 	SWTRIG;         /**< Offset: 0x14 (R/W  8) Software Trigger */
+		RO8					z__Reserved2[0x17];
+		RW8 	INTENCLR;       /**< Offset: 0x2C (R/W  8) Interrupt Enable Clear */
+		RW8 	INTENSET;       /**< Offset: 0x2D (R/W  8) Interrupt Enable Set */
+		RW8 	INTFLAG;        /**< Offset: 0x2E (R/W  8) Interrupt Flag Status and Clear */
+		RO8 	STATUS;         /**< Offset: 0x2F (R/   8) Status */
+		RO32	SYNCBUSY;       /**< Offset: 0x30 (R/   32) Synchronization Busy */
+		RW32	DSEQDATA;       /**< Offset: 0x34 ( /W  32) DMA Sequencial Data */
+		RW32	DSEQCTRL;       /**< Offset: 0x38 (R/W  32) DMA Sequential Control */
+		RO32	DSEQSTAT;       /**< Offset: 0x3C (R/   32) DMA Sequencial Status */
+		RO16	RESULT;         /**< Offset: 0x40 (R/   16) Result Conversion Value */
+		RO8					z__Reserved3[0x02];
+		RO16	RESS;           /**< Offset: 0x44 (R/   16) Last Sample Result */
+		RO8					z__Reserved4[0x02];
+		RW16	CALIB;          /**< Offset: 0x48 (R/W  16) Calibration */ 
 	};
 
+	typedef S_ADC S_ADC0, S_ADC1;
+
+	#define ADC_SWRST               	(1UL<<0)            /**< (ADC_CTRLA) Software Reset Position */
+	#define ADC_ENABLE              	(1UL<<1)            /**< (ADC_CTRLA) Enable Position */
+	#define ADC_DUALSEL_BOTH			(0UL<<3)            /**< (ADC_CTRLA) Start event or software trigger will start a conversion on both ADCs  */
+	#define ADC_DUALSEL_INTERLEAVE		(1UL<<3)            /**< (ADC_CTRLA) START event or software trigger will alternatingly start a conversion on ADC0 and ADC1  */
+	#define ADC_SLAVEEN             	(1UL<<5)            /**< (ADC_CTRLA) Slave Enable Position */
+	#define ADC_RUNSTDBY            	(1UL<<6)            /**< (ADC_CTRLA) Run in Standby Position */
+	#define ADC_ONDEMAND            	(1UL<<7)            /**< (ADC_CTRLA) On Demand Control Position */
+	#define ADC_PRESCALER(value)    	(((value)&7)<<8)
+	#define ADC_PRESCALER_DIV2      	(0UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 2  */
+	#define ADC_PRESCALER_DIV4      	(1UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 4  */
+	#define ADC_PRESCALER_DIV8      	(2UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 8  */
+	#define ADC_PRESCALER_DIV16     	(3UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 16  */
+	#define ADC_PRESCALER_DIV32     	(4UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 32  */
+	#define ADC_PRESCALER_DIV64     	(5UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 64  */
+	#define ADC_PRESCALER_DIV128    	(6UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 128  */
+	#define ADC_PRESCALER_DIV256    	(7UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 256  */
+	#define ADC_R2R						(1UL<<15)			/**< (ADC_CTRLA) Rail to Rail Operation Enable Position */
+
+	#define ADC_FLUSHEI            		(1UL<<0)			/**< (ADC_EVCTRL) Flush Event Input Enable Position */
+	#define ADC_STARTEI            		(1UL<<1)			/**< (ADC_EVCTRL) Start Conversion Event Input Enable Position */
+	#define ADC_FLUSHINV           		(1UL<<2)			/**< (ADC_EVCTRL) Flush Event Invert Enable Position */
+	#define ADC_STARTINV           		(1UL<<3)			/**< (ADC_EVCTRL) Start Conversion Event Invert Enable Position */
+	#define ADC_RESRDYEO           		(1UL<<4)			/**< (ADC_EVCTRL) Result Ready Event Out Position */
+	#define ADC_WINMONEO           		(1UL<<5)			/**< (ADC_EVCTRL) Window Monitor Event Out Position */
+
+	#define ADC_DBGRUN					(1UL<<0)			/**< (ADC_DBGCTRL) Debug Run Position */ 
+
+	#define ADC_MUXPOS(value)			((value)&0x1F)
+	#define ADC_MUXPOS_AIN0       		(0x0)               	/**< (ADC_INPUTCTRL) ADC AIN0 Pin  */
+	#define ADC_MUXPOS_AIN1       		(0x1)               	/**< (ADC_INPUTCTRL) ADC AIN1 Pin  */
+	#define ADC_MUXPOS_AIN2       		(0x2)               	/**< (ADC_INPUTCTRL) ADC AIN2 Pin  */
+	#define ADC_MUXPOS_AIN3       		(0x3)               	/**< (ADC_INPUTCTRL) ADC AIN3 Pin  */
+	#define ADC_MUXPOS_AIN4       		(0x4)               	/**< (ADC_INPUTCTRL) ADC AIN4 Pin  */
+	#define ADC_MUXPOS_AIN5       		(0x5)               	/**< (ADC_INPUTCTRL) ADC AIN5 Pin  */
+	#define ADC_MUXPOS_AIN6       		(0x6)               	/**< (ADC_INPUTCTRL) ADC AIN6 Pin  */
+	#define ADC_MUXPOS_AIN7       		(0x7)               	/**< (ADC_INPUTCTRL) ADC AIN7 Pin  */
+	#define ADC_MUXPOS_AIN8       		(0x8)               	/**< (ADC_INPUTCTRL) ADC AIN8 Pin  */
+	#define ADC_MUXPOS_AIN9       		(0x9)               	/**< (ADC_INPUTCTRL) ADC AIN9 Pin  */
+	#define ADC_MUXPOS_AIN10      		(0xA)               	/**< (ADC_INPUTCTRL) ADC AIN10 Pin  */
+	#define ADC_MUXPOS_AIN11      		(0xB)               	/**< (ADC_INPUTCTRL) ADC AIN11 Pin  */
+	#define ADC_MUXPOS_AIN12      		(0xC)               	/**< (ADC_INPUTCTRL) ADC AIN12 Pin  */
+	#define ADC_MUXPOS_AIN13      		(0xD)               	/**< (ADC_INPUTCTRL) ADC AIN13 Pin  */
+	#define ADC_MUXPOS_AIN14      		(0xE)               	/**< (ADC_INPUTCTRL) ADC AIN14 Pin  */
+	#define ADC_MUXPOS_AIN15      		(0xF)               	/**< (ADC_INPUTCTRL) ADC AIN15 Pin  */
+	#define ADC_MUXPOS_AIN16      		(0x10)              	/**< (ADC_INPUTCTRL) ADC AIN16 Pin  */
+	#define ADC_MUXPOS_AIN17      		(0x11)              	/**< (ADC_INPUTCTRL) ADC AIN17 Pin  */
+	#define ADC_MUXPOS_AIN18      		(0x12)              	/**< (ADC_INPUTCTRL) ADC AIN18 Pin  */
+	#define ADC_MUXPOS_AIN19      		(0x13)              	/**< (ADC_INPUTCTRL) ADC AIN19 Pin  */
+	#define ADC_MUXPOS_AIN20      		(0x14)              	/**< (ADC_INPUTCTRL) ADC AIN20 Pin  */
+	#define ADC_MUXPOS_AIN21      		(0x15)              	/**< (ADC_INPUTCTRL) ADC AIN21 Pin  */
+	#define ADC_MUXPOS_AIN22      		(0x16)              	/**< (ADC_INPUTCTRL) ADC AIN22 Pin  */
+	#define ADC_MUXPOS_AIN23      		(0x17)              	/**< (ADC_INPUTCTRL) ADC AIN23 Pin  */
+	#define ADC_MUXPOS_SCALEDCOREVCC	(0x18)                  	/**< (ADC_INPUTCTRL) 1/4 Scaled Core Supply  */
+	#define ADC_MUXPOS_SCALEDVBAT 		(0x19)              	/**< (ADC_INPUTCTRL) 1/4 Scaled VBAT Supply  */
+	#define ADC_MUXPOS_SCALEDIOVCC		(0x1A)              	/**< (ADC_INPUTCTRL) 1/4 Scaled I/O Supply  */
+	#define ADC_MUXPOS_BANDGAP    		(0x1B)              	/**< (ADC_INPUTCTRL) Bandgap Voltage  */
+	#define ADC_MUXPOS_PTAT       		(0x1C)              	/**< (ADC_INPUTCTRL) Temperature Sensor TSENSP  */
+	#define ADC_MUXPOS_CTAT       		(0x1D)              	/**< (ADC_INPUTCTRL) Temperature Sensor TSENSC  */
+	#define ADC_MUXPOS_DAC        		(0x1E)              	/**< (ADC_INPUTCTRL) DAC Output  */
+	#define ADC_MUXPOS_PTC        		(0x1F)              	/**< (ADC_INPUTCTRL) PTC output (only on ADC0)  */
+	#define ADC_DIFFMODE				(1UL<<7)				/**< (ADC_INPUTCTRL) Differential Mode Position */
+	#define ADC_MUXNEG(value)			(((value)&0x1F)<<8)
+	#define ADC_MUXNEG_AIN0       		(0x00UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN0 Pin  */
+	#define ADC_MUXNEG_AIN1       		(0x01UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN1 Pin  */
+	#define ADC_MUXNEG_AIN2       		(0x02UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN2 Pin  */
+	#define ADC_MUXNEG_AIN3       		(0x03UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN3 Pin  */
+	#define ADC_MUXNEG_AIN4       		(0x04UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN4 Pin  */
+	#define ADC_MUXNEG_AIN5       		(0x05UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN5 Pin  */
+	#define ADC_MUXNEG_AIN6       		(0x06UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN6 Pin  */
+	#define ADC_MUXNEG_AIN7       		(0x07UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN7 Pin  */
+	#define ADC_MUXNEG_GND        		(0x18UL<<8)         	/**< (ADC_INPUTCTRL) Internal Ground  */
+	#define ADC_DSEQSTOP				(1UL<<15)           	/**< (ADC_INPUTCTRL) Stop DMA Sequencing Position */
+
+	#define ADC_LEFTADJ               	(1UL<<0)              	/**< (ADC_CTRLB) Left-Adjusted Result Position */
+	#define ADC_FREERUN               	(1UL<<1)              	/**< (ADC_CTRLB) Free Running Mode Position */
+	#define ADC_CORREN					(1UL<<2)                /**< (ADC_CTRLB) Digital Correction Logic Enable Position */
+	#define ADC_RESSEL_12BIT          	(0UL<<3)              	/**< (ADC_CTRLB) 12-bit result  */
+	#define ADC_RESSEL_16BIT          	(1UL<<3)              	/**< (ADC_CTRLB) For averaging mode output  */
+	#define ADC_RESSEL_10BIT          	(2UL<<3)              	/**< (ADC_CTRLB) 10-bit result  */
+	#define ADC_RESSEL_8BIT           	(3UL<<3)              	/**< (ADC_CTRLB) 8-bit result  */
+	#define ADC_WINMODE_DISABLE       	(0UL<<8)              	/**< (ADC_CTRLB) No window mode (default)  */
+	#define ADC_WINMODE_MODE1         	(1UL<<8)              	/**< (ADC_CTRLB) RESULT > WINLT  */
+	#define ADC_WINMODE_MODE2         	(2UL<<8)              	/**< (ADC_CTRLB) RESULT < WINUT  */
+	#define ADC_WINMODE_MODE3         	(3UL<<8)              	/**< (ADC_CTRLB) WINLT < RESULT < WINUT  */
+	#define ADC_WINMODE_MODE4         	(4UL<<8)              	/**< (ADC_CTRLB) !(WINLT < RESULT < WINUT)  */
+	#define ADC_WINSS                 	(1UL<<11)             	/**< (ADC_CTRLB) Window Single Sample Position */
+
+	#define	ADC_REFSEL_INTREF			(0x0)                   /**< (ADC_REFCTRL) Internal Bandgap Reference  */
+	#define	ADC_REFSEL_INTVCC	  		(0x2)                   /**< (ADC_REFCTRL) 1/2 VDDANA  */
+	#define	ADC_REFSEL_VDDANA	  		(0x3)                   /**< (ADC_REFCTRL) VDDANA  */
+	#define	ADC_REFSEL_AREFA    		(0x4)                   /**< (ADC_REFCTRL) External Reference A  */
+	#define	ADC_REFSEL_AREFB    		(0x5)                   /**< (ADC_REFCTRL) External Reference B  */
+	#define	ADC_REFSEL_AREFC    		(0x6)                   /**< (ADC_REFCTRL) External Reference C (only on ADC1)  */
+	#define	ADC_REFCOMP					(1UL<<7)                /**< (ADC_REFCTRL) Reference Buffer Offset Compensation Enable Position */
+
+	#define ADC_SAMPLENUM(value)    	((value)&15)
+	#define ADC_SAMPLENUM_1         	(0x0)             		/**< (ADC_AVGCTRL) 1 sample  */
+	#define ADC_SAMPLENUM_2         	(0x1)             		/**< (ADC_AVGCTRL) 2 samples  */
+	#define ADC_SAMPLENUM_4         	(0x2)             		/**< (ADC_AVGCTRL) 4 samples  */
+	#define ADC_SAMPLENUM_8         	(0x3)             		/**< (ADC_AVGCTRL) 8 samples  */
+	#define ADC_SAMPLENUM_16        	(0x4)             		/**< (ADC_AVGCTRL) 16 samples  */
+	#define ADC_SAMPLENUM_32        	(0x5)             		/**< (ADC_AVGCTRL) 32 samples  */
+	#define ADC_SAMPLENUM_64        	(0x6)             		/**< (ADC_AVGCTRL) 64 samples  */
+	#define ADC_SAMPLENUM_128       	(0x7)             		/**< (ADC_AVGCTRL) 128 samples  */
+	#define ADC_SAMPLENUM_256       	(0x8)             		/**< (ADC_AVGCTRL) 256 samples  */
+	#define ADC_SAMPLENUM_512       	(0x9)             		/**< (ADC_AVGCTRL) 512 samples  */
+	#define ADC_SAMPLENUM_1024      	(0xA)             		/**< (ADC_AVGCTRL) 1024 samples  */
+	#define ADC_ADJRES(value)       	(((value)&7)<<4)		/**< (ADC_AVGCTRL) Adjusting Result / Division Coefficient */	
+
+	#define ADC_SAMPLEN(value)			((value)&0x3F)			/**< (ADC_SAMPCTRL) Sampling Time Length  */
+	#define ADC_OFFCOMP		   			(1UL<<7)				/**< (ADC_SAMPCTRL) Comparator Offset Compensation Enable Position */
+
+	#define ADC_FLUSH					(1UL<<0)    			/**< (ADC_SWTRIG) ADC Conversion Flush Position */
+	#define ADC_START					(1UL<<1)    			/**< (ADC_SWTRIG) Start ADC Conversion Position */
+
+	#define ADC_RESRDY					(1UL<<0)       			/**< (ADC_INTFLAG) Result Ready Interrupt Flag Position */
+	#define ADC_OVERRUN					(1UL<<1)       			/**< (ADC_INTFLAG) Overrun Interrupt Flag Position */
+	#define ADC_WINMON					(1UL<<2)       			/**< (ADC_INTFLAG) Window Monitor Interrupt Flag Position */
+
+	#define ADC_ADCBUSY					(1UL<<0)				/**< (ADC_STATUS) ADC Busy Status Position */
+
+	#define ADC_SYNC_SWRST        		(1UL<<0)   				/**< (ADC_SYNCBUSY) SWRST Synchronization Busy Position */
+	#define ADC_SYNC_ENABLE       		(1UL<<1)   				/**< (ADC_SYNCBUSY) ENABLE Synchronization Busy Position */
+	#define ADC_SYNC_INPUTCTRL    		(1UL<<2)   				/**< (ADC_SYNCBUSY) Input Control Synchronization Busy Position */
+	#define ADC_SYNC_CTRLB        		(1UL<<3)   				/**< (ADC_SYNCBUSY) Control B Synchronization Busy Position */
+	#define ADC_SYNC_REFCTRL      		(1UL<<4)   				/**< (ADC_SYNCBUSY) Reference Control Synchronization Busy Position */
+	#define ADC_SYNC_AVGCTRL      		(1UL<<5)   				/**< (ADC_SYNCBUSY) Average Control Synchronization Busy Position */
+	#define ADC_SYNC_SAMPCTRL     		(1UL<<6)   				/**< (ADC_SYNCBUSY) Sampling Time Control Synchronization Busy Position */
+	#define ADC_SYNC_WINLT        		(1UL<<7)   				/**< (ADC_SYNCBUSY) Window Monitor Lower Threshold Synchronization Busy Position */
+	#define ADC_SYNC_WINUT        		(1UL<<8)   				/**< (ADC_SYNCBUSY) Window Monitor Upper Threshold Synchronization Busy Position */
+	#define ADC_SYNC_GAINCORR     		(1UL<<9)   				/**< (ADC_SYNCBUSY) Gain Correction Synchronization Busy Position */
+	#define ADC_SYNC_OFFSETCORR   		(1UL<<10)  				/**< (ADC_SYNCBUSY) Offset Correction Synchronization Busy Position */
+	#define ADC_SYNC_SWTRIG       		(1UL<<11)  				/**< (ADC_SYNCBUSY) Software Trigger Synchronization Busy Position */
+
+	#define ADC_DSEQ_INPUTCTRL    		(1UL<<0)               	/**< (ADC_DSEQCTRL) Input Control Position */
+	#define ADC_DSEQ_CTRLB        		(1UL<<1)               	/**< (ADC_DSEQCTRL) Control B Position */
+	#define ADC_DSEQ_REFCTRL      		(1UL<<2)               	/**< (ADC_DSEQCTRL) Reference Control Position */
+	#define ADC_DSEQ_AVGCTRL      		(1UL<<3)               	/**< (ADC_DSEQCTRL) Average Control Position */
+	#define ADC_DSEQ_SAMPCTRL     		(1UL<<4)               	/**< (ADC_DSEQCTRL) Sampling Time Control Position */
+	#define ADC_DSEQ_WINLT        		(1UL<<5)               	/**< (ADC_DSEQCTRL) Window Monitor Lower Threshold Position */
+	#define ADC_DSEQ_WINUT        		(1UL<<6)               	/**< (ADC_DSEQCTRL) Window Monitor Upper Threshold Position */
+	#define ADC_DSEQ_GAINCORR     		(1UL<<7)               	/**< (ADC_DSEQCTRL) Gain Correction Position */
+	#define ADC_DSEQ_OFFSETCORR   		(1UL<<8)               	/**< (ADC_DSEQCTRL) Offset Correction Position */
+	#define ADC_DSEQ_AUTOSTART    		(1UL<<31)              	/**< (ADC_DSEQCTRL) ADC Auto-Start Conversion Position */
+	#define ADC_DSEQ_BUSY	    		(1UL<<31)              	/**< (ADC_DSEQSTAT) DMA Sequencing Busy Position */ 
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	//struct S_MATRIX
-	//{
-	//	AT91_REG		MCFG[16];
-	//	AT91_REG		SCFG[16];
-	//	struct { AT91_REG A; AT91_REG B; } PRAS[18];
-	//	AT91_REG		zreserve;
-	//	AT91_REG		SYSIO;
-	//	AT91_REG		zreserve1;
-	//	AT91_REG		SMCNFCS;
-	//};
-
-	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-	//struct S_EFC
-	//{
-	//	AT91_REG		FMR;
-	//	AT91_REG		FCR;
-	//	AT91_REG		FSR;
-	//	AT91_REG		FRR;
-	//};
-
-	//typedef S_EFC S_EFC0, S_EFC1;
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -2758,6 +2911,8 @@ namespace HW
 	MK_PTR(PIOB,	0x41008080);
 	MK_PTR(PIOC,	0x41008100);
 
+	MK_PTR(ADC0,	0x43001c00);
+	MK_PTR(ADC1,	0x43002000);
 
 	MK_PTR(NVMCTRL,	0x41004000);
 	MK_PTR(RTC,		0x40002400);
