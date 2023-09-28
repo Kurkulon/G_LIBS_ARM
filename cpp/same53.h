@@ -2550,6 +2550,81 @@ namespace T_HW
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+	struct S_DAC
+	{
+		RW8 	CTRLA;  		/**< Offset: 0x00 (R/W  8) Control A */
+		RW8 	CTRLB;  		/**< Offset: 0x01 (R/W  8) Control B */
+		RW8 	EVCTRL; 		/**< Offset: 0x02 (R/W  8) Event Control */
+		RO8						z__Reserved1[0x01];
+		RW8 	INTENCLR;  		/**< Offset: 0x04 (R/W  8) Interrupt Enable Clear */
+		RW8 	INTENSET;  		/**< Offset: 0x05 (R/W  8) Interrupt Enable Set */
+		RW8 	INTFLAG;   		/**< Offset: 0x06 (R/W  8) Interrupt Flag Status and Clear */
+		RO8 	STATUS;    		/**< Offset: 0x07 (R/   8) Status */
+		RO32	SYNCBUSY;  		/**< Offset: 0x08 (R/   32) Synchronization Busy */
+		RW16	DACCTRL[2];		/**< Offset: 0x0C (R/W  16) DAC n Control */
+		RW16	DATA[2];   		/**< Offset: 0x10 ( /W  16) DAC n Data */
+		RW16	DATABUF[2];		/**< Offset: 0x14 ( /W  16) DAC n Data Buffer */
+		RW8 	DBGCTRL;   		/**< Offset: 0x18 (R/W  8) Debug Control */
+		RO8						z__Reserved2[0x03];
+		RO16	RESULT[2];		/**< Offset: 0x1C (R/   16) Filter Result */ 	
+	};
+
+	#define DAC_SWRST			(1UL<<0)					/**< (DAC_CTRLA) Software Reset Position */
+	#define DAC_ENABLE			(1UL<<1)					/**< (DAC_CTRLA) Enable DAC Controller Position */
+
+	#define	DAC_DIFF			(1UL<<0)                    /**< (DAC_CTRLB) Differential mode enable Position */
+	#define	DAC_REFSEL_VREFAU	(0UL<<1)                    /**< (DAC_CTRLB) External reference unbuffered  */
+	#define	DAC_REFSEL_VDDANA	(1UL<<1)                    /**< (DAC_CTRLB) Analog supply  */
+	#define	DAC_REFSEL_VREFAB	(2UL<<1)                    /**< (DAC_CTRLB) External reference buffered  */
+	#define	DAC_REFSEL_INTREF	(3UL<<1)                    /**< (DAC_CTRLB) Internal bandgap reference  */
+
+	#define DAC_STARTEI0 		(1UL<<0)					/**< (DAC_EVCTRL) Start Conversion Event Input DAC 0 Position */
+	#define DAC_STARTEI1 		(1UL<<1)					/**< (DAC_EVCTRL) Start Conversion Event Input DAC 1 Position */
+	#define DAC_EMPTYEO0 		(1UL<<2)					/**< (DAC_EVCTRL) Data Buffer Empty Event Output DAC 0 Position */
+	#define DAC_EMPTYEO1 		(1UL<<3)					/**< (DAC_EVCTRL) Data Buffer Empty Event Output DAC 1 Position */
+	#define DAC_INVEI0   		(1UL<<4)					/**< (DAC_EVCTRL) Enable Invertion of DAC 0 input event Position */
+	#define DAC_INVEI1   		(1UL<<5)					/**< (DAC_EVCTRL) Enable Invertion of DAC 1 input event Position */
+	#define DAC_RESRDYEO0		(1UL<<6)					/**< (DAC_EVCTRL) Result Ready Event Output 0 Position */
+	#define DAC_RESRDYEO1		(1UL<<7)					/**< (DAC_EVCTRL) Result Ready Event Output 1 Position */
+
+	#define DAC_UNDERRUN0 		(1UL<<0)					/**< (DAC_INTFLAG) Result 0 Underrun Position */
+	#define DAC_UNDERRUN1 		(1UL<<1)					/**< (DAC_INTFLAG) Result 1 Underrun Position */
+	#define DAC_EMPTY0    		(1UL<<2)					/**< (DAC_INTFLAG) Data Buffer 0 Empty Position */
+	#define DAC_EMPTY1    		(1UL<<3)					/**< (DAC_INTFLAG) Data Buffer 1 Empty Position */
+	#define DAC_RESRDY0   		(1UL<<4)					/**< (DAC_INTFLAG) Result 0 Ready Position */
+	#define DAC_RESRDY1   		(1UL<<5)					/**< (DAC_INTFLAG) Result 1 Ready Position */
+	#define DAC_OVERRUN0  		(1UL<<6)					/**< (DAC_INTFLAG) Result 0 Overrun Position */
+	#define DAC_OVERRUN1  		(1UL<<7)					/**< (DAC_INTFLAG) Result 1 Overrun Position */
+	
+	#define DAC_READY0         	(1UL<<0)   					/**< (DAC_STATUS) DAC 0 Startup Ready Position */
+	#define DAC_READY1         	(1UL<<1)   					/**< (DAC_STATUS) DAC 1 Startup Ready Position */
+	#define DAC_EOC0          	(1UL<<2)   					/**< (DAC_STATUS) DAC 0 End of Conversion Position */
+	#define DAC_EOC1          	(1UL<<3)   					/**< (DAC_STATUS) DAC 1 End of Conversion Position */
+
+	#define DAC_DATA0			(1UL<<2)               		/**< (DAC_SYNCBUSY) Data DAC 0 Position */
+	#define DAC_DATA1			(1UL<<3)               		/**< (DAC_SYNCBUSY) Data DAC 1 Position */
+	#define DAC_DATABUF0		(1UL<<4)               		/**< (DAC_SYNCBUSY) Data Buffer DAC 0 Position */
+	#define DAC_DATABUF1		(1UL<<5)               		/**< (DAC_SYNCBUSY) Data Buffer DAC 1 Position */
+
+	#define DAC_LEFTADJ			(1UL<<0)         			/**< (DAC_DACCTRL) Left Adjusted Data Position */
+	//#define DAC_ENABLE			(1UL<<1)     			/**< (DAC_DACCTRL) Enable DAC0 Position */
+	#define	DAC_CC100K			(0UL<<2)         			/**< (DAC_DACCTRL) 100kSPS  */
+	#define	DAC_CC1M			(1UL<<2)         			/**< (DAC_DACCTRL) 500kSPS  */
+	#define	DAC_CC12M			(2UL<<2)         			/**< (DAC_DACCTRL) 1MSPS  */
+	#define DAC_FEXT			(1UL<<5)         			/**< (DAC_DACCTRL) Standalone Filter Position */
+	#define DAC_RUNSTDBY		(1UL<<6)         			/**< (DAC_DACCTRL) Run in Standby Position */
+	#define DAC_DITHER			(1UL<<7)         			/**< (DAC_DACCTRL) Dithering Mode Position */
+	#define DAC_REFRESH(value)  (((value)&15)<<8)			/**< (DAC_DACCTRL) Refresh period x 30 us */
+	#define	DAC_OSR_1           (0UL<<13)        			/**< (DAC_DACCTRL) No Over Sampling  */
+	#define	DAC_OSR_2           (1UL<<13)        			/**< (DAC_DACCTRL) 2x Over Sampling Ratio  */
+	#define	DAC_OSR_4           (2UL<<13)        			/**< (DAC_DACCTRL) 4x Over Sampling Ratio  */
+	#define	DAC_OSR_8           (3UL<<13)        			/**< (DAC_DACCTRL) 8x Over Sampling Ratio  */
+	#define	DAC_OSR_16          (4UL<<13)        			/**< (DAC_DACCTRL) 16x Over Sampling Ratio  */
+	#define	DAC_OSR_32          (5UL<<13)        			/**< (DAC_DACCTRL) 32x Over Sampling Ratio  */
+
+	#define DAC_DBGRUN			(1UL<<0)                    /**< (DAC_DBGCTRL) Debug Run Position */ 
+
+
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -2913,6 +2988,7 @@ namespace HW
 
 	MK_PTR(ADC0,	0x43001c00);
 	MK_PTR(ADC1,	0x43002000);
+	MK_PTR(DAC,		0x43002400);
 
 	MK_PTR(NVMCTRL,	0x41004000);
 	MK_PTR(RTC,		0x40002400);
