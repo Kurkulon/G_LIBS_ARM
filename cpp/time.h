@@ -9,7 +9,7 @@
 #include "core.h"
 #endif
 
-#if defined(CPU_SAME53) || defined(CPU_XMC48)
+#if defined(CPU_SAME53) || defined(CPU_XMC48) || defined(WIN32)
 
 #define RTC_type RTC
 
@@ -61,8 +61,8 @@ extern void RTT_Init();
 
 extern LARGE_INTEGER queryPerformanceFrequency;
 
-//#define US2RT(x) (((u32)(x) * queryPerformanceFrequency.LowPart + 500000UL) / 1000000UL)
-//#define MS2RT(x) (((u32)(x) * queryPerformanceFrequency.LowPart + 500UL) / 1000UL)
+#define US2CTM(x) (((u32)(x) * queryPerformanceFrequency.LowPart + 500000UL) / 1000000UL)
+#define MS2CTM(x) (((u32)(x) * queryPerformanceFrequency.LowPart + 500UL) / 1000UL)
 
 inline u32 GetCYCCNT() 
 { 
@@ -73,7 +73,7 @@ inline u32 GetCYCCNT()
 	return t.LowPart; 
 }
 
-#elif (__TARGET_ARCH_ARM == 0 && __TARGET_ARCH_THUMB == 4)
+#elif defined(CORTEX_M4)
 
 inline u32 GetCYCCNT() { return CM4::DWT->CYCCNT; }
 
@@ -81,7 +81,7 @@ inline u32 GetCYCCNT() { return CM4::DWT->CYCCNT; }
 #define US2CTM(x) US2CLK(x)
 #define MS2CTM(x) MS2CLK(x)
 
-#elif defined(CPU_LPC824) || defined(CPU_LPC812)
+#elif defined(CORETYPE_LPC8XX)
 
 inline u32 GetCYCCNT() { return ~HW::WKT->COUNT; }
 

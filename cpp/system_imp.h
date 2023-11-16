@@ -54,7 +54,7 @@ static void Test_PIO_Pins()
 
 				u32 a1 = HW::PIOA->IN;
 				u32 b1 = HW::PIOB->IN;
-				u32 c1 = HW::PIOB->IN;
+				u32 c1 = HW::PIOC->IN;
 
 				if ((pinMaskA && ((a1 & pinMaskA) == 0)) || (pinMaskB && ((b1 & pinMaskB) == 0)) || (pinMaskC && ((c1 & pinMaskC) == 0)))
 				{
@@ -69,7 +69,7 @@ static void Test_PIO_Pins()
 
 				u32 a2 = HW::PIOA->IN;
 				u32 b2 = HW::PIOB->IN;
-				u32 c2 = HW::PIOB->IN;
+				u32 c2 = HW::PIOC->IN;
 
 				if ((a2 & pinMaskA) || (b2 & pinMaskB) || (c2 & pinMaskC))
 				{
@@ -84,7 +84,7 @@ static void Test_PIO_Pins()
 
 				u32 a3 = HW::PIOA->IN;
 				u32 b3 = HW::PIOB->IN;
-				u32 c3 = HW::PIOB->IN;
+				u32 c3 = HW::PIOC->IN;
 
 				HW::PIOA->OUTCLR = pinMaskA;
 				HW::PIOB->OUTCLR = pinMaskB;
@@ -351,7 +351,7 @@ extern "C" void SystemInit()
 
 		HW::DLR->LNEN = 0;
 
-	#elif defined(CPU_LPC824) || defined(CPU_LPC812)
+	#elif defined(CORETYPE_LPC8XX)
 
 		u32 i;
 		using namespace CM0;

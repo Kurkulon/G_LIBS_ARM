@@ -6,6 +6,14 @@
 #define	CORETYPE_SAME53
 #define CORTEX_M4
 
+#ifndef __TARGET_ARCH_ARM
+#define __TARGET_ARCH_ARM		0
+#endif
+
+#ifndef __TARGET_ARCH_THUMB
+#define __TARGET_ARCH_THUMB		4
+#endif
+
 #include "same53.h"
 
 #elif defined(CPU_XMC48)
@@ -13,12 +21,19 @@
 #define	CORETYPE_XMC4800
 #define CORTEX_M4
 
+#ifndef __TARGET_ARCH_ARM
+#define __TARGET_ARCH_ARM		0
+#endif
+
+#ifndef __TARGET_ARCH_THUMB
+#define __TARGET_ARCH_THUMB		4
+#endif
+
 #include "XMC4800.h"
 
 #elif defined(CPU_LPC824)
 
-#define	CORETYPE_LPC82X
-
+#define	CORETYPE_LPC8XX
 #define	CORETYPE_LPC82X
 #define CORTEX_M0
 
@@ -26,8 +41,7 @@
 
 #elif defined(CPU_LPC812)
 
-#define	CORETYPE_LPC81X
-
+#define	CORETYPE_LPC8XX
 #define	CORETYPE_LPC81X
 #define CORTEX_M0
 

@@ -130,7 +130,7 @@ void ComPort::InitHW()
 
 		_DMA->SetDlrLineNum(_DRL);
 
-	#elif defined(CPU_LPC824) || defined(CPU_LPC812)
+	#elif defined(CORETYPE_LPC8XX)
 
 		HW::SYSCON->SYSAHBCLKCTRL |= 1UL<<_upid;
 
@@ -277,7 +277,7 @@ bool ComPort::Connect(CONNECT_TYPE ct, dword speed, byte parity, byte stopBits)
 
 		};
 
-	#elif defined(CPU_LPC824) || defined(CPU_LPC812)
+	#elif defined(CORETYPE_LPC8XX)
 
 		switch (ct)
 		{
@@ -386,7 +386,7 @@ word ComPort::BoudToPresc(dword speed)
 
 		return 1024 - presc;
 
-	#elif defined(CPU_LPC824) || defined(CPU_LPC812)
+	#elif defined(CORETYPE_LPC8XX)
 
 		return (MCK/16+speed/2) / speed - 1;
 

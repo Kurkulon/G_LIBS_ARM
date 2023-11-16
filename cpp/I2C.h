@@ -101,7 +101,7 @@ protected:
 	u16		wlen2;
 	u16 	rlen;
 
-#elif defined (CPU_LPC824) || defined(CPU_LPC812)
+#elif defined (CORETYPE_LPC8XX)
 
 	const byte	_PIN_SCL;
 	const byte	_PIN_SDA;
@@ -169,7 +169,7 @@ public:
 		: USIC(num), _PIO_SCL(pio_scl), _PIO_SDA(pio_sda), _PIN_SCL(pin_scl), _PIN_SDA(pin_sda), _MUX_SCL(mux_scl), _MUX_SDA(mux_sda), _DMA(dma),
 		_DX0CR(dx0cr), _DX1CR(dx1cr), _GEN_CLK(genclk), _dsc(0), _state(I2C_WAIT) {}
 
-#elif defined (CPU_LPC824) || defined(CPU_LPC812)
+#elif defined (CORETYPE_LPC8XX)
 
 	S_I2C(byte num, byte pinscl, byte pinsda, u32 genclk)
 		: USIC(num), _PIN_SCL(pinscl), _PIN_SDA(pinsda), _GEN_CLK(genclk), _dsc(0), _state(I2C_WAIT) {}

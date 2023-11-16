@@ -400,7 +400,7 @@ byte S_SPIM::WriteReadByte(byte v)
 	
 		return 0;
 
-	#elif defined(WIN32)
+	#else	//elif defined(WIN32)
 
 		return 0;
 		

@@ -133,7 +133,7 @@ class ComPort : public USIC
 //		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _prevDmaCounter; }
 		u16	GetRecievedLen() { return GetDmaCounter(); }
 
-	#elif defined (CPU_LPC824) || defined(CPU_LPC812)
+	#elif defined (CORETYPE_LPC8XX)
 
 		const byte	_PIN_SCK;
 		const byte	_PIN_TX;
@@ -244,7 +244,7 @@ class ComPort : public USIC
 	void		Set_RTS() { if (_PIO_RTS != 0) _PIO_RTS->SET(_MASK_RTS); }
 	void		Clr_RTS() { if (_PIO_RTS != 0) _PIO_RTS->CLR(_MASK_RTS); }
 
-#elif defined(CPU_LPC824) || defined(CPU_LPC812)
+#elif defined(CORETYPE_LPC8XX)
 
 	void		Set_RTS() { HW::GPIO->SET(_MASK_RTS); }
 	void		Clr_RTS() { HW::GPIO->CLR(_MASK_RTS); }

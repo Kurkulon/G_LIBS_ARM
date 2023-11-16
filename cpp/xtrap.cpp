@@ -1,4 +1,6 @@
-#if !defined(CPU_LPC824) && !defined(CPU_LPC812)
+#include "core.h"
+
+#ifndef CORETYPE_LPC8XX
 
 #include "xtrap.h"
 #include "trap.h"
@@ -277,4 +279,5 @@ void UpdateTraps()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#endif // #if !defined(CPU_LPC824) && !defined(CPU_LPC812)
+#endif // #ifndef CORETYPE_LPC8XX
+

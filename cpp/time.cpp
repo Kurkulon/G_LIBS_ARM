@@ -18,7 +18,7 @@ volatile u32 msec = 0;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#if defined(CPU_SAME53) || defined(CPU_XMC48)
+#if defined(CPU_SAME53) || defined(CPU_XMC48) || defined(WIN32)
 
 RTC timeBDC;
 
@@ -246,7 +246,7 @@ static void InitTimer(u32 cpuclk)
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#if defined(CPU_LPC824) || defined(CPU_LPC812)
+#ifdef CORETYPE_LPC8XX
 
 static __irq void WKT_Handler()
 {
@@ -260,7 +260,7 @@ static __irq void WKT_Handler()
 
 static void InitCycleCountTimer()
 {
-#if (__TARGET_ARCH_ARM == 0 && __TARGET_ARCH_THUMB == 4)
+#ifdef CORTEX_M4
 
 	CM4::CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 
@@ -279,7 +279,7 @@ static void InitCycleCountTimer()
 		SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_RED "!!! ERROR !!! Cycle counter not supported\n");
 	};
 
-#elif defined(CPU_LPC824) || defined(CPU_LPC812)
+#elif defined(CORETYPE_LPC8XX)
 
 	using namespace HW;
 

@@ -4,7 +4,7 @@
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#if defined(CPU_LPC824) || defined(CPU_LPC812)
+#ifdef CORETYPE_LPC8XX
 
 	S_I2C *S_I2C::_i2c0 = 0;
 	__irq void S_I2C::I2C0_Handler() { if (_i2c0 != 0) _i2c0->IRQ_Handler(); }
@@ -199,7 +199,7 @@ void S_I2C::InitHW()
 		//CM4::NVIC->CLR_PR(I2C_IRQ);
 		//CM4::NVIC->SET_ER(I2C_IRQ);
 
-#elif defined(CPU_LPC824) || defined(CPU_LPC812)
+#elif defined(CORETYPE_LPC8XX)
 
 	#ifndef I2C0_IRQ
 	#define I2C0_IRQ I2C_IRQ
@@ -312,7 +312,7 @@ bool S_I2C::Connect(u32 baudrate)
 
 		InitHW();
 
-	#elif defined(CPU_LPC824) || defined(CPU_LPC812)
+	#elif defined(CORETYPE_LPC8XX)
 
 		baudrate *= 4;
 
@@ -362,7 +362,7 @@ bool S_I2C::AddRequest(DSCI2C *d)
 
 	if (d->wdata2 == 0 || d->wlen2 == 0) d->wdata2 = 0, d->wlen2 = 0;
 
-	#if defined(CPU_LPC824) || defined(CPU_LPC812)
+	#if defined(CORETYPE_LPC8XX)
 		__disable_irq(); if (_dsc == 0)	Write(d); else _reqList.Add(d); __enable_irq();
 	#else
 		_reqList.Add(d);

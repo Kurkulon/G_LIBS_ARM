@@ -1,4 +1,6 @@
-#if !defined(CPU_LPC824) && !defined(CPU_LPC812)
+#include "core.h"
+
+#ifndef CORETYPE_LPC8XX
 
 //#define _CRT_SECURE_NO_WARNINGS
 
@@ -1245,4 +1247,5 @@ void TRAP_Idle()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#endif // #if !defined(CPU_LPC824) && !defined(CPU_LPC812)
+#endif // #ifndef CORETYPE_LPC8XX
+
