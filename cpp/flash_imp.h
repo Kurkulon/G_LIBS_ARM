@@ -629,6 +629,8 @@ struct Write
 	u32		rejVec ;
 	u32		errVec ;
 
+	RTC_type lastRTC;
+
 	Ptr<MB> curWrBuf;
 
 	SpareArea spare;
@@ -689,6 +691,8 @@ void Write::Init()
 	spare.v1.fbp = 0;		
 
 	spare.v1.chipMask = nandSize.mask;
+
+	GetTime(&lastRTC);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -717,6 +721,8 @@ void Write::Init(u32 bl, u32 file, u32 prfile)
 	spare.v1.fbp = 0;		
 
 	spare.v1.chipMask = nandSize.mask;
+
+	GetTime(&lastRTC);
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -751,6 +757,8 @@ void Write::Vector_Make(VecData *vd, u16 size)
 //	vd->h.device = 0;
 	GetTime(&vd->h.rtc);
 
+	lastRTC = vd->h.rtc;
+
 	vd->h.prVecAdr = prWrAdr; 
 	vd->h.flags = 0;
 	vd->h.dataLen = size;
@@ -777,6 +785,8 @@ bool Write::Start()
 
 #endif
 
+	if (lastRTC.time == timeBDC.time) return false;
+
 	curWrBuf = writeFlBuf.Get();
 
 	if (curWrBuf.Valid())
@@ -790,6 +800,8 @@ bool Write::Start()
 			curWrBuf.Free();
 			return false;
 		};
+
+		//GetTime(&lastRTC);
 
 		vector = (VecData*)((byte*)curWrBuf->GetDataPtr()-sizeof(VecData::Hdr));
 		vector->h.dataLen = curWrBuf->len;
