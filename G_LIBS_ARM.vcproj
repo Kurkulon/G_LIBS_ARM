@@ -314,6 +314,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\Clock.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\Clock_imp.h"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\cm0.h"
 				>
 			</File>

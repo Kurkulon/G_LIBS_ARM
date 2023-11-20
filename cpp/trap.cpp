@@ -45,7 +45,7 @@ enum trap_status
 	TRAP_PAUSE_VECTOR
 };
 
-static trap_status trapStatus = TRAP_WAIT;
+//static trap_status trapStatus = TRAP_WAIT;
 
 
 static const bool __trace = true;
@@ -60,13 +60,13 @@ static bool startSendVector = false;
 static u16  startSession = 0;
 static u64	startAdr = 0;
 
-static bool startSendSession = false;
+//static bool startSendSession = false;
 static bool stop = false;
 static bool pause = false;
 
 
 /******************************************************/
-static void TRAP_MakePacketHeaders(char *data, bool need_ask, bool is_ask, char device);
+//static void TRAP_MakePacketHeaders(char *data, bool need_ask, bool is_ask, char device);
 static void MakePacketHeaders(TrapHdr *p, bool need_ask, bool is_ask, char device);
 
 static void StartSendVector(u16 session, u64 adr);
@@ -426,23 +426,23 @@ bool TRAP_MEMORY_SendSession(u16 session, i64 size, i64 last_adress, RTC_type st
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool TRAP_MEMORY_SendLastSession(const SessionInfo *si)
-{
-	return TRAP_MEMORY_SendSession(si->session, si->size, si->last_adress, si->start_rtc, si->stop_rtc, si->flags);
-}
+//static bool TRAP_MEMORY_SendLastSession(const SessionInfo *si)
+//{
+//	return TRAP_MEMORY_SendSession(si->session, si->size, si->last_adress, si->start_rtc, si->stop_rtc, si->flags);
+//}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool TRAP_MEMORY_SendNullSession()
-{
-	SessionInfo si;
-
-	si.size = 0;
-	si.last_adress = ~0;
-	si.session = ~0;
-
-	return TRAP_MEMORY_SendSession(si.session, si.size, si.last_adress, si.start_rtc, si.stop_rtc, si.flags);
-}
+//static bool TRAP_MEMORY_SendNullSession()
+//{
+//	SessionInfo si;
+//
+//	si.size = 0;
+//	si.last_adress = ~0;
+//	si.session = ~0;
+//
+//	return TRAP_MEMORY_SendSession(si.session, si.size, si.last_adress, si.start_rtc, si.stop_rtc, si.flags);
+//}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1052,6 +1052,7 @@ static bool UpdateSendVector()
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/*
 static bool UpdateSendVector_Dlya_Vova()
 {
 	static byte i = 0;
@@ -1063,7 +1064,7 @@ static bool UpdateSendVector_Dlya_Vova()
 	static u32 vecCount = 0;
 //	static u32 fragLen = 0;
 //	static u32 fragOff = 0;
-	static u16 ipID = 0;
+//	static u16 ipID = 0;
 //	static u16 crc = 0;
 
 	static TM32 tm;
@@ -1227,7 +1228,7 @@ static bool UpdateSendVector_Dlya_Vova()
 
 	return true;
 }
-
+*/
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 void TRAP_Init()

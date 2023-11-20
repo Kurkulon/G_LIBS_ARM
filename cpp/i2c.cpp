@@ -443,7 +443,7 @@ bool S_I2C::Update()
 
 		case I2C_WRITE:
 
-			if((i2c->INTFLAG & I2C_ERROR) || i2c->STATUS.RXNACK)
+			if(i2c->INTFLAG & I2C_ERROR) // || i2c->STATUS.RXNACK)
 			{
 				i2c->CTRLB = I2C_SMEN|I2C_CMD_STOP;
 				
@@ -469,9 +469,9 @@ bool S_I2C::Update()
 				{
 					_DMA->Disable();
 
-					dsc.ack = true;
+					dsc.ack = (i2c->STATUS.RXNACK == 0);
 
-					if (_dsc->rlen > 0)
+					if (dsc.ack && _dsc->rlen > 0)
 					{
 						_DMA->ReadPeripheral(&i2c->DATA, _dsc->rdata, _dsc->rlen, DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_RX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
 
@@ -501,7 +501,7 @@ bool S_I2C::Update()
 
 		case I2C_READ:
 
-			if((i2c->INTFLAG & I2C_ERROR) || i2c->STATUS.RXNACK)
+			if(i2c->INTFLAG & I2C_ERROR) // || i2c->STATUS.RXNACK)
 			{
 				i2c->CTRLB = I2C_SMEN|I2C_ACKACT|I2C_CMD_STOP;
 				
@@ -527,7 +527,7 @@ bool S_I2C::Update()
 				{
 					_DMA->Disable();
 
-					dsc.ack = true;
+					dsc.ack = (i2c->STATUS.RXNACK == 0);
 
 					while (i2c->SYNCBUSY) __nop();
 

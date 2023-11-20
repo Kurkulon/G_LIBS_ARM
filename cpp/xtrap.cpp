@@ -34,7 +34,7 @@ struct TrapReq
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static TrapReq  traps[10];
+//static TrapReq  traps[10];
 
 //static List<TrapReq> freeTrapList;
 static ListPtr<MB> reqTrapList;
