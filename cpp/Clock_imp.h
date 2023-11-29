@@ -397,6 +397,27 @@ void SetClock(const RTC &t)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+bool ClockReqTemp(DSCI2C &dsc, byte buf[8])
+{
+	return clock->ReqTemp(dsc, buf);
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+i16	ClockGetTemp(DSCI2C &dsc)
+{
+	return clock->GetTemp(dsc);
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+bool ClockStartConvTemp(DSCI2C &dsc, byte buf[8])
+{
+	return clock->StartConvTemp(dsc, buf);
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 static __irq void Clock_IRQ()
 {
 #ifdef CPU_SAME53

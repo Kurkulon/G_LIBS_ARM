@@ -663,4 +663,47 @@ enum { TRAP_RDC_COMMAND_MESSAGING_ENABLE = ('M'<<8) + 'E' };
 enum { TRAP_RDC_COMMAND_MESSAGING_DISABLE = ('M'<<8) + 'D' };
 enum { TRAP_RDC_COMMAND_TIME_RESET = ('T'<<8) + 'R' };
 
+__packed struct trap_header_type
+{
+	byte dst;
+	byte src;
+	byte cmd;
+	byte crc;
+} ;
+
+__packed struct devices_memory_data_type
+{
+	u16 version;
+	u16 serial;
+	i16 temperature; //0.1gr
+	u16 status; // на твоё умотрение
+	u16 errors; //= 0
+} ;
+
+__packed struct trap_memory_control_main_type
+{
+	trap_header_type header;
+	devices_memory_data_type memory_data;
+};
+
+typedef enum
+{
+	DEVICE_TELEMETRY,
+	DEVICE_CONTROL,
+	DEVICE_MEMORY,
+	DEVICE_GENERATOR,
+	DEVICE_INCLINOMETR,
+	DEVICE_ZOND,
+	DEVICE_DRIVER,
+	DEVICE_COMMUTATOR,
+	DEVICE_ELECTRODE,
+} device_type;
+
+typedef enum
+{
+	DEVICE_COMMAND_MAIN,
+	DEVICE_COMMAND_SETUP,
+	DEVICE_COMMAND_CALIBRATION,
+} device_command_type;
+
 #endif // TRAP_DEF_H__28_01_2016__15_08

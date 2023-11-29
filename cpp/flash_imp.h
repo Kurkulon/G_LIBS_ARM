@@ -7,6 +7,7 @@
 #include "trap.h"
 #include "PointerCRC.h"
 #include "SEGGER_RTT.h"
+#include "CRC_CCITT_DMA.h"
 
 #include "flash_def.h"
 //#include "extern_def.h"

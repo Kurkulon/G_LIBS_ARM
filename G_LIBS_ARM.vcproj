@@ -366,6 +366,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\CRC_CCITT_DMA.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\CRC_CCITT_DMA_IMP.h"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\DMA.h"
 				>
 			</File>

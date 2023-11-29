@@ -102,6 +102,44 @@ __forceinline i32 _InterlockedDecrement(volatile i32 *v) { __disable_irq(); i32 
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+__forceinline u32 Push_IRQ()
+{
+#ifndef WIN32
+
+	register u32 t;
+
+	register u32 primask __asm("primask");
+
+	t = primask;
+
+	__disable_irq();
+
+	return t;
+
+#else 
+
+	return 0;
+
+#endif
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+__forceinline void Pop_IRQ(u32 t)
+{
+#ifndef WIN32
+
+	register u32 primask __asm("primask");
+
+	primask = t;
+
+#endif
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 union DataCRC
 {
 	word	w;
