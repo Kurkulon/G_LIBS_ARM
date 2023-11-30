@@ -49,7 +49,6 @@ class ComPort : public USIC
 
 	#endif
 
-
   protected:
 
 	enum STATUS485 { WRITEING = 0, WAIT_READ = 1, READING = 2, READ_END = 3 };
@@ -89,8 +88,8 @@ class ComPort : public USIC
 
 		u32 _status;
 
-		bool IsTransmited() { return (_uhw.usart->INTFLAG & (USART_TXC|USART_DRE)) && _DMA->CheckComplete(); }
-		bool IsRecieved()	{ u32 s = _uhw.usart->INTFLAG & (USART_ERROR|USART_RXS); if (s) { _status |= s; _uhw.usart->INTFLAG = s; return true; } else return false; }
+		bool IsTransmited() { bool c = _DMA->CheckComplete(); return c && (_uhw.usart->INTFLAG & (USART_TXC|USART_DRE)); }
+		bool IsRecieved()	{ _DMA->Update(); u32 s = _uhw.usart->INTFLAG & (USART_ERROR|USART_RXS); if (s) { _status |= s; _uhw.usart->INTFLAG = s; return true; } else return false; }
 		u32	GetDmaCounter() { return _DMA->GetBytesLeft(); }
 		u16	GetRecievedLen() { return _pReadBuffer->maxLen - GetDmaCounter(); }
 
