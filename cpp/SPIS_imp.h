@@ -167,11 +167,14 @@ bool S_SPIS::Update()
 		case READ:
 		{
 			u32 t = GetDmaCounter();
+			
+			if (t < _prevCounter) _prevCounter = t;
 
 			if (spi->INTFLAG & SPI_DRE)
 			{
 				spi->DATA = 0x55;
 				//spi->INTFLAG = SPI_DRE|SPI_TXC;
+
 
 				_rtm.Reset();
 				_readTimeout = _postReadTimeout;
@@ -180,14 +183,20 @@ bool S_SPIS::Update()
 			{
 				if (_rtm.Timeout(_readTimeout))
 				{
-					_prbuf->len = GetRecievedLen();
-					_prbuf->recieved = _prbuf->len > 0;
+					_DMARX->Suspend();
 
-					_DMARX->Disable();
+					u16 t = GetDmaCounter();
+
+					if (t < _prevCounter) _prevCounter = t;
+
+					_prbuf->len = _prbuf->maxLen - t; //GetRecievedLen();
+					_prbuf->recieved = _prbuf->len > 0;
 
 					spi->CTRLB &= ~SPI_RXEN;
 					spi->INTFLAG = ~0;
 					spi->INTENCLR = ~0;
+
+					_DMARX->Disable();
 
 					Usic_Unlock();
 

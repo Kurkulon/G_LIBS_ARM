@@ -76,7 +76,7 @@ protected:
 
 	u32					_postReadTimeout;
 	u32					_readTimeout;
-	u32					_prevCounter;
+	u16					_prevCounter;
 
 	CTM32				_rtm;
 

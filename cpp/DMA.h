@@ -83,6 +83,7 @@ public:
 	
 	void Disable() { while (_dmach->CTRLA & DMCH_ENABLE) _dmach->CTRLA &= ~DMCH_ENABLE; _dmach->CTRLA = DMCH_SWRST; }
 	void Reset() { _dmach->CTRLA = DMCH_SWRST; }
+	void Suspend() { _dmach->CTRLB = DMCH_CMD_SUSPEND; }
 
 	bool CheckComplete() { if (_dmach->STATUS & DMCH_FERR) _dmach->CTRLB = DMCH_CMD_RESUME; return (_dmach->CTRLA & DMCH_ENABLE) == 0 /*|| (_dmach->INTFLAG & DMCH_TCMPL)*/; }
 	void Update() { if (_dmach->STATUS & DMCH_FERR) _dmach->CTRLB = DMCH_CMD_RESUME; }
