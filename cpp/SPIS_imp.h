@@ -40,7 +40,7 @@ void S_SPIS::InitHW()
 
 		spi->CTRLA = SERCOM_MODE_SPI_SLAVE|_DIPO|_DOPO|__CTRLA;
 		spi->CTRLB = 0;
-		spi->CTRLC = 1;
+		spi->CTRLC = SPI_DATA32B|SPI_ICSPACE(1);
 
 		spi->DBGCTRL = 1;
 
@@ -166,15 +166,10 @@ bool S_SPIS::Update()
 
 		case READ:
 		{
-			u32 t = GetDmaCounter();
-			
-			if (t < _prevCounter) _prevCounter = t;
-
 			if (spi->INTFLAG & SPI_DRE)
 			{
 				spi->DATA = 0x55;
 				//spi->INTFLAG = SPI_DRE|SPI_TXC;
-
 
 				_rtm.Reset();
 				_readTimeout = _postReadTimeout;
@@ -183,20 +178,15 @@ bool S_SPIS::Update()
 			{
 				if (_rtm.Timeout(_readTimeout))
 				{
-					_DMARX->Suspend();
+					_DMARX->Disable();
 
-					u16 t = GetDmaCounter();
-
-					if (t < _prevCounter) _prevCounter = t;
-
-					_prbuf->len = _prbuf->maxLen - t; //GetRecievedLen();
+					_prbuf->len = GetRecievedLen();
 					_prbuf->recieved = _prbuf->len > 0;
 
 					spi->CTRLB &= ~SPI_RXEN;
 					spi->INTFLAG = ~0;
 					spi->INTENCLR = ~0;
-
-					_DMARX->Disable();
+					spi->CTRLA &= ~SPI_ENABLE;
 
 					Usic_Unlock();
 
@@ -246,15 +236,20 @@ bool S_SPIS::Read(S_SPIS::RBUF *rbuf, u32 preTimeout, u32 postTimeout)
 
 		_uhw.spi->INTFLAG = ~0;
 		_uhw.spi->INTENCLR = ~0;
-		_uhw.spi->CTRLB |= SPI_RXEN; while(_uhw.spi->SYNCBUSY);
+		_uhw.spi->CTRLB |= SPI_RXEN; 
+		_uhw.spi->CTRLA |= SPI_ENABLE;
 
-		do t = _uhw.spi->DATA; while(_uhw.spi->INTFLAG & SPI_RXC); 
+		while(_uhw.spi->SYNCBUSY);
+
+		//do t = _uhw.spi->DATA; while(_uhw.spi->INTFLAG & SPI_RXC); 
 
 		while(_uhw.spi->INTFLAG & SPI_DRE) _uhw.spi->DATA = 0xAA;
 
-		_prevCounter = _prbuf->maxLen;
+		//do t = _uhw.spi->DATA; while(_uhw.spi->INTFLAG & SPI_RXC); 
 
-		_DMARX->ReadPeripheral(&_uhw.spi->DATA, _prbuf->data, _prbuf->maxLen,	DMCH_TRIGACT_BURST|(((DMCH_TRIGSRC_SERCOM0_RX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_BYTE);
+		_prevCounter = _prbuf->maxLen>>2;
+
+		_DMARX->ReadPeripheral(&_uhw.spi->DATA, _prbuf->data, _prevCounter,	DMCH_TRIGACT_BURST|DMCH_BURSTLEN_SINGLE|DMCH_THRESHOLD_8BEATS|(((DMCH_TRIGSRC_SERCOM0_RX>>8)+_usic_num*2)<<8), DMDSC_BEATSIZE_WORD);
 
 	#elif defined(CPU_XMC48)
 

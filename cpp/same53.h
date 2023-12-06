@@ -1338,10 +1338,13 @@ namespace T_HW
 	#define SPI_AMODE_2_ADDR	(1<<14)
 	#define SPI_AMODE_RANGE		(2<<14)
 	#define SPI_RXEN			(1<<17)		/**< \brief (SERCOM_SPI_CTRLB) Receiver Enable */
-	#define SPI_FIFOCLR_NONE	(0<<22)
-	#define SPI_FIFOCLR_TXFIFO	(1<<22)
-	#define SPI_FIFOCLR_RXFIFO	(2<<22)
-	#define SPI_FIFOCLR_BOTH	(3<<22)
+	//#define SPI_FIFOCLR_NONE	(0<<22)
+	//#define SPI_FIFOCLR_TXFIFO	(1<<22)
+	//#define SPI_FIFOCLR_RXFIFO	(2<<22)
+	//#define SPI_FIFOCLR_BOTH	(3<<22)
+
+	#define SPI_ICSPACE(v)		((v)&0x3F)	/**< (SERCOM_SPIM_CTRLC) Inter-Character Spacing Position */
+	#define SPI_DATA32B			(1UL<<24)	/**< (SERCOM_SPIM_CTRLC) Data 32 Bit Position */
 
 	#define SPI_DRE 			(1<<0)		/**< \brief (SERCOM_SPI_INTENCLR) Data Register Empty Interrupt Disable */
 	#define SPI_TXC 			(1<<1)		/**< \brief (SERCOM_SPI_INTENCLR) Transmit Complete Interrupt Disable */

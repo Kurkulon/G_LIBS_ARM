@@ -147,7 +147,7 @@ void DMA_CH::ReadPeripheral(const volatile void *src, volatile void *dst, u16 le
 		_dmach->CTRLA = 0;
 
 		_dmadsc->SRCADDR = src;
-		_dmadsc->DSTADDR = (byte*)dst+len;
+		_dmadsc->DSTADDR = (byte*)dst+(len<<((ctrl2>>8)&3));
 		_dmadsc->DESCADDR = 0;
 		_dmadsc->BTCNT = _dmawrb->BTCNT = len;
 		_dmadsc->BTCTRL = ctrl2 | DMDSC_VALID|DMDSC_DSTINC; //|DMDSC_BEATSIZE_BYTEC;

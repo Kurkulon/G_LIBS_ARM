@@ -87,7 +87,7 @@ protected:
 #ifndef WIN32
 
 	u32	GetDmaCounter() { return _DMARX->GetBytesLeft(); }
-	u16	GetRecievedLen() { return _prbuf->maxLen - GetDmaCounter(); }
+	u16	GetRecievedLen() { return _prbuf->maxLen - GetDmaCounter()*4; }
 
 #endif
 
