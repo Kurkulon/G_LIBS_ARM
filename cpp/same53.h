@@ -567,6 +567,8 @@ namespace T_HW
 	#define XOSC_STARTUP(value) 	(((value)&0xF) << 20)
 	#define XOSC_CFDPRESC(value)	(((value)&0xF) << 24)   /**< \brief (OSCCTRL_XOSCCTRL) Clock Failure Detector Prescaler */
 
+	#define XOSC_RDY0				(1<<0)					/**< \brief (OSCCTRL_STATUS) XOSC 0 Ready */
+	#define XOSC_RDY1				(1<<1)					/**< \brief (OSCCTRL_STATUS) XOSC 1 Ready */
 
 	#define DFLL_ENABLE 			(1<<1) 					/**< \brief (OSCCTRL_DFLLCTRLA) DFLL Enable */
 	#define DFLL_RUNSTDBY 			(1<<6) 					/**< \brief (OSCCTRL_DFLLCTRLA) Run in Standby */

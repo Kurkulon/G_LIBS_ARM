@@ -70,6 +70,11 @@ static volatile bool busyWriteThread = false;
 //#pragma O3
 //#pragma Otime
 
+#ifndef NAND_DELAY_FEAT
+#define NAND_DELAY_FEAT()	{ delay(US2CLK(2));	}
+#endif
+
+
 #endif 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -507,7 +512,9 @@ static void NAND_Set_Features(byte adr, byte p1, byte p2, byte p3, byte p4)
 	NAND_WRITE(p2); 
 	NAND_WRITE(p3); 
 	NAND_WRITE(p4); 
-	while(!NAND_BUSY());
+
+	NAND_DELAY_FEAT();
+
 	while(NAND_BUSY());
 
 	NAND_DIR_IN();
@@ -523,7 +530,7 @@ static void NAND_Get_Features(byte adr, byte* p)
 	NAND_CMD_LATCH(NAND_CMD_GET_FEATURES);
 	NAND_ADR_LATCH(adr);
 
-	while(!NAND_BUSY());
+	NAND_DELAY_FEAT();
 
 	NAND_DIR_IN();
 

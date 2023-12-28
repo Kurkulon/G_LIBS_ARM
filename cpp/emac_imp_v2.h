@@ -1448,7 +1448,7 @@ bool HW_EMAC_UpdateLink()
 
 				if (reg_PHYCON1 & PHYCON1_ENERGY_DETECT)
 				{
-					if (!emacEnergyDetected) SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_WHITE "Ethernet Signal present on receive differential pair\n");
+					if (!emacEnergyDetected) SEGGER_RTT_printf(0, RTT_CTRL_TEXT_WHITE "Ethernet Signal present on receive differential pair - %u ms\n", GetMilliseconds());
 
 					emacEnergyDetected = true;
 				};

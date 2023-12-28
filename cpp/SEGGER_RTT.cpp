@@ -84,8 +84,8 @@ Purpose : Implementation of SEGGER real-time terminal (RTT) which allows
 **********************************************************************
 */
 
-#define MIN(a, b)        (((a) < (b)) ? (a) : (b))
-#define MAX(a, b)        (((a) > (b)) ? (a) : (b))
+//#define MIN(a, b)        (((a) < (b)) ? (a) : (b))
+//#define MAX(a, b)        (((a) > (b)) ? (a) : (b))
 
 #define MEMCPY(a, b, c)  memcpy((a),(b),(c))
 
