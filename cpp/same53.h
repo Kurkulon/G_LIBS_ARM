@@ -1509,9 +1509,9 @@ namespace T_HW
 	#define TCC_CPTEN2        		(1<<26)           /**< \brief (TCC_CTRLA) Capture Channel 2 Enable */
 	#define TCC_CPTEN3        		(1<<27)           /**< \brief (TCC_CTRLA) Capture Channel 3 Enable */
 		
-	#define TCC_DIR        		(1<<0)            /**< \brief (TCC_CTRLBCLR) Counter Direction */
-	#define TCC_LUPD       		(1<<1)            /**< \brief (TCC_CTRLBCLR) Lock Update */
-	#define TCC_ONESHOT    		(1<<2)            /**< \brief (TCC_CTRLBCLR) One-Shot */
+	#define TCC_DIR        			(1<<0)            /**< \brief (TCC_CTRLBCLR) Counter Direction */
+	#define TCC_LUPD       			(1<<1)            /**< \brief (TCC_CTRLBCLR) Lock Update */
+	#define TCC_ONESHOT    			(1<<2)            /**< \brief (TCC_CTRLBCLR) One-Shot */
 	#define TCC_IDXCMD_DISABLE 		(0<<3)
 	#define TCC_IDXCMD_SET     		(1<<3)
 	#define TCC_IDXCMD_CLEAR   		(2<<3)
@@ -1522,109 +1522,117 @@ namespace T_HW
 	#define TCC_CMD_UPDATE     		(3<<5)
 	#define TCC_CMD_READSYNC   		(4<<5)
 
-	#define TCC_OVF        (1<<0)            /**< \brief (TCC_INTENCLR) Overflow Interrupt Enable */
-	#define TCC_TRG        (1<<1)            /**< \brief (TCC_INTENCLR) Retrigger Interrupt Enable */
-	#define TCC_CNT        (1<<2)            /**< \brief (TCC_INTENCLR) Counter Interrupt Enable */
-	#define TCC_ERR        (1<<3)            /**< \brief (TCC_INTENCLR) Error Interrupt Enable */
-	#define TCC_UFS        (1<<10)           /**< \brief (TCC_INTENCLR) Non-Recoverable Update Fault Interrupt Enable */
-	#define TCC_DFS        (1<<11)           /**< \brief (TCC_INTENCLR) Non-Recoverable Debug Fault Interrupt Enable */
-	#define TCC_FAULTA     (1<<12)           /**< \brief (TCC_INTENCLR) Recoverable Fault A Interrupt Enable */
-	#define TCC_FAULTB     (1<<13)           /**< \brief (TCC_INTENCLR) Recoverable Fault B Interrupt Enable */
-	#define TCC_FAULT0     (1<<14)           /**< \brief (TCC_INTENCLR) Non-Recoverable Fault 0 Interrupt Enable */
-	#define TCC_FAULT1     (1<<15)           /**< \brief (TCC_INTENCLR) Non-Recoverable Fault 1 Interrupt Enable */
-	#define TCC_MC0        (1<<16)           /**< \brief (TCC_INTENCLR) Match or Capture Channel 0 Interrupt Enable */
-	#define TCC_MC1        (1<<17)           /**< \brief (TCC_INTENCLR) Match or Capture Channel 1 Interrupt Enable */
-	#define TCC_MC2        (1<<18)           /**< \brief (TCC_INTENCLR) Match or Capture Channel 2 Interrupt Enable */
-	#define TCC_MC3        (1<<19)           /**< \brief (TCC_INTENCLR) Match or Capture Channel 3 Interrupt Enable */
+	#define TCC_OTMX(v)         	((v)&3)				/**< \brief (TCC_WEXCTRL) Output Matrix */
+	#define TCC_DTIEN0      		(1UL<<8)        	/**< \brief (TCC_WEXCTRL) Dead-time Insertion Generator 0 Enable */
+	#define TCC_DTIEN1      		(1UL<<9)        	/**< \brief (TCC_WEXCTRL) Dead-time Insertion Generator 1 Enable */
+	#define TCC_DTIEN2      		(1UL<<10)       	/**< \brief (TCC_WEXCTRL) Dead-time Insertion Generator 2 Enable */
+	#define TCC_DTIEN3      		(1UL<<11)       	/**< \brief (TCC_WEXCTRL) Dead-time Insertion Generator 3 Enable */
+	#define TCC_DTLS(v)         	(((v)&0xFF)<<16)	/**< \brief (TCC_WEXCTRL) Dead-time Low Side Outputs Value */
+	#define TCC_DTHS(v)         	(((v)&0xFF)<<24)	/**< \brief (TCC_WEXCTRL) Dead-time High Side Outputs Value */
 
-	#define TCC_NRE0         		(1<<0)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 0 Output Enable */
-	#define TCC_NRE1         		(1<<1)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 1 Output Enable */
-	#define TCC_NRE2         		(1<<2)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 2 Output Enable */
-	#define TCC_NRE3         		(1<<3)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 3 Output Enable */
-	#define TCC_NRE4         		(1<<4)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 4 Output Enable */
-	#define TCC_NRE5         		(1<<5)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 5 Output Enable */
-	#define TCC_NRE6         		(1<<6)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 6 Output Enable */
-	#define TCC_NRE7         		(1<<7)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 7 Output Enable */
-	#define TCC_NRV0         		(1<<8)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 0 Output Value */
-	#define TCC_NRV1         		(1<<9)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 1 Output Value */
-	#define TCC_NRV2         		(1<<10)           /**< \brief (TCC_DRVCTRL) Non-Recoverable State 2 Output Value */
-	#define TCC_NRV3         		(1<<11)           /**< \brief (TCC_DRVCTRL) Non-Recoverable State 3 Output Value */
-	#define TCC_NRV4         		(1<<12)           /**< \brief (TCC_DRVCTRL) Non-Recoverable State 4 Output Value */
-	#define TCC_NRV5         		(1<<13)           /**< \brief (TCC_DRVCTRL) Non-Recoverable State 5 Output Value */
-	#define TCC_NRV6         		(1<<14)           /**< \brief (TCC_DRVCTRL) Non-Recoverable State 6 Output Value */
-	#define TCC_NRV7         		(1<<15)           /**< \brief (TCC_DRVCTRL) Non-Recoverable State 7 Output Value */
-	#define TCC_INVEN0       		(1<<16)           /**< \brief (TCC_DRVCTRL) Output Waveform 0 Inversion */
-	#define TCC_INVEN1       		(1<<17)           /**< \brief (TCC_DRVCTRL) Output Waveform 1 Inversion */
-	#define TCC_INVEN2       		(1<<18)           /**< \brief (TCC_DRVCTRL) Output Waveform 2 Inversion */
-	#define TCC_INVEN3       		(1<<19)           /**< \brief (TCC_DRVCTRL) Output Waveform 3 Inversion */
-	#define TCC_INVEN4       		(1<<20)           /**< \brief (TCC_DRVCTRL) Output Waveform 4 Inversion */
-	#define TCC_INVEN5       		(1<<21)           /**< \brief (TCC_DRVCTRL) Output Waveform 5 Inversion */
-	#define TCC_INVEN6       		(1<<22)           /**< \brief (TCC_DRVCTRL) Output Waveform 6 Inversion */
-	#define TCC_INVEN7       		(1<<23)           /**< \brief (TCC_DRVCTRL) Output Waveform 7 Inversion */
+	#define TCC_OVF        			(1<<0)        		/**< \brief (TCC_INTENCLR) Overflow Interrupt Enable */
+	#define TCC_TRG        			(1<<1)        		/**< \brief (TCC_INTENCLR) Retrigger Interrupt Enable */
+	#define TCC_CNT        			(1<<2)        		/**< \brief (TCC_INTENCLR) Counter Interrupt Enable */
+	#define TCC_ERR        			(1<<3)        		/**< \brief (TCC_INTENCLR) Error Interrupt Enable */
+	#define TCC_UFS        			(1<<10)       		/**< \brief (TCC_INTENCLR) Non-Recoverable Update Fault Interrupt Enable */
+	#define TCC_DFS        			(1<<11)       		/**< \brief (TCC_INTENCLR) Non-Recoverable Debug Fault Interrupt Enable */
+	#define TCC_FAULTA     			(1<<12)       		/**< \brief (TCC_INTENCLR) Recoverable Fault A Interrupt Enable */
+	#define TCC_FAULTB     			(1<<13)       		/**< \brief (TCC_INTENCLR) Recoverable Fault B Interrupt Enable */
+	#define TCC_FAULT0     			(1<<14)       		/**< \brief (TCC_INTENCLR) Non-Recoverable Fault 0 Interrupt Enable */
+	#define TCC_FAULT1     			(1<<15)       		/**< \brief (TCC_INTENCLR) Non-Recoverable Fault 1 Interrupt Enable */
+	#define TCC_MC0        			(1<<16)       		/**< \brief (TCC_INTENCLR) Match or Capture Channel 0 Interrupt Enable */
+	#define TCC_MC1        			(1<<17)       		/**< \brief (TCC_INTENCLR) Match or Capture Channel 1 Interrupt Enable */
+	#define TCC_MC2        			(1<<18)       		/**< \brief (TCC_INTENCLR) Match or Capture Channel 2 Interrupt Enable */
+	#define TCC_MC3        			(1<<19)       		/**< \brief (TCC_INTENCLR) Match or Capture Channel 3 Interrupt Enable */
+
+	#define TCC_NRE0         		(1<<0)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 0 Output Enable */
+	#define TCC_NRE1         		(1<<1)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 1 Output Enable */
+	#define TCC_NRE2         		(1<<2)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 2 Output Enable */
+	#define TCC_NRE3         		(1<<3)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 3 Output Enable */
+	#define TCC_NRE4         		(1<<4)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 4 Output Enable */
+	#define TCC_NRE5         		(1<<5)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 5 Output Enable */
+	#define TCC_NRE6         		(1<<6)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 6 Output Enable */
+	#define TCC_NRE7         		(1<<7)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 7 Output Enable */
+	#define TCC_NRV0         		(1<<8)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 0 Output Value */
+	#define TCC_NRV1         		(1<<9)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 1 Output Value */
+	#define TCC_NRV2         		(1<<10)       		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 2 Output Value */
+	#define TCC_NRV3         		(1<<11)       		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 3 Output Value */
+	#define TCC_NRV4         		(1<<12)       		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 4 Output Value */
+	#define TCC_NRV5         		(1<<13)       		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 5 Output Value */
+	#define TCC_NRV6         		(1<<14)       		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 6 Output Value */
+	#define TCC_NRV7         		(1<<15)       		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 7 Output Value */
+	#define TCC_INVEN0       		(1<<16)       		/**< \brief (TCC_DRVCTRL) Output Waveform 0 Inversion */
+	#define TCC_INVEN1       		(1<<17)       		/**< \brief (TCC_DRVCTRL) Output Waveform 1 Inversion */
+	#define TCC_INVEN2       		(1<<18)       		/**< \brief (TCC_DRVCTRL) Output Waveform 2 Inversion */
+	#define TCC_INVEN3       		(1<<19)       		/**< \brief (TCC_DRVCTRL) Output Waveform 3 Inversion */
+	#define TCC_INVEN4       		(1<<20)       		/**< \brief (TCC_DRVCTRL) Output Waveform 4 Inversion */
+	#define TCC_INVEN5       		(1<<21)       		/**< \brief (TCC_DRVCTRL) Output Waveform 5 Inversion */
+	#define TCC_INVEN6       		(1<<22)       		/**< \brief (TCC_DRVCTRL) Output Waveform 6 Inversion */
+	#define TCC_INVEN7       		(1<<23)       		/**< \brief (TCC_DRVCTRL) Output Waveform 7 Inversion */
 	#define TCC_FILTERVAL0(value) 	((value)&0xF << 24)
 	#define TCC_FILTERVAL1(value) 	((value)&0xF << 28)
 
-	#define TCC_EVACT0_OFF       	(0x0)		/**< \brief (TCC_EVCTRL) Event action disabled */
-	#define TCC_EVACT0_RETRIGGER 	(0x1)		/**< \brief (TCC_EVCTRL) Start, restart or re-trigger counter on event */
-	#define TCC_EVACT0_COUNTEV   	(0x2)		/**< \brief (TCC_EVCTRL) Count on event */
-	#define TCC_EVACT0_START     	(0x3)		/**< \brief (TCC_EVCTRL) Start counter on event */
-	#define TCC_EVACT0_INC       	(0x4)		/**< \brief (TCC_EVCTRL) Increment counter on event */
-	#define TCC_EVACT0_COUNT     	(0x5)		/**< \brief (TCC_EVCTRL) Count on active state of asynchronous event */
-	#define TCC_EVACT0_FAULT     	(0x7)		/**< \brief (TCC_EVCTRL) Non-recoverable fault */
-	#define TCC_EVACT1_OFF       	(0x0<<3)	/**< \brief (TCC_EVCTRL) Event action disabled */
-	#define TCC_EVACT1_RETRIGGER 	(0x1<<3)	/**< \brief (TCC_EVCTRL) Re-trigger counter on event */
-	#define TCC_EVACT1_DIR       	(0x2<<3)	/**< \brief (TCC_EVCTRL) Direction control */
-	#define TCC_EVACT1_STOP      	(0x3<<3)	/**< \brief (TCC_EVCTRL) Stop counter on event */
-	#define TCC_EVACT1_DEC       	(0x4<<3)	/**< \brief (TCC_EVCTRL) Decrement counter on event */
-	#define TCC_EVACT1_PPW       	(0x5<<3)	/**< \brief (TCC_EVCTRL) Period capture value in CC0 register, pulse width capture value in CC1 register */
-	#define TCC_EVACT1_PWP       	(0x6<<3)	/**< \brief (TCC_EVCTRL) Period capture value in CC1 register, pulse width capture value in CC0 register */
-	#define TCC_EVACT1_FAULT     	(0x7<<3)	/**< \brief (TCC_EVCTRL) Non-recoverable fault */
-	#define TCC_CNTSEL_START     	(0x0<<6)	/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a new counter cycle starts */
-	#define TCC_CNTSEL_END       	(0x1<<6)	/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a counter cycle ends */
-	#define TCC_CNTSEL_BETWEEN   	(0x2<<6)	/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a counter cycle ends, except for the first and last cycles */
-	#define TCC_CNTSEL_BOUNDARY  	(0x3<<6)	/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a new counter cycle starts or a counter cycle ends */
-	#define TCC_OVFEO        		(1<<8)    	/**< \brief (TCC_EVCTRL) Overflow/Underflow Output Event Enable */
-	#define TCC_TRGEO        		(1<<9)    	/**< \brief (TCC_EVCTRL) Retrigger Output Event Enable */
-	#define TCC_CNTEO        		(1<<10)   	/**< \brief (TCC_EVCTRL) Timer/counter Output Event Enable */
-	#define TCC_TCINV0       		(1<<12)   	/**< \brief (TCC_EVCTRL) Inverted Event 0 Input Enable */
-	#define TCC_TCINV1       		(1<<13)   	/**< \brief (TCC_EVCTRL) Inverted Event 1 Input Enable */
-	#define TCC_TCEI0        		(1<<14)   	/**< \brief (TCC_EVCTRL) Timer/counter Event 0 Input Enable */
-	#define TCC_TCEI1        		(1<<15)   	/**< \brief (TCC_EVCTRL) Timer/counter Event 1 Input Enable */
-	#define TCC_MCEI0        		(1<<16)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 0 Event Input Enable */
-	#define TCC_MCEI1        		(1<<17)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 1 Event Input Enable */
-	#define TCC_MCEI2        		(1<<18)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 2 Event Input Enable */
-	#define TCC_MCEI3        		(1<<19)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 3 Event Input Enable */
-	#define TCC_MCEO0        		(1<<24)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 0 Event Output Enable */
-	#define TCC_MCEO1        		(1<<25)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 1 Event Output Enable */
-	#define TCC_MCEO2        		(1<<26)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 2 Event Output Enable */
-	#define TCC_MCEO3        		(1<<27)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 3 Event Output Enable */
+	#define TCC_EVACT0_OFF       	(0x0)				/**< \brief (TCC_EVCTRL) Event action disabled */
+	#define TCC_EVACT0_RETRIGGER 	(0x1)				/**< \brief (TCC_EVCTRL) Start, restart or re-trigger counter on event */
+	#define TCC_EVACT0_COUNTEV   	(0x2)				/**< \brief (TCC_EVCTRL) Count on event */
+	#define TCC_EVACT0_START     	(0x3)				/**< \brief (TCC_EVCTRL) Start counter on event */
+	#define TCC_EVACT0_INC       	(0x4)				/**< \brief (TCC_EVCTRL) Increment counter on event */
+	#define TCC_EVACT0_COUNT     	(0x5)				/**< \brief (TCC_EVCTRL) Count on active state of asynchronous event */
+	#define TCC_EVACT0_FAULT     	(0x7)				/**< \brief (TCC_EVCTRL) Non-recoverable fault */
+	#define TCC_EVACT1_OFF       	(0x0<<3)			/**< \brief (TCC_EVCTRL) Event action disabled */
+	#define TCC_EVACT1_RETRIGGER 	(0x1<<3)			/**< \brief (TCC_EVCTRL) Re-trigger counter on event */
+	#define TCC_EVACT1_DIR       	(0x2<<3)			/**< \brief (TCC_EVCTRL) Direction control */
+	#define TCC_EVACT1_STOP      	(0x3<<3)			/**< \brief (TCC_EVCTRL) Stop counter on event */
+	#define TCC_EVACT1_DEC       	(0x4<<3)			/**< \brief (TCC_EVCTRL) Decrement counter on event */
+	#define TCC_EVACT1_PPW       	(0x5<<3)			/**< \brief (TCC_EVCTRL) Period capture value in CC0 register, pulse width capture value in CC1 register */
+	#define TCC_EVACT1_PWP       	(0x6<<3)			/**< \brief (TCC_EVCTRL) Period capture value in CC1 register, pulse width capture value in CC0 register */
+	#define TCC_EVACT1_FAULT     	(0x7<<3)			/**< \brief (TCC_EVCTRL) Non-recoverable fault */
+	#define TCC_CNTSEL_START     	(0x0<<6)			/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a new counter cycle starts */
+	#define TCC_CNTSEL_END       	(0x1<<6)			/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a counter cycle ends */
+	#define TCC_CNTSEL_BETWEEN   	(0x2<<6)			/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a counter cycle ends, except for the first and last cycles */
+	#define TCC_CNTSEL_BOUNDARY  	(0x3<<6)			/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a new counter cycle starts or a counter cycle ends */
+	#define TCC_OVFEO        		(1<<8)    			/**< \brief (TCC_EVCTRL) Overflow/Underflow Output Event Enable */
+	#define TCC_TRGEO        		(1<<9)    			/**< \brief (TCC_EVCTRL) Retrigger Output Event Enable */
+	#define TCC_CNTEO        		(1<<10)   			/**< \brief (TCC_EVCTRL) Timer/counter Output Event Enable */
+	#define TCC_TCINV0       		(1<<12)   			/**< \brief (TCC_EVCTRL) Inverted Event 0 Input Enable */
+	#define TCC_TCINV1       		(1<<13)   			/**< \brief (TCC_EVCTRL) Inverted Event 1 Input Enable */
+	#define TCC_TCEI0        		(1<<14)   			/**< \brief (TCC_EVCTRL) Timer/counter Event 0 Input Enable */
+	#define TCC_TCEI1        		(1<<15)   			/**< \brief (TCC_EVCTRL) Timer/counter Event 1 Input Enable */
+	#define TCC_MCEI0        		(1<<16)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 0 Event Input Enable */
+	#define TCC_MCEI1        		(1<<17)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 1 Event Input Enable */
+	#define TCC_MCEI2        		(1<<18)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 2 Event Input Enable */
+	#define TCC_MCEI3        		(1<<19)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 3 Event Input Enable */
+	#define TCC_MCEO0        		(1<<24)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 0 Event Output Enable */
+	#define TCC_MCEO1        		(1<<25)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 1 Event Output Enable */
+	#define TCC_MCEO2        		(1<<26)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 2 Event Output Enable */
+	#define TCC_MCEO3        		(1<<27)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 3 Event Output Enable */
 
-	#define	TCC_WAVEGEN_NFRQ        (0x0)   /**< \brief (TCC_WAVE) Normal frequency */
-	#define	TCC_WAVEGEN_MFRQ        (0x1)   /**< \brief (TCC_WAVE) Match frequency */
-	#define	TCC_WAVEGEN_NPWM        (0x2)   /**< \brief (TCC_WAVE) Normal PWM */
-	#define	TCC_WAVEGEN_DSCRITICAL  (0x4)   /**< \brief (TCC_WAVE) Dual-slope critical */
-	#define	TCC_WAVEGEN_DSBOTTOM    (0x5)   /**< \brief (TCC_WAVE) Dual-slope with interrupt/event condition when COUNT reaches ZERO */
-	#define	TCC_WAVEGEN_DSBOTH      (0x6)   /**< \brief (TCC_WAVE) Dual-slope with interrupt/event condition when COUNT reaches ZERO or TOP */
-	#define	TCC_WAVEGEN_DSTOP       (0x7)   /**< \brief (TCC_WAVE) Dual-slope with interrupt/event condition when COUNT reaches TOP */
-	#define	TCC_RAMP_1          	(0x0<<4)   /**< \brief (TCC_WAVE) RAMP1 operation */
-	#define	TCC_RAMP_2A         	(0x1<<4)   /**< \brief (TCC_WAVE) Alternative RAMP2 operation */
-	#define	TCC_RAMP_2          	(0x2<<4)   /**< \brief (TCC_WAVE) RAMP2 operation */
-	#define	TCC_RAMP_2C         	(0x3<<4)   /**< \brief (TCC_WAVE) Critical RAMP2 operation */
-	#define TCC_CIPEREN         	(1<<7)            /**< \brief (TCC_WAVE) Circular period Enable */
-	#define TCC_CICCEN0         	(1<<8)            /**< \brief (TCC_WAVE) Circular Channel 0 Enable */
-	#define TCC_CICCEN1         	(1<<9)            /**< \brief (TCC_WAVE) Circular Channel 1 Enable */
-	#define TCC_CICCEN2         	(1<<10)           /**< \brief (TCC_WAVE) Circular Channel 2 Enable */
-	#define TCC_CICCEN3         	(1<<11)           /**< \brief (TCC_WAVE) Circular Channel 3 Enable */
-	#define TCC_POL0            	(1<<16)           /**< \brief (TCC_WAVE) Channel 0 Polarity */
-	#define TCC_POL1            	(1<<17)           /**< \brief (TCC_WAVE) Channel 1 Polarity */
-	#define TCC_POL2            	(1<<18)           /**< \brief (TCC_WAVE) Channel 2 Polarity */
-	#define TCC_POL3         		(1<<19)           /**< \brief (TCC_WAVE) Channel 3 Polarity */
-	#define TCC_POL4         		(1<<20)           /**< \brief (TCC_WAVE) Channel 4 Polarity */
-	#define TCC_POL5         		(1<<21)           /**< \brief (TCC_WAVE) Channel 5 Polarity */
-	#define TCC_SWAP0        		(1<<24)           /**< \brief (TCC_WAVE) Swap DTI Output Pair 0 */
-	#define TCC_SWAP1           	(1<<25)           /**< \brief (TCC_WAVE) Swap DTI Output Pair 1 */
-	#define TCC_SWAP2           	(1<<26)           /**< \brief (TCC_WAVE) Swap DTI Output Pair 2 */
-	#define TCC_SWAP3           	(1<<27)           /**< \brief (TCC_WAVE) Swap DTI Output Pair 3 */
+	#define	TCC_WAVEGEN_NFRQ        (0x0)   			/**< \brief (TCC_WAVE) Normal frequency */
+	#define	TCC_WAVEGEN_MFRQ        (0x1)   			/**< \brief (TCC_WAVE) Match frequency */
+	#define	TCC_WAVEGEN_NPWM        (0x2)   			/**< \brief (TCC_WAVE) Normal PWM */
+	#define	TCC_WAVEGEN_DSCRITICAL  (0x4)   			/**< \brief (TCC_WAVE) Dual-slope critical */
+	#define	TCC_WAVEGEN_DSBOTTOM    (0x5)   			/**< \brief (TCC_WAVE) Dual-slope with interrupt/event condition when COUNT reaches ZERO */
+	#define	TCC_WAVEGEN_DSBOTH      (0x6)   			/**< \brief (TCC_WAVE) Dual-slope with interrupt/event condition when COUNT reaches ZERO or TOP */
+	#define	TCC_WAVEGEN_DSTOP       (0x7)   			/**< \brief (TCC_WAVE) Dual-slope with interrupt/event condition when COUNT reaches TOP */
+	#define	TCC_RAMP_1          	(0x0<<4)			/**< \brief (TCC_WAVE) RAMP1 operation */
+	#define	TCC_RAMP_2A         	(0x1<<4)			/**< \brief (TCC_WAVE) Alternative RAMP2 operation */
+	#define	TCC_RAMP_2          	(0x2<<4)			/**< \brief (TCC_WAVE) RAMP2 operation */
+	#define	TCC_RAMP_2C         	(0x3<<4)			/**< \brief (TCC_WAVE) Critical RAMP2 operation */
+	#define TCC_CIPEREN         	(1<<7)            	/**< \brief (TCC_WAVE) Circular period Enable */
+	#define TCC_CICCEN0         	(1<<8)            	/**< \brief (TCC_WAVE) Circular Channel 0 Enable */
+	#define TCC_CICCEN1         	(1<<9)            	/**< \brief (TCC_WAVE) Circular Channel 1 Enable */
+	#define TCC_CICCEN2         	(1<<10)           	/**< \brief (TCC_WAVE) Circular Channel 2 Enable */
+	#define TCC_CICCEN3         	(1<<11)           	/**< \brief (TCC_WAVE) Circular Channel 3 Enable */
+	#define TCC_POL0            	(1<<16)           	/**< \brief (TCC_WAVE) Channel 0 Polarity */
+	#define TCC_POL1            	(1<<17)           	/**< \brief (TCC_WAVE) Channel 1 Polarity */
+	#define TCC_POL2            	(1<<18)           	/**< \brief (TCC_WAVE) Channel 2 Polarity */
+	#define TCC_POL3         		(1<<19)           	/**< \brief (TCC_WAVE) Channel 3 Polarity */
+	#define TCC_POL4         		(1<<20)           	/**< \brief (TCC_WAVE) Channel 4 Polarity */
+	#define TCC_POL5         		(1<<21)           	/**< \brief (TCC_WAVE) Channel 5 Polarity */
+	#define TCC_SWAP0        		(1<<24)           	/**< \brief (TCC_WAVE) Swap DTI Output Pair 0 */
+	#define TCC_SWAP1           	(1<<25)           	/**< \brief (TCC_WAVE) Swap DTI Output Pair 1 */
+	#define TCC_SWAP2           	(1<<26)           	/**< \brief (TCC_WAVE) Swap DTI Output Pair 2 */
+	#define TCC_SWAP3           	(1<<27)           	/**< \brief (TCC_WAVE) Swap DTI Output Pair 3 */
 
 	#define TCC0_CC_NUM				6
 	#define TCC1_CC_NUM				4
