@@ -7,7 +7,7 @@
 //#endif
 //#endif
 
-#ifndef __CC_ARM //WIN32
+#ifdef _MSC_VER //__CC_ARM //WIN32
 
 	#define WINDOWS_IGNORE_PACKING_MISMATCH
 

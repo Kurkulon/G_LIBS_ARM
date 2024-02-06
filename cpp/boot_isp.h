@@ -1,5 +1,7 @@
-#ifndef TFTP_DEF_H__25_03_2020__18_35
-#define TFTP_DEF_H__25_03_2020__18_35
+#ifndef BOOT_ISP_H__06_02_2024__11_40
+#define BOOT_ISP_H__06_02_2024__11_40
+
+#pragma once
 
 #include "mem.h"
 
@@ -33,6 +35,6 @@ extern u32	ISP_GetFlashWriteOK();
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-#endif // TFTP_DEF_H__25_03_2020__18_35
+#endif // BOOT_ISP_H__06_02_2024__11_40
 
 

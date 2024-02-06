@@ -7,6 +7,13 @@
 #include <crc16.h>
 #include <SEGGER_RTT.h>
 #include <boot_isp.h>
+#include <boot_req.h>
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#ifndef BOOT_HANDSHAKE_TIMEOUT		
+#define BOOT_HANDSHAKE_TIMEOUT		(200)
+#endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -51,7 +58,9 @@
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+#ifndef BOOTLOADER_VERSION
 #define BOOTLOADER_VERSION			0x0101
+#endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -387,37 +396,44 @@ static bool runEmac = false;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-__packed struct ReqHS { u64 guid; u16 crc; };
-__packed struct RspHS { u64 guid; u16 crc; };
+typedef BootReqHS ReqHS;
+typedef BootRspHS RspHS;
+
+
+//__packed struct ReqHS { u64 guid; u16 crc; };
+//__packed struct RspHS { u64 guid; u16 crc; };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-struct ReqMes
-{
-	u32 len;
-	
-	union
-	{
-		struct { u32 func; u32 len;										u16 align; u16 crc; }	F1; // Get CRC
-		struct { u32 func; u32 sadr;									u16 align; u16 crc; }	F2; // Erase sector
-		struct { u32 func; u32 padr; u32 plen; u32 pdata[PAGEDWORDS];	u16 align; u16 crc; }	F3; // Programm page
-	};
+typedef BootReqMes ReqMes;
+typedef BootRspMes RspMes;
 
-};
+//struct ReqMes
+//{
+//	u32 len;
+//	
+//	union
+//	{
+//		struct { u32 func; u32 len;										u16 align; u16 crc; }	F1; // Get CRC
+//		struct { u32 func;												u16 align; u16 crc; }	F2; // Exit boot loader
+//		struct { u32 func; u32 padr; u32 plen; u32 pdata[PAGEDWORDS];	u16 align; u16 crc; }	F3; // Programm page
+//	};
+//
+//};
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-struct RspMes
-{
-	u32 len;
-
-	union
-	{
-		struct { u32 func; u32 pageLen;	u32 len;	u16 sCRC;	u16 crc; }	F1; // Get CRC
-		struct { u32 func; u32 sadr;	u32 status; u16 align;	u16 crc; } 	F2; // Erase sector
-		struct { u32 func; u32 padr;	u32 status; u16 align;	u16 crc; } 	F3; // Programm page
-	};
-};
+//struct RspMes
+//{
+//	u32 len;
+//
+//	union
+//	{
+//		struct { u32 func; u32 pageLen;	u32 len;	u16 sCRC;	u16 crc; }	F1; // Get CRC
+//		struct { u32 func;							u16 align;	u16 crc; } 	F2; // Exit boot loader
+//		struct { u32 func; u32 padr;	u32 status; u16 align;	u16 crc; } 	F3; // Programm page
+//	};
+//};
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -725,14 +741,13 @@ static bool HandShake()
 
 	SEGGER_RTT_WriteString(0, RTT_CTRL_TEXT_BRIGHT_CYAN "Start handshake ...\n");
 
-	while (!tm.Check(200) && !c)
+	while (!tm.Check(BOOT_HANDSHAKE_TIMEOUT) && !c)
 	{
 		Pin_MainLoop_Tgl();
 
 		HW::WDT->Update();
 
 		#ifdef BOOT_COM
-
 
 			switch (i)
 			{
@@ -835,23 +850,21 @@ static bool Request_F1_GetCRC(ReqMes &req, RspMes &rsp)
 	rsp.F1.crc = GetCRC16(&rsp.F1, sizeof(rsp.F1) - 2);
 	rsp.len = sizeof(rsp.F1);
 
-	return false;
+	return true;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool Request_F2_EraseSector(ReqMes &req, RspMes &rsp)
+static bool Request_F2_ExitBootLoader(ReqMes &req, RspMes &rsp)
 {
-	bool c = false;
+	//bool c = false;
 
-	if (req.len == sizeof(req.F2))
-	{
-		c = true; //IAP_EraseSector(req.F2.sadr);
-	};
+	//if (req.len == sizeof(req.F2))
+	//{
+	//	c = true; //IAP_EraseSector(req.F2.sadr);
+	//};
 
 	rsp.F2.func = req.F2.func;
-	rsp.F2.sadr = req.F2.sadr;
-	rsp.F2.status = c;
 	rsp.F2.crc = GetCRC16(&rsp.F2, sizeof(rsp.F2) - 2);
 	rsp.len = sizeof(rsp.F2);
 
@@ -897,9 +910,9 @@ static bool RequestHandler(Ptr<MB> &mb, RspMes &rsp)
 
 	switch (req.F1.func)
 	{
-		case 1: c = Request_F1_GetCRC(req, rsp);		break;
-		case 2: c = Request_F2_EraseSector(req, rsp);	break;
-		case 3: c = Request_F3_WritePage(mb, rsp);		break;
+		case 1: c = Request_F1_GetCRC(req, rsp);			break;
+		case 2: c = Request_F2_ExitBootLoader(req, rsp);	break;
+		case 3: c = Request_F3_WritePage(mb, rsp);			break;
 	};
 
 	return c;
@@ -917,7 +930,7 @@ static void UpdateCom()
 
 	static byte i = 0;
 
-//	static bool c = true;
+	static bool c = true;
 
 	static TM32 tm;
 
@@ -928,7 +941,7 @@ static void UpdateCom()
 	{
 		case 0:
 
-			mb = AllocMemBuffer(sizeof(ReqMes));
+			mb = AllocMemBuffer(sizeof(ReqMes) + ISP_PAGESIZE);
 
 			if (mb.Valid())
 			{
@@ -958,7 +971,7 @@ static void UpdateCom()
 				{
 					req->len = rb.len;
 
-					RequestHandler(mb, rsp);
+					c = RequestHandler(mb, rsp);
 					
 					timeOut.Reset();
 
@@ -968,7 +981,7 @@ static void UpdateCom()
 				{
 					if (timeOut.Check(2000))
 					{
-						runCom = false;
+						runCom = c = false;
 					};
 
 					i = 4;
@@ -998,6 +1011,8 @@ static void UpdateCom()
 				mb.Free();
 				req = 0;
 				i = 0;
+
+				runCom = c;
 			};
 
 			break;

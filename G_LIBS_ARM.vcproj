@@ -314,6 +314,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cpp\boot_req.h"
+				>
+			</File>
+			<File
 				RelativePath=".\cpp\Clock.h"
 				>
 			</File>
@@ -447,6 +451,14 @@
 			</File>
 			<File
 				RelativePath=".\cpp\PointerCRC.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\RequestQuery.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cpp\RequestQuery_imp.h"
 				>
 			</File>
 			<File
