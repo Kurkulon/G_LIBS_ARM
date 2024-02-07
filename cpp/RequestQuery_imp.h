@@ -95,7 +95,9 @@ void RequestQuery::Update()
 			}
 			else
 			{
-				_state = 0;
+				_req.Free();
+
+				_state = WAIT;
 			}; 
 
 			break;
@@ -227,13 +229,13 @@ void RequestQuery::Update()
 				_req->ready = true;
 			};
 
+		default:
+
+			_req.Free();
+
 			_state = WAIT;
 
 			break;
-
-		default:
-
-			_state = WAIT;
 	};
 }
 

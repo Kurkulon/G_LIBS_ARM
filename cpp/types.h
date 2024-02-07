@@ -56,7 +56,8 @@ static const dword __NAN_dword = 0xFFFFFFFF;
 #define NAN (*((const float*)(&__NAN_dword)))
 #endif
 
-inline float ABS(float v) { *((u32*)&v) &= 0x7FFFFFFF; return v; }
+__forceinline float	ABS(float v)	{ *((u32*)&v) &= 0x7FFFFFFF; return v; }
+__forceinline i32	ABS(i32 v)		{ return (v<0) ? -v : v; }
 
 //inline bool fIsValid(float v) { return (((u16*)&v)[1] & 0x7F80) != 0x7F80; }
 //inline bool dIsValid(double v) { return (((u32*)&v)[1] & 0x7FF0) != 0x7FF0; }
