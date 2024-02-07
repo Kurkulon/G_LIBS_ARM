@@ -7,7 +7,7 @@
 //#include "vector.h"
 #include "trap_def.h"
 #include "list.h"
-#include <stddef.h>
+//#include <stddef.h>
 #include "CRC16.h"
 
 

@@ -121,7 +121,7 @@
     <NMakeCleanCommandLine>%40del /Q $(OutDir)*.*</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)\SAME53_d.a</NMakeOutput>
     <NMakePreprocessorDefinitions>_DEBUG,__softfp=,CPU_SAME53;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>$(ARMCC50INC);$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(ARMCC50INC);</NMakeIncludeSearchPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SAME53_Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
@@ -131,7 +131,7 @@
     <NMakeCleanCommandLine>%40del /Q $(OutDir)*.*</NMakeCleanCommandLine>
     <NMakeOutput>$(ProjectDir)\SAME53_r.a</NMakeOutput>
     <NMakePreprocessorDefinitions>__softfp=,CPU_SAME53;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>$(ARMCC50INC);$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(ARMCC50INC);</NMakeIncludeSearchPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XMC48_Debug|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
