@@ -63,6 +63,8 @@ void RequestQuery::Update()
 
 				if (_req.Valid())
 				{
+					_req->ready = false;
+
 					_state = UPDATE_CRC_1;
 
 					if ((_req->updateCRC || _req->checkCRC) && _req->crcType >= _req->CRC16_NOT_VALID)
@@ -71,6 +73,10 @@ void RequestQuery::Update()
 						_req->checkCRC = false;
 					};
 				};
+			}
+			else
+			{
+				_req.Free();
 			};
 
 			break;
@@ -230,8 +236,6 @@ void RequestQuery::Update()
 			};
 
 		default:
-
-			_req.Free();
 
 			_state = WAIT;
 

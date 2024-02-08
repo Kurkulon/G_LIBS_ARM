@@ -1,6 +1,8 @@
 #ifndef TYPES_H__15_05_2009__14_37
 #define TYPES_H__15_05_2009__14_37
 
+#pragma once
+
 //#ifdef _WIN32
 //#ifndef WIN32
 //#define WIN32
@@ -16,7 +18,7 @@
 	#define __packed __declspec(align(1))
 	#define __softfp /**/
 	#define __irq __declspec(naked)
-	#define __align(v)
+	#define __align(v) __declspec(align(v))
 	#define __attribute__(v)
 	#define __func__ __FUNCTION__
 

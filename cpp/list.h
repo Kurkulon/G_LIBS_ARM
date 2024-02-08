@@ -1,6 +1,8 @@
 #ifndef LIST_H__03_02_2016__14_38
 #define LIST_H__03_02_2016__14_38
 
+#pragma once
+
 #include "types.h"
 
 #ifdef WIN32

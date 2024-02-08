@@ -453,8 +453,10 @@ extern "C" void SystemInit()
 			CM4::SCB->CPACR = 0;
 		#endif
 
-	  /* Enable unaligned memory access - SCB_CCR.UNALIGN_TRP = 0 */
-		CM4::SCB->CCR &= ~(SCB_CCR_UNALIGN_TRP_Msk);
+		#ifndef _DEBUG
+			/* Enable unaligned memory access - SCB_CCR.UNALIGN_TRP = 0 */
+			CM4::SCB->CCR &= ~(SCB_CCR_UNALIGN_TRP_Msk);
+		#endif
 
 	#endif
 
