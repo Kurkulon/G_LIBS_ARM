@@ -60,7 +60,7 @@ protected:
 
 	List* _selfPtr;
 
-	void Assert(T* r) { DEBUG_ASSERT(r->next == 0); }
+	void Assert(T* r) { DEBUG_ASSERT(HW::RamCheck(r) && r->next == 0); }
 
   public:
 
